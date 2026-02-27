@@ -33,21 +33,22 @@ const ContentManagement: React.FC = () => {
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+    e.preventDefault(); // Ngăn load trang
     try {
       if (editingItem) {
         await contentService.updateLibraryItem(editingItem.id, formData);
         alert('Cập nhật thành công!');
       } else {
         await contentService.addLibraryItem(formData);
-        alert('Thêm mới thành công!');
+        alert('Thêm mới bài viết thành công!');
       }
       setIsModalOpen(false);
       setEditingItem(null);
       resetForm();
       fetchItems();
-    } catch (error) {
-      alert('Có lỗi xảy ra khi lưu bài viết!');
+    } catch (error: any) {
+      console.error('Lỗi lưu bài:', error);
+      alert(`Có lỗi xảy ra khi lưu bài viết: ${error.message || 'Lỗi hệ thống'}`);
     }
   };
 
@@ -154,7 +155,6 @@ const ContentManagement: React.FC = () => {
         </div>
       </div>
 
-      {/* Modal Form */}
       {isModalOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 font-display">
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setIsModalOpen(false)}></div>
@@ -164,92 +164,95 @@ const ContentManagement: React.FC = () => {
               <button onClick={() => setIsModalOpen(false)} className="text-text-soft hover:text-red-500 bg-white size-8 flex items-center justify-center rounded-full shadow-sm border border-gold/10 transition-colors"><span className="material-symbols-outlined">close</span></button>
             </div>
             
-            <form onSubmit={handleSubmit} className="p-5 md:p-6 space-y-4 md:space-y-5 overflow-y-auto custom-scrollbar flex-1">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-5">
-                <div>
-                  <label className="block text-[10px] font-black uppercase text-text-soft tracking-widest mb-1.5">Danh mục</label>
-                  <select 
-                    value={formData.category} 
-                    onChange={e => setFormData({...formData, category: e.target.value as any})}
-                    className="w-full p-3 rounded-xl border border-gold/20 bg-white focus:border-primary outline-none font-bold text-text-main shadow-sm transition-colors cursor-pointer"
-                  >
-                    <option value="architecture">Kiến trúc</option>
-                    <option value="ritual">Nghi lễ</option>
-                    <option value="festival">Lễ hội</option>
-                  </select>
+            {/* BỌC NÚT VÀO TRONG FORM */}
+            <form onSubmit={handleSubmit} className="flex flex-col flex-1 overflow-hidden">
+              <div className="p-5 md:p-6 space-y-4 md:space-y-5 overflow-y-auto custom-scrollbar flex-1">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-5">
+                  <div>
+                    <label className="block text-[10px] font-black uppercase text-text-soft tracking-widest mb-1.5">Danh mục</label>
+                    <select 
+                      value={formData.category} 
+                      onChange={e => setFormData({...formData, category: e.target.value as any})}
+                      className="w-full p-3 rounded-xl border border-gold/20 bg-white focus:border-primary outline-none font-bold text-text-main shadow-sm transition-colors cursor-pointer"
+                    >
+                      <option value="architecture">Kiến trúc</option>
+                      <option value="ritual">Nghi lễ</option>
+                      <option value="festival">Lễ hội</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-black uppercase text-text-soft tracking-widest mb-1.5">Dân tộc</label>
+                    <input 
+                      type="text" 
+                      required
+                      value={formData.ethnic} 
+                      onChange={e => setFormData({...formData, ethnic: e.target.value})}
+                      className="w-full p-3 rounded-xl border border-gold/20 bg-white focus:border-primary outline-none font-bold text-text-main shadow-sm transition-colors"
+                      placeholder="Ví dụ: Kinh, Thái, Mường..."
+                    />
+                  </div>
                 </div>
+
                 <div>
-                  <label className="block text-[10px] font-black uppercase text-text-soft tracking-widest mb-1.5">Dân tộc</label>
+                  <label className="block text-[10px] font-black uppercase text-text-soft tracking-widest mb-1.5">Tiêu đề</label>
                   <input 
                     type="text" 
                     required
-                    value={formData.ethnic} 
-                    onChange={e => setFormData({...formData, ethnic: e.target.value})}
-                    className="w-full p-3 rounded-xl border border-gold/20 bg-white focus:border-primary outline-none font-bold text-text-main shadow-sm transition-colors"
-                    placeholder="Ví dụ: Kinh, Thái, Mường..."
+                    value={formData.title} 
+                    onChange={e => setFormData({...formData, title: e.target.value})}
+                    className="w-full p-3 md:p-4 rounded-xl border border-gold/20 bg-white focus:border-primary outline-none font-black text-primary shadow-sm transition-colors text-sm md:text-base"
+                    placeholder="Nhập tiêu đề bài viết..."
                   />
                 </div>
-              </div>
 
-              <div>
-                <label className="block text-[10px] font-black uppercase text-text-soft tracking-widest mb-1.5">Tiêu đề</label>
-                <input 
-                  type="text" 
-                  required
-                  value={formData.title} 
-                  onChange={e => setFormData({...formData, title: e.target.value})}
-                  className="w-full p-3 md:p-4 rounded-xl border border-gold/20 bg-white focus:border-primary outline-none font-black text-primary shadow-sm transition-colors text-sm md:text-base"
-                  placeholder="Nhập tiêu đề bài viết..."
-                />
-              </div>
+                <div>
+                  <label className="block text-[10px] font-black uppercase text-text-soft tracking-widest mb-1.5">Mô tả ngắn</label>
+                  <textarea 
+                    required
+                    value={formData.desc} 
+                    onChange={e => setFormData({...formData, desc: e.target.value})}
+                    className="w-full p-3 rounded-xl border border-gold/20 bg-white focus:border-primary outline-none h-20 font-medium shadow-sm transition-colors resize-none"
+                    placeholder="Mô tả ngắn gọn về di sản..."
+                  />
+                </div>
 
-              <div>
-                <label className="block text-[10px] font-black uppercase text-text-soft tracking-widest mb-1.5">Mô tả ngắn</label>
-                <textarea 
-                  required
-                  value={formData.desc} 
-                  onChange={e => setFormData({...formData, desc: e.target.value})}
-                  className="w-full p-3 rounded-xl border border-gold/20 bg-white focus:border-primary outline-none h-20 font-medium shadow-sm transition-colors resize-none"
-                  placeholder="Mô tả ngắn gọn về di sản..."
-                />
-              </div>
+                <div>
+                  <label className="block text-[10px] font-black uppercase text-text-soft tracking-widest mb-1.5">Nội dung chi tiết</label>
+                  <textarea 
+                    required
+                    value={formData.content} 
+                    onChange={e => setFormData({...formData, content: e.target.value})}
+                    className="w-full p-4 rounded-xl border border-gold/20 bg-white focus:border-primary outline-none h-40 md:h-56 font-medium shadow-sm transition-colors resize-none leading-relaxed"
+                    placeholder="Nội dung chi tiết..."
+                  />
+                </div>
 
-              <div>
-                <label className="block text-[10px] font-black uppercase text-text-soft tracking-widest mb-1.5">Nội dung chi tiết</label>
-                <textarea 
-                  required
-                  value={formData.content} 
-                  onChange={e => setFormData({...formData, content: e.target.value})}
-                  className="w-full p-4 rounded-xl border border-gold/20 bg-white focus:border-primary outline-none h-40 md:h-56 font-medium shadow-sm transition-colors resize-none leading-relaxed"
-                  placeholder="Nội dung chi tiết..."
-                />
+                <div>
+                  <label className="block text-[10px] font-black uppercase text-text-soft tracking-widest mb-1.5">Link Hình ảnh</label>
+                  <input 
+                    type="text" 
+                    required
+                    value={formData.image} 
+                    onChange={e => setFormData({...formData, image: e.target.value})}
+                    className="w-full p-3 rounded-xl border border-gold/20 bg-white focus:border-primary outline-none font-medium shadow-sm transition-colors"
+                    placeholder="https://..."
+                  />
+                  {formData.image && (
+                    <div className="mt-3 h-32 md:h-48 w-full object-cover rounded-xl border border-gold/20 overflow-hidden bg-background-light shadow-inner">
+                       <img src={formData.image} alt="Preview" className="w-full h-full object-cover" onError={(e) => (e.currentTarget.src = 'https://placehold.co/600x400?text=L%E1%BB%97i+%E1%BA%A3nh')} />
+                    </div>
+                  )}
+                </div>
               </div>
-
-              <div>
-                <label className="block text-[10px] font-black uppercase text-text-soft tracking-widest mb-1.5">Link Hình ảnh</label>
-                <input 
-                  type="text" 
-                  required
-                  value={formData.image} 
-                  onChange={e => setFormData({...formData, image: e.target.value})}
-                  className="w-full p-3 rounded-xl border border-gold/20 bg-white focus:border-primary outline-none font-medium shadow-sm transition-colors"
-                  placeholder="https://..."
-                />
-                {formData.image && (
-                  <div className="mt-3 h-32 md:h-48 w-full object-cover rounded-xl border border-gold/20 overflow-hidden bg-background-light shadow-inner">
-                     <img src={formData.image} alt="Preview" className="w-full h-full object-cover" onError={(e) => (e.currentTarget.src = 'https://placehold.co/600x400?text=L%E1%BB%97i+%E1%BA%A3nh')} />
-                  </div>
-                )}
+              
+              <div className="p-5 md:p-6 border-t border-gold/10 bg-white shrink-0 flex justify-end gap-3 shadow-[0_-5px_15px_rgba(0,0,0,0.02)]">
+                  <button type="button" onClick={() => setIsModalOpen(false)} className="px-6 py-3 border border-gold/20 text-text-main font-bold rounded-xl hover:bg-background-light transition-colors text-xs uppercase tracking-widest">Hủy</button>
+                  <button type="submit" className="px-6 py-3 bg-primary text-white font-black rounded-xl hover:brightness-110 shadow-lg shadow-primary/20 transition-all active:scale-95 text-xs uppercase tracking-widest flex items-center gap-2">
+                     <span className="material-symbols-outlined text-base">publish</span>
+                     {editingItem ? 'Lưu thay đổi' : 'Đăng bài'}
+                  </button>
               </div>
             </form>
-            
-            <div className="p-5 md:p-6 border-t border-gold/10 bg-white shrink-0 flex justify-end gap-3 shadow-[0_-5px_15px_rgba(0,0,0,0.02)]">
-                <button type="button" onClick={() => setIsModalOpen(false)} className="px-6 py-3 border border-gold/20 text-text-main font-bold rounded-xl hover:bg-background-light transition-colors text-xs uppercase tracking-widest">Hủy</button>
-                <button type="submit" className="px-6 py-3 bg-primary text-white font-black rounded-xl hover:brightness-110 shadow-lg shadow-primary/20 transition-all active:scale-95 text-xs uppercase tracking-widest flex items-center gap-2">
-                   <span className="material-symbols-outlined text-base">publish</span>
-                   {editingItem ? 'Lưu thay đổi' : 'Đăng bài'}
-                </button>
-            </div>
           </div>
         </div>
       )}

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import AdminLayout from './AdminLayout';
 import { productService, Product } from '../../services/productService';
-import { rawData } from '../Marketplace'; // Import dữ liệu gốc để seed
+import { rawData } from '../Marketplace'; 
 
 const ProductManagement: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
@@ -9,7 +9,6 @@ const ProductManagement: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   
-  // Form State
   const [formData, setFormData] = useState<Partial<Product>>({
     name: '', ethnic: '', price: 0, description: '', image: '', category: 'Thủ công'
   });
@@ -29,7 +28,6 @@ const ProductManagement: React.FC = () => {
     setIsLoading(false);
   };
 
-  // Hàm Seed dữ liệu từ Marketplace.tsx vào Supabase
   const handleSeedData = async () => {
     if (!window.confirm('Bạn có chắc muốn nạp dữ liệu mẫu vào Database? Hành động này sẽ thêm nhiều sản phẩm.')) return;
     
@@ -71,25 +69,37 @@ const ProductManagement: React.FC = () => {
     try {
       await productService.deleteProduct(id);
       setProducts(prev => prev.filter(p => p.id !== id));
+      alert('Đã xóa thành công!');
     } catch (error) {
-      alert('Xóa thất bại');
+      console.error('Lỗi xóa:', error);
+      alert('Xóa thất bại! Vui lòng kiểm tra quyền Admin.');
     }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+    e.preventDefault(); // Ngăn chặn load lại trang
+    
+    // Đảm bảo có price_display để không bị lỗi trống trên Marketplace
+    const payload = {
+      ...formData,
+      price_display: formData.price_display || `${(formData.price || 0).toLocaleString('vi-VN')} VNĐ`
+    };
+
     try {
       if (editingProduct) {
-        await productService.updateProduct(editingProduct.id, formData);
+        await productService.updateProduct(editingProduct.id, payload);
+        alert('Cập nhật thành công!');
       } else {
-        await productService.addProduct(formData as Product);
+        await productService.addProduct(payload as Product);
+        alert('Thêm sản phẩm thành công!');
       }
       setIsModalOpen(false);
       setEditingProduct(null);
       setFormData({ name: '', ethnic: '', price: 0, description: '', image: '', category: 'Thủ công' });
       fetchProducts();
-    } catch (error) {
-      alert('Lưu thất bại');
+    } catch (error: any) {
+      console.error('Lưu thất bại:', error);
+      alert(`Lưu thất bại: ${error.message || 'Vui lòng kiểm tra lại quyền Admin trên Supabase'}`);
     }
   };
 
@@ -119,7 +129,6 @@ const ProductManagement: React.FC = () => {
         </div>
       </div>
 
-      {/* Table */}
       <div className="bg-white rounded-2xl shadow-sm border border-gold/10 overflow-hidden animate-slide-up">
         <div className="overflow-x-auto custom-scrollbar">
           <table className="w-full text-left border-collapse min-w-[600px]">
@@ -169,7 +178,6 @@ const ProductManagement: React.FC = () => {
         </div>
       </div>
 
-      {/* Modal Thêm/Sửa */}
       {isModalOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 font-display">
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setIsModalOpen(false)}></div>
@@ -179,48 +187,51 @@ const ProductManagement: React.FC = () => {
               <button onClick={() => setIsModalOpen(false)} className="text-text-soft hover:text-red-500 bg-white size-8 flex items-center justify-center rounded-full shadow-sm border border-gold/10 transition-colors"><span className="material-symbols-outlined text-xl">close</span></button>
             </div>
             
-            <form onSubmit={handleSubmit} className="p-5 md:p-6 space-y-4 md:space-y-5 overflow-y-auto custom-scrollbar flex-1">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-5">
-                <div>
-                  <label className="block text-[10px] font-black text-text-soft uppercase tracking-widest mb-1.5">Tên sản phẩm</label>
-                  <input required type="text" value={formData.name || ''} onChange={e => setFormData({...formData, name: e.target.value})} className="w-full border border-gold/20 bg-white rounded-xl p-3 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none font-bold text-text-main transition-all shadow-sm" placeholder="Nhập tên..." />
+            {/* Form bọc toàn bộ Nội dung và Nút Submit */}
+            <form onSubmit={handleSubmit} className="flex flex-col flex-1 overflow-hidden">
+              <div className="p-5 md:p-6 space-y-4 md:space-y-5 overflow-y-auto custom-scrollbar flex-1">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-5">
+                  <div>
+                    <label className="block text-[10px] font-black text-text-soft uppercase tracking-widest mb-1.5">Tên sản phẩm</label>
+                    <input required type="text" value={formData.name || ''} onChange={e => setFormData({...formData, name: e.target.value})} className="w-full border border-gold/20 bg-white rounded-xl p-3 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none font-bold text-text-main transition-all shadow-sm" placeholder="Nhập tên..." />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-black text-text-soft uppercase tracking-widest mb-1.5">Dân tộc</label>
+                    <input required type="text" value={formData.ethnic || ''} onChange={e => setFormData({...formData, ethnic: e.target.value})} className="w-full border border-gold/20 bg-white rounded-xl p-3 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none font-bold text-text-main transition-all shadow-sm" placeholder="VD: Mông, Thái..." />
+                  </div>
                 </div>
-                <div>
-                  <label className="block text-[10px] font-black text-text-soft uppercase tracking-widest mb-1.5">Dân tộc</label>
-                  <input required type="text" value={formData.ethnic || ''} onChange={e => setFormData({...formData, ethnic: e.target.value})} className="w-full border border-gold/20 bg-white rounded-xl p-3 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none font-bold text-text-main transition-all shadow-sm" placeholder="VD: Mông, Thái..." />
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-5">
+                  <div>
+                    <label className="block text-[10px] font-black text-text-soft uppercase tracking-widest mb-1.5">Giá (VNĐ)</label>
+                    <input required type="number" value={formData.price || 0} onChange={e => setFormData({...formData, price: Number(e.target.value)})} className="w-full border border-gold/20 bg-white rounded-xl p-3 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none font-black text-primary transition-all shadow-sm" />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-black text-text-soft uppercase tracking-widest mb-1.5">Link Ảnh (URL)</label>
+                    <input required type="text" value={formData.image || ''} onChange={e => setFormData({...formData, image: e.target.value})} className="w-full border border-gold/20 bg-white rounded-xl p-3 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none font-medium text-text-main transition-all shadow-sm" placeholder="https://..." />
+                  </div>
                 </div>
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-5">
-                <div>
-                  <label className="block text-[10px] font-black text-text-soft uppercase tracking-widest mb-1.5">Giá (VNĐ)</label>
-                  <input required type="number" value={formData.price || 0} onChange={e => setFormData({...formData, price: Number(e.target.value)})} className="w-full border border-gold/20 bg-white rounded-xl p-3 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none font-black text-primary transition-all shadow-sm" />
-                </div>
-                <div>
-                  <label className="block text-[10px] font-black text-text-soft uppercase tracking-widest mb-1.5">Link Ảnh (URL)</label>
-                  <input required type="text" value={formData.image || ''} onChange={e => setFormData({...formData, image: e.target.value})} className="w-full border border-gold/20 bg-white rounded-xl p-3 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none font-medium text-text-main transition-all shadow-sm" placeholder="https://..." />
-                </div>
-              </div>
-              
-              {/* Preview Ảnh Nhỏ */}
-              {formData.image && (
-                <div className="mt-2 h-24 sm:h-32 w-full rounded-xl border border-gold/20 overflow-hidden bg-background-light">
-                   <img src={formData.image} alt="Preview" className="w-full h-full object-contain" onError={(e) => (e.currentTarget.src = 'https://placehold.co/400x200?text=L%E1%BB%97i+%E1%BA%A3nh')} />
-                </div>
-              )}
+                
+                {formData.image && (
+                  <div className="mt-2 h-24 sm:h-32 w-full rounded-xl border border-gold/20 overflow-hidden bg-background-light">
+                     <img src={formData.image} alt="Preview" className="w-full h-full object-contain" onError={(e) => (e.currentTarget.src = 'https://placehold.co/400x200?text=L%E1%BB%97i+%E1%BA%A3nh')} />
+                  </div>
+                )}
 
-              <div>
-                <label className="block text-[10px] font-black text-text-soft uppercase tracking-widest mb-1.5">Câu chuyện / Mô tả</label>
-                <textarea rows={4} value={formData.description || ''} onChange={e => setFormData({...formData, description: e.target.value})} className="w-full border border-gold/20 bg-white rounded-xl p-3 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none font-medium text-text-main transition-all shadow-sm resize-none"></textarea>
+                <div>
+                  <label className="block text-[10px] font-black text-text-soft uppercase tracking-widest mb-1.5">Câu chuyện / Mô tả</label>
+                  <textarea required rows={4} value={formData.description || ''} onChange={e => setFormData({...formData, description: e.target.value})} className="w-full border border-gold/20 bg-white rounded-xl p-3 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none font-medium text-text-main transition-all shadow-sm resize-none"></textarea>
+                </div>
+              </div>
+
+              {/* Nút Submit ĐÃ ĐƯỢC ĐƯA VÀO TRONG FORM */}
+              <div className="p-5 md:p-6 border-t border-gold/10 bg-white shrink-0 flex justify-end gap-3 shadow-[0_-5px_15px_rgba(0,0,0,0.02)]">
+                  <button type="button" onClick={() => setIsModalOpen(false)} className="px-6 py-3 border border-gold/20 text-text-main font-bold rounded-xl hover:bg-background-light transition-colors text-xs uppercase tracking-widest">Hủy</button>
+                  <button type="submit" className="px-6 py-3 bg-primary text-white font-black rounded-xl hover:brightness-110 shadow-lg shadow-primary/20 transition-all active:scale-95 text-xs uppercase tracking-widest flex items-center gap-2">
+                     <span className="material-symbols-outlined text-base">save</span>
+                     Lưu sản phẩm
+                  </button>
               </div>
             </form>
-
-            <div className="p-5 md:p-6 border-t border-gold/10 bg-white shrink-0 flex justify-end gap-3 shadow-[0_-5px_15px_rgba(0,0,0,0.02)]">
-                <button type="button" onClick={() => setIsModalOpen(false)} className="px-6 py-3 border border-gold/20 text-text-main font-bold rounded-xl hover:bg-background-light transition-colors text-xs uppercase tracking-widest">Hủy</button>
-                <button type="submit" className="px-6 py-3 bg-primary text-white font-black rounded-xl hover:brightness-110 shadow-lg shadow-primary/20 transition-all active:scale-95 text-xs uppercase tracking-widest flex items-center gap-2">
-                   <span className="material-symbols-outlined text-base">save</span>
-                   Lưu sản phẩm
-                </button>
-            </div>
           </div>
         </div>
       )}
