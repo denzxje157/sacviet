@@ -1,24 +1,25 @@
-// Dùng require thay vì import để chống lỗi biên dịch trên Vercel
 const { createClient } = require('@supabase/supabase-js');
 
 module.exports = async function (req, res) {
-  // Chỉ nhận POST
+  // Chỉ nhận tín hiệu POST
   if (req.method !== 'POST') {
     return res.status(405).json({ message: 'Chỉ nhận POST request' });
   }
 
   try {
+    // 1. TÌM CHÌA KHÓA (Hỗ trợ nhiều tên biến đề phòng bạn gõ nhầm trên Vercel)
     const supabaseUrl = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL;
-    const supabaseKey = process.env.SUPABASE_SERVICE_KEY;
+    const supabaseKey = process.env.SUPABASE_SERVICE_KEY || process.env.VITE_SUPABASE_SERVICE_KEY || process.env.VITE_SUPABASE_ANON_KEY;
 
-    // Bắt lỗi ngay nếu thiếu biến môi trường
-    if (!supabaseUrl || !supabaseKey) {
-      return res.status(500).json({ error: 'Vercel đang thiếu biến môi trường Supabase' });
-    }
+    // Báo lỗi rõ ràng ra SePay nếu vẫn thiếu chìa
+    if (!supabaseUrl) return res.status(400).json({ error: 'Vercel đang thiếu URL Supabase' });
+    if (!supabaseKey) return res.status(400).json({ error: 'Vercel đang thiếu Key Supabase' });
 
+    // 2. KHỞI TẠO SUPABASE
     const supabase = createClient(supabaseUrl, supabaseKey);
     const data = req.body;
     
+    // 3. ĐỌC DỮ LIỆU SEPAY
     const content = data.content || data.transactionContent || data.description || '';
     const type = data.transferType;
 
@@ -32,10 +33,9 @@ module.exports = async function (req, res) {
     }
 
     let orderId = orderMatch[0].toUpperCase();
-    if (!orderId.includes('-')) {
-        orderId = orderId.replace('SN', 'SN-');
-    }
+    if (!orderId.includes('-')) orderId = orderId.replace('SN', 'SN-');
 
+    // 4. TÌM VÀ CẬP NHẬT ĐƠN HÀNG
     const { data: order, error: fetchError } = await supabase
       .from('orders')
       .select('*')
@@ -57,6 +57,6 @@ module.exports = async function (req, res) {
 
   } catch (error) {
     console.error('Lỗi Webhook:', error);
-    return res.status(500).json({ error: error.message || 'Lỗi không xác định' });
+    return res.status(500).json({ error: error.message || 'Lỗi hệ thống' });
   }
 };
