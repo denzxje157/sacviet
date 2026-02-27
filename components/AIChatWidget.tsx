@@ -2,9 +2,9 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { GoogleGenAI } from "@google/genai";
 import { useNavigate } from 'react-router-dom';
-import { ethnicData } from '../pages/Home.tsx';
+import { ethnicData, marketplaceData } from '../data/mockData.ts'; // Sửa dòng này
+// Xóa bỏ các dòng import marketplaceData hay ethnicData cũ từ Home/Marketplace
 import { heritageData } from '../pages/MapPage.tsx';
-import { marketplaceData } from '../pages/Marketplace.tsx';
 import { contentService, LibraryItem } from '../services/contentService';
 
 interface Message {
