@@ -26,18 +26,33 @@ interface CartContextType {
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
+// HÀM XỬ LÝ GIÁ TIỀN THÔNG MINH
+// VD: "300.000 - 500.000 VNĐ" -> Lấy 300000
+const safeParsePrice = (priceStr: string): number => {
+  if (!priceStr) return 0;
+  const match = priceStr.match(/\d{1,3}(?:\.\d{3})*/);
+  if (match) {
+    return parseInt(match[0].replace(/\./g, ''), 10);
+  }
+  return 0;
+};
+
 export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [cart, setCart] = useState<CartItem[]>([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
 
   const addToCart = (item: CartItem) => {
+    // Đảm bảo giá tiền được bóc tách đúng trước khi vào giỏ
+    const correctPriceValue = safeParsePrice(item.price);
+    const correctedItem = { ...item, priceValue: correctPriceValue };
+
     setCart(prev => {
-      const existing = prev.find(i => i.id === item.id);
+      const existing = prev.find(i => i.id === correctedItem.id);
       if (existing) {
-        return prev.map(i => i.id === item.id ? { ...i, quantity: i.quantity + 1 } : i);
+        return prev.map(i => i.id === correctedItem.id ? { ...i, quantity: i.quantity + 1 } : i);
       }
-      return [...prev, { ...item, quantity: 1 }];
+      return [...prev, { ...correctedItem, quantity: 1 }];
     });
     setIsCartOpen(true);
   };

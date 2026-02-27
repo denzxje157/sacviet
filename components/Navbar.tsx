@@ -30,14 +30,14 @@ const Navbar: React.FC = () => {
             <div className="relative">
               <div className="absolute inset-0 bg-gold/20 rounded-full blur-md group-hover:blur-lg transition-all"></div>
               <img 
-                src="https://lh3.googleusercontent.com/d/18IzzMdMCckjzNcMpkhqp52zhXw72K9js" 
-                alt="Logo Sắc Nối" 
+                src="https://cazllsidgvysyxbvrftq.supabase.co/storage/v1/object/public/images-sacviet/logo.png" 
+                alt="Logo Sắc Việt" 
                 className="relative h-10 w-10 md:h-12 md:w-12 rounded-full object-cover border-2 border-gold shadow-md transition-transform group-hover:scale-110"
               />
             </div>
             <div className="flex flex-col leading-none">
               <h1 className="text-lg md:text-xl font-black uppercase tracking-tighter text-primary group-hover:text-red-700 transition-colors">SẮC VIỆT</h1>
-              <span className="text-[9px] md:text-[10px] font-bold tracking-[0.3em] text-text-soft group-hover:text-gold transition-colors">DI SẢN VIỆT</span>
+              <span className="text-[9px] md:text-[10px] font-bold tracking-[0.1em] text-text-soft group-hover:text-gold transition-colors">KẾT NỐI BẢN SẮC VIỆT</span>
             </div>
           </Link>
 

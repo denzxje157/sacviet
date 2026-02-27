@@ -13,25 +13,59 @@ const CartDrawer: React.FC = () => {
   const [paymentMethod, setPaymentMethod] = useState<'cod' | 'qr'>('cod');
   const [orderId, setOrderId] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  
-  // Thêm state để lắng nghe trạng thái thanh toán từ Supabase
   const [orderStatus, setOrderStatus] = useState<'pending' | 'paid'>('pending');
 
-  useEffect(() => {
-    if (user) {
-      setFormData(prev => ({
-        ...prev,
-        name: user.fullName || prev.name,
-        email: user.email || prev.email,
-      }));
-    }
-  }, [user]);
+  const [savedAddresses, setSavedAddresses] = useState<any[]>([]);
+  const [selectedAddressId, setSelectedAddressId] = useState<string>('new');
 
-  // HỆ THỐNG LẮNG NGHE TIỀN VỀ (POLLING) - CHUẨN SHOPEE
+  useEffect(() => {
+    const fetchAddresses = async () => {
+      if (user && step === 'checkout') {
+        const { data } = await supabase
+          .from('user_addresses')
+          .select('*')
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false });
+
+        if (data && data.length > 0) {
+          setSavedAddresses(data);
+          setSelectedAddressId(data[0].id);
+          setFormData(prev => ({
+            ...prev,
+            name: data[0].name,
+            phone: data[0].phone,
+            address: data[0].address,
+            email: user.email || prev.email
+          }));
+        } else {
+          setSelectedAddressId('new');
+        }
+      }
+    };
+    fetchAddresses();
+  }, [user, step]);
+
+  const handleSelectAddress = (addrId: string) => {
+    setSelectedAddressId(addrId);
+    if (addrId !== 'new') {
+      const addr = savedAddresses.find(a => a.id === addrId);
+      if (addr) {
+        setFormData(prev => ({ ...prev, name: addr.name, phone: addr.phone, address: addr.address }));
+      }
+    } else {
+      setFormData(prev => ({ ...prev, name: user?.user_metadata?.full_name || '', phone: '', address: '' }));
+    }
+  };
+
+  useEffect(() => {
+    if (user && step === 'cart') {
+      setFormData(prev => ({ ...prev, name: user.user_metadata?.full_name || prev.name, email: user.email || prev.email }));
+    }
+  }, [user, step]);
+
   useEffect(() => {
     if (step !== 'success' || !orderId || paymentMethod === 'cod') return;
 
-    // Cứ 3 giây hỏi Database 1 lần xem đơn này đã 'paid' chưa
     const interval = setInterval(async () => {
       try {
         const { data } = await supabase
@@ -41,23 +75,20 @@ const CartDrawer: React.FC = () => {
           .single();
 
         if (data && data.status === 'paid') {
-          // BÙM! Có người chuyển khoản -> Dừng hỏi và chuyển trạng thái UI
           setOrderStatus('paid');
           clearInterval(interval);
           
-          // Chuyển khoản xong thì tự động xóa giỏ hàng và mở Zalo
           setTimeout(() => {
-            const zaloMsg = `Chào Sắc Việt, tôi đã thanh toán thành công đơn hàng ${orderId}.`;
-            window.open(`https://zalo.me/0987654321?text=${encodeURIComponent(zaloMsg)}`, '_blank');
             clearCart();
-          }, 2000);
+            const zaloMsg = `Chào Sắc Việt, tôi đã thanh toán thành công đơn hàng ${orderId}.`;
+            window.location.href = `https://zalo.me/0987654321?text=${encodeURIComponent(zaloMsg)}`;
+          }, 3000);
         }
       } catch (err) {
         console.error("Lỗi kiểm tra thanh toán:", err);
       }
     }, 3000);
 
-    // Dọn dẹp bộ đếm nếu đóng giỏ hàng
     return () => clearInterval(interval);
   }, [step, orderId, paymentMethod]);
 
@@ -71,11 +102,8 @@ const CartDrawer: React.FC = () => {
     }
 
     setIsSubmitting(true);
-    
-    // Sinh mã đơn hàng
     const newOrderId = `SN-${Math.floor(100000 + Math.random() * 900000)}`;
     setOrderId(newOrderId);
-    
     const paymentText = paymentMethod === 'cod' ? 'Thanh toán khi nhận hàng (COD)' : 'Chuyển khoản (QR)';
 
     const orderData = {
@@ -91,23 +119,27 @@ const CartDrawer: React.FC = () => {
       payment_method: paymentText,
       total: totalPrice,
       items: cart,
-      status: 'pending' as const, // Mặc định là chờ thanh toán
+      status: 'pending' as const,
       created_at: new Date().toISOString()
     };
 
     try {
-      // Lưu đơn vào Database
+      if (selectedAddressId === 'new') {
+        await supabase.from('user_addresses').insert([{
+          user_id: user.id,
+          name: formData.name,
+          phone: formData.phone,
+          address: formData.address
+        }]);
+      }
+
       await orderService.createOrder(orderData);
       
-      // Chuyển sang màn hình "Chờ thanh toán"
       setStep('success');
       setOrderStatus('pending');
       setIsSubmitting(false);
 
-      // Nếu là COD thì xử lý luôn, không cần chờ Webhook
       if (paymentMethod === 'cod') {
-        
-        // --- THÊM ĐOẠN NÀY ĐỂ GỌI API GỬI MAIL ---
         try {
           await fetch('/api/send-email', {
             method: 'POST',
@@ -122,18 +154,16 @@ const CartDrawer: React.FC = () => {
             })
           });
         } catch (e) {
-          console.error("Lỗi khi gọi API gửi mail COD:", e);
+          console.error("Lỗi gửi mail COD", e);
         }
-        // ------------------------------------------
 
-        setOrderStatus('paid'); // Giả vờ 'paid' để hiện tích xanh
+        setOrderStatus('paid');
         setTimeout(() => {
+           clearCart();
            const codMsg = `Chào Sắc Việt, tôi vừa đặt đơn hàng COD mã: ${newOrderId}`;
            window.location.href = `https://zalo.me/0987654321?text=${encodeURIComponent(codMsg)}`;
-           clearCart();
         }, 3000);
       }
-      
     } catch (error) {
       console.error('Lỗi lưu đơn hàng:', error);
       setIsSubmitting(false);
@@ -145,27 +175,21 @@ const CartDrawer: React.FC = () => {
       <div className="absolute inset-0 bg-text-main/60 backdrop-blur-sm animate-fade-in" onClick={toggleCart}></div>
       
       <div className="relative w-full max-w-md bg-[#F7F3E9] h-full shadow-2xl flex flex-col border-l-4 border-gold animate-slide-in-right">
-        
         {/* Header */}
         <div className="p-6 bg-primary text-white flex items-center justify-between shadow-md shrink-0">
           <div className="flex items-center gap-3">
-            <div className="bg-white/20 p-2 rounded-full">
-               <span className="material-symbols-outlined text-2xl">shopping_bag</span>
-            </div>
+            <div className="bg-white/20 p-2 rounded-full"><span className="material-symbols-outlined text-2xl">shopping_bag</span></div>
             <div>
                <h2 className="text-lg font-black uppercase tracking-widest leading-none">Giỏ Hàng</h2>
                <p className="text-[10px] text-gold-light font-bold mt-1 opacity-90">Di sản trong tay bạn</p>
             </div>
           </div>
-          <button onClick={toggleCart} className="bg-white/10 hover:bg-white/20 p-2 rounded-full transition-colors flex items-center text-white">
-            <span className="material-symbols-outlined">close</span>
-          </button>
+          <button onClick={toggleCart} className="bg-white/10 hover:bg-white/20 p-2 rounded-full transition-colors flex items-center text-white"><span className="material-symbols-outlined">close</span></button>
         </div>
 
         {/* Body Content */}
         <div className="flex-1 overflow-y-auto custom-scrollbar p-6 bg-[#F7F3E9]">
           
-          {/* STEP 1: XEM GIỎ HÀNG */}
           {step === 'cart' && (
             <>
               {cart.length === 0 ? (
@@ -182,9 +206,7 @@ const CartDrawer: React.FC = () => {
                         <div className="flex-1 min-w-0">
                            <div className="flex justify-between items-start mb-1">
                               <h3 className="font-black text-text-main text-sm line-clamp-2 pr-2">{item.name}</h3>
-                              <button onClick={() => removeFromCart(item.id)} className="text-text-soft/40 hover:text-primary transition-colors">
-                                <span className="material-symbols-outlined text-lg">delete</span>
-                              </button>
+                              <button onClick={() => removeFromCart(item.id)} className="text-text-soft/40 hover:text-primary transition-colors"><span className="material-symbols-outlined text-lg">delete</span></button>
                            </div>
                            <p className="text-[10px] text-bronze uppercase font-black tracking-widest mb-2">{item.ethnic}</p>
                            <div className="flex items-center justify-between">
@@ -203,33 +225,61 @@ const CartDrawer: React.FC = () => {
             </>
           )}
 
-          {/* STEP 2: NHẬP THÔNG TIN (KHÔNG HIỆN QR Ở ĐÂY NỮA) */}
           {step === 'checkout' && (
              <div className="bg-white p-6 rounded-3xl border border-gold/20 shadow-sm animate-fade-in">
                 <h3 className="font-black text-text-main uppercase text-sm mb-6 flex items-center gap-2">
                    <span className="material-symbols-outlined text-primary">fact_check</span>
-                   Thông tin người nhận
+                   Thông tin giao hàng
                 </h3>
+                
+                {savedAddresses.length > 0 && (
+                  <div className="mb-6 space-y-3">
+                    <label className="block text-[10px] font-black uppercase text-bronze mb-1 ml-2">Sổ địa chỉ của bạn</label>
+                    {savedAddresses.map(addr => (
+                      <div key={addr.id} onClick={() => handleSelectAddress(addr.id)} className={`p-4 rounded-xl border-2 cursor-pointer transition-all flex items-start gap-3 ${selectedAddressId === addr.id ? 'border-primary bg-primary/5 shadow-sm' : 'border-gold/20 bg-background-light hover:border-primary/40'}`}>
+                        <div className={`mt-1 size-4 rounded-full border-2 flex items-center justify-center shrink-0 ${selectedAddressId === addr.id ? 'border-primary' : 'border-gold/40'}`}>
+                           {selectedAddressId === addr.id && <div className="size-2 bg-primary rounded-full"></div>}
+                        </div>
+                        <div>
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="font-bold text-sm text-text-main leading-none">{addr.name}</span>
+                            <span className="text-xs font-bold text-text-soft border-l border-gold/30 pl-2 leading-none">{addr.phone}</span>
+                          </div>
+                          <p className="text-xs text-text-soft line-clamp-2">{addr.address}</p>
+                        </div>
+                      </div>
+                    ))}
+                    <div onClick={() => handleSelectAddress('new')} className={`p-3 rounded-xl border-2 border-dashed cursor-pointer transition-all flex items-center justify-center gap-2 ${selectedAddressId === 'new' ? 'border-primary bg-primary/5 text-primary' : 'border-gold/30 bg-background-light text-text-soft hover:border-primary hover:text-primary'}`}>
+                      <span className="material-symbols-outlined text-lg">add_circle</span>
+                      <span className="text-xs font-bold">Thêm địa chỉ mới</span>
+                    </div>
+                  </div>
+                )}
+
                 <form id="checkout-form" onSubmit={handleCheckout} className="space-y-4">
+                   {(selectedAddressId === 'new' || savedAddresses.length === 0) && (
+                     <div className="space-y-4 bg-background-light p-4 rounded-2xl border border-gold/10">
+                        <div>
+                            <label className="block text-[10px] font-black uppercase text-bronze mb-1 ml-2">Họ và tên</label>
+                            <input required type="text" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} className="w-full bg-white border border-gold/20 rounded-xl px-4 py-3 text-sm font-medium focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary" placeholder="Ví dụ: Nguyễn Văn A" />
+                        </div>
+                        <div>
+                            <label className="block text-[10px] font-black uppercase text-bronze mb-1 ml-2">Số điện thoại (Zalo)</label>
+                            <input required type="tel" value={formData.phone} onChange={e => setFormData({...formData, phone: e.target.value})} className="w-full bg-white border border-gold/20 rounded-xl px-4 py-3 text-sm font-medium focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary" placeholder="Ví dụ: 0912..." />
+                        </div>
+                        <div>
+                            <label className="block text-[10px] font-black uppercase text-bronze mb-1 ml-2">Địa chỉ nhận hàng</label>
+                            <textarea required value={formData.address} onChange={e => setFormData({...formData, address: e.target.value})} className="w-full bg-white border border-gold/20 rounded-xl px-4 py-3 text-sm font-medium focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary min-h-[80px]" placeholder="Số nhà, phường/xã, quận/huyện, tỉnh/thành phố..."></textarea>
+                        </div>
+                     </div>
+                   )}
                    <div>
-                      <label className="block text-[10px] font-black uppercase text-bronze mb-1 ml-2">Họ và tên</label>
-                      <input required type="text" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} className="w-full bg-background-light border border-gold/20 rounded-xl px-4 py-3 text-sm font-medium focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary" placeholder="Ví dụ: Nguyễn Văn A" />
-                   </div>
-                   <div>
-                      <label className="block text-[10px] font-black uppercase text-bronze mb-1 ml-2">Email xác nhận</label>
+                      <label className="block text-[10px] font-black uppercase text-bronze mb-1 ml-2">Email nhận hóa đơn</label>
                       <input required type="email" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} className="w-full bg-background-light border border-gold/20 rounded-xl px-4 py-3 text-sm font-medium focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary" placeholder="Ví dụ: email@gmail.com" />
                    </div>
                    <div>
-                      <label className="block text-[10px] font-black uppercase text-bronze mb-1 ml-2">Số điện thoại (Zalo)</label>
-                      <input required type="tel" value={formData.phone} onChange={e => setFormData({...formData, phone: e.target.value})} className="w-full bg-background-light border border-gold/20 rounded-xl px-4 py-3 text-sm font-medium focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary" placeholder="Ví dụ: 0912..." />
-                   </div>
-                   <div>
-                      <label className="block text-[10px] font-black uppercase text-bronze mb-1 ml-2">Địa chỉ nhận hàng</label>
-                      <textarea required value={formData.address} onChange={e => setFormData({...formData, address: e.target.value})} className="w-full bg-background-light border border-gold/20 rounded-xl px-4 py-3 text-sm font-medium focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary min-h-[80px]" placeholder="Số nhà, phường/xã..."></textarea>
-                   </div>
-                   <div>
                       <label className="block text-[10px] font-black uppercase text-bronze mb-1 ml-2">Lời nhắn (Tùy chọn)</label>
-                      <textarea value={formData.note} onChange={e => setFormData({...formData, note: e.target.value})} className="w-full bg-background-light border border-gold/20 rounded-xl px-4 py-3 text-sm font-medium focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary min-h-[60px]"></textarea>
+                      <textarea value={formData.note} onChange={e => setFormData({...formData, note: e.target.value})} className="w-full bg-background-light border border-gold/20 rounded-xl px-4 py-3 text-sm font-medium focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary min-h-[60px]" placeholder="Ghi chú thêm cho shop..."></textarea>
                    </div>
 
                    <div className="mt-6 pt-4 border-t border-gold/10">
@@ -251,23 +301,15 @@ const CartDrawer: React.FC = () => {
              </div>
           )}
 
-          {/* STEP 3: MÀN HÌNH CHỜ THANH TOÁN HOẶC THÀNH CÔNG */}
           {step === 'success' && (
              <div className="h-full flex flex-col items-center justify-center text-center p-2 animate-fade-in">
-                
                 {paymentMethod === 'qr' && orderStatus === 'pending' ? (
-                   // GIAO DIỆN ĐANG CHỜ KHÁCH QUÉT MÃ QR
                    <div className="bg-white p-6 rounded-3xl border border-gold/20 shadow-xl w-full flex flex-col items-center">
                      <p className="text-xs font-black text-primary uppercase tracking-widest mb-2">Quét mã để thanh toán</p>
                      <p className="text-xs text-text-soft mb-4">Đơn hàng <span className="font-bold text-text-main">{orderId}</span></p>
                      
                      <div className="bg-white p-2 rounded-xl border-2 border-primary border-dashed mb-4 relative">
-                        {/* QUAN TRỌNG: Dùng orderId làm Nội dung chuyển khoản để SePay nhận diện */}
-                        <img 
-                          src={`https://img.vietqr.io/image/MB-666150707-compact2.png?amount=${totalPrice}&addInfo=${orderId}&accountName=NGUYEN%20HOANG%20ANH`} 
-                          alt="VietQR MB Bank" 
-                          className="w-56 h-56 object-contain" 
-                        />
+                        <img src={`https://img.vietqr.io/image/MB-666150707-compact2.png?amount=${totalPrice}&addInfo=${orderId}&accountName=NGUYEN%20HOANG%20ANH`} alt="VietQR MB Bank" className="w-56 h-56 object-contain" />
                      </div>
                      
                      <div className="text-[11px] text-text-soft space-y-1 bg-background-light w-full p-4 rounded-xl border border-gold/10 text-left mb-6">
@@ -284,19 +326,16 @@ const CartDrawer: React.FC = () => {
                      </div>
                    </div>
                 ) : (
-                   // GIAO DIỆN ĐÃ THANH TOÁN THÀNH CÔNG (Sau khi SePay báo về)
                    <div className="flex flex-col items-center animate-slide-up bg-white p-8 rounded-3xl border border-gold/20 shadow-xl w-full">
                       <div className="size-24 bg-green-100 rounded-full flex items-center justify-center mb-6 shadow-inner relative">
                         <div className="absolute inset-0 bg-green-400 rounded-full animate-ping opacity-20"></div>
                         <span className="material-symbols-outlined text-5xl text-green-600">check_circle</span>
                       </div>
                       <h3 className="text-2xl font-black text-text-main mb-3 leading-tight">Đặt Hàng <br/> Thành Công!</h3>
-                      
                       <div className="bg-background-light px-6 py-4 rounded-2xl border border-gold/20 mb-6 shadow-sm w-full">
                         <p className="text-[10px] text-text-soft uppercase font-black tracking-widest mb-1">Mã đơn hàng</p>
                         <p className="text-xl font-black text-primary tracking-widest">{orderId}</p>
                       </div>
-                      
                       <p className="text-text-soft mb-6 text-sm">Cảm ơn bạn. Thông tin hóa đơn sẽ sớm được gửi qua Email.</p>
                       <p className="text-xs font-bold text-primary animate-pulse flex items-center gap-2">
                         Đang chuyển hướng Zalo <span className="material-symbols-outlined text-sm">open_in_new</span>
@@ -317,23 +356,13 @@ const CartDrawer: React.FC = () => {
              
              {step === 'cart' ? (
                <button onClick={() => setStep('checkout')} className="w-full bg-primary text-white py-4 rounded-2xl font-black uppercase tracking-widest hover:brightness-110 shadow-xl shadow-primary/20 transition-all active:scale-95 flex items-center justify-center gap-2">
-                 Tiến hành đặt hàng
-                 <span className="material-symbols-outlined text-lg">arrow_forward</span>
+                 Tiến hành đặt hàng <span className="material-symbols-outlined text-lg">arrow_forward</span>
                </button>
              ) : (
                <div className="flex gap-3">
-                  <button onClick={() => setStep('cart')} disabled={isSubmitting} className="flex-1 bg-background-light text-text-soft border border-gold/20 py-4 rounded-2xl font-black uppercase tracking-widest hover:bg-gold/10 transition-colors disabled:opacity-50">
-                    Quay lại
-                  </button>
-                  <button type="submit" form="checkout-form" disabled={isSubmitting} className="flex-[2] bg-primary text-white py-4 rounded-2xl font-black uppercase tracking-widest hover:brightness-110 shadow-xl shadow-primary/20 transition-all active:scale-95 flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed">
-                    {isSubmitting ? (
-                      <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                    ) : (
-                      <>
-                        Xác nhận & Gửi đơn
-                        <span className="material-symbols-outlined text-lg">send</span>
-                      </>
-                    )}
+                  <button onClick={() => setStep('cart')} disabled={isSubmitting} className="flex-1 bg-background-light text-text-soft border border-gold/20 py-4 rounded-2xl font-black uppercase tracking-widest hover:bg-gold/10 transition-colors disabled:opacity-50">Quay lại</button>
+                  <button type="submit" form="checkout-form" disabled={isSubmitting || (selectedAddressId === 'new' && (!formData.name || !formData.phone || !formData.address))} className="flex-[2] bg-primary text-white py-4 rounded-2xl font-black uppercase tracking-widest hover:brightness-110 shadow-xl shadow-primary/20 transition-all active:scale-95 flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed">
+                    {isSubmitting ? <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div> : <>Xác nhận & Gửi <span className="material-symbols-outlined text-lg">send</span></>}
                   </button>
                </div>
              )}

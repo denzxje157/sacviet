@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { MapContainer, TileLayer, Marker, ZoomControl, Tooltip, useMap } from 'react-leaflet';
 import L from 'leaflet';
@@ -39,7 +38,6 @@ const MapFixer = () => {
   return null;
 };
 
-// ... (Giữ nguyên heritageData) ...
 export const heritageData: HeritageSite[] = [
   { id: 'yentu', name: "Yên Tử – Vĩnh Nghiêm – Côn Sơn, Kiếp Bạc", type: 'UNESCO', unescoYear: '2025', category: 'temple', location: "Quảng Ninh, Bắc Giang và Hải Phòng", coords: [21.1578, 106.7214], description: "Vùng đất thiêng của Phật giáo Trúc Lâm, nơi hội tụ linh khí đất trời và những giá trị lịch sử, văn hóa vô giá.", img: "https://cdn2.tuoitre.vn/thumb_w/1200/471584752817336320/2025/7/12/chua-yen-tu-17523255573811017341205-80-0-1152-2048-crop-1752325584572837395867.jpg", vrEmbedUrl: "https://smarttravel-vr.mobifone.vn/vr-tour/quan-the-di-tich-va-danh-lam-thang-canh-yen-tu/66a8e8db9b37be124d53b99a" },
   { id: 'thanh-nha-ho', name: "Thành Nhà Hồ", type: 'UNESCO', unescoYear: '2011', category: 'citadel', location: "Thanh Hóa", coords: [20.0782, 105.6067], description: "Tòa thành đá độc nhất vô nhị ở Đông Nam Á với kỹ thuật ghép đá tinh xảo từ thế kỷ 14.", img: "https://image.sggp.org.vn/1200x630/Uploaded/2026/lcgkcwvo/2023_11_14/1-9587.jpg.webp", vrEmbedUrl: "https://yootek.vn/chiem-nguong-toan-canh-thanh-nha-ho/" },
@@ -179,7 +177,8 @@ const MapPage: React.FC = () => {
 
       <main className="flex-1 relative bg-background-light overflow-hidden p-4 lg:p-8">
         <div className="w-full h-full rounded-[2.5rem] overflow-hidden border-2 border-gold/20 shadow-inner relative">
-          <MapContainer key={moduleKey} center={MAP_CENTER} zoom={6} className="w-full h-full" zoomControl={false} attributionControl={false}>
+          {/* ĐÃ XÓA KEY BỊ LỖI Ở ĐÂY */}
+          <MapContainer center={MAP_CENTER} zoom={6} className="w-full h-full" zoomControl={false} attributionControl={false}>
             <MapFixer />
             <TileLayer url="https://mt1.google.com/vt/lyrs=m&hl=vi&x={x}&y={y}&z={z}" noWrap={true} />
             <ZoomControl position="bottomright" />

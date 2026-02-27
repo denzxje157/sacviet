@@ -4,6 +4,7 @@ import { useSearchParams } from 'react-router-dom';
 import { useCart } from '../context/CartContext.tsx';
 import { supabase } from '../services/supabaseClient.ts'; 
 import { marketplaceData } from '../data/mockData.ts';
+
 interface Product {
   id: string;
   name: string;
@@ -226,21 +227,22 @@ const Marketplace: React.FC = () => {
         </section>
 
         <div className="sticky top-20 md:top-24 z-40 mb-6 md:mb-10 space-y-4 md:space-y-6">
-          <div className="max-w-3xl mx-auto relative group">
-            <div className="max-w-3xl mx-auto relative group">
+          {/* ĐÃ FIX: Chỉ giữ lại 1 div bọc ngoài và 1 icon kính lúp */}
+          <div className="max-w-3xl mx-auto relative group z-20">
+            <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
+              <span className="material-symbols-outlined text-gold group-hover:text-primary transition-colors text-xl md:text-2xl leading-none">
+                search
+              </span>
+            </div>
             <input 
               type="text" 
               placeholder="Tìm kiếm sản phẩm..." 
               value={searchTerm} 
               onChange={(e) => { setSearchTerm(e.target.value); setCurrentPage(1); }} 
-              className="w-full bg-white/95 backdrop-blur border-2 border-gold/20 rounded-full py-4 px-14 text-text-main shadow-xl text-lg font-medium focus:outline-none focus:border-primary transition-all" 
+              className="w-full bg-white/95 backdrop-blur border-2 border-gold/20 rounded-full py-4 pl-14 pr-6 text-text-main shadow-xl text-lg font-medium focus:outline-none focus:border-primary transition-all block" 
             />
-            <span className="material-symbols-outlined absolute left-5 top-1/2 -translate-y-1/2 text-gold text-2xl pointer-events-none">
-              search
-            </span>
           </div>
-            <span className="material-symbols-outlined absolute left-4 md:left-5 top-1/2 -translate-y-1/2 text-gold text-xl md:text-2xl">search</span>
-          </div>
+
           <div className="bg-white/90 backdrop-blur p-2 rounded-2xl md:rounded-[2.5rem] border border-gold/20 shadow-lg flex items-center max-w-[95vw] md:max-w-[90vw] mx-auto group">
              <button onClick={scrollLeft} className="p-2 hover:bg-gold/10 rounded-full text-gold transition-colors shrink-0"><span className="material-symbols-outlined">chevron_left</span></button>
              <div ref={scrollRef} className="flex-1 flex overflow-x-auto gap-2 px-2 custom-scrollbar-h py-2 scroll-smooth no-scrollbar">

@@ -151,7 +151,7 @@ const AuthModal: React.FC = () => {
             {mode === 'login' ? 'Đăng Nhập' : 'Đăng Ký'}
           </h2>
           <p className="text-xs font-bold text-bronze uppercase tracking-widest">
-            {mode === 'login' ? 'Chào mừng trở lại Sắc Nối' : 'Tham gia cùng Sắc Nối'}
+            {mode === 'login' ? 'Chào mừng trở lại Sắc Việt' : 'Tham gia cùng Sắc Việt'}
           </p>
         </div>
 

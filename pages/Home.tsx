@@ -3,7 +3,8 @@ import { createPortal } from 'react-dom';
 import { MapContainer, TileLayer, Marker, ZoomControl, Tooltip, useMap, useMapEvents } from 'react-leaflet';
 import L from 'leaflet';
 import { useNavigate } from 'react-router-dom';
-import { ethnicData, EthnicGroup } from '../data/mockData.ts'; // Import từ kho dữ liệu tổng
+import { ethnicData, EthnicGroup } from '../data/mockData.ts'; 
+import { supabase } from '../services/supabaseClient.ts'; // ĐÃ THÊM KẾT NỐI SUPABASE
 
 interface Story {
   id: string;
@@ -59,16 +60,6 @@ const MapFixer = () => {
     const timer = setTimeout(() => { map.invalidateSize(); }, 600);
     return () => clearTimeout(timer);
   }, [map]);
-  return null;
-};
-
-const MapInteractionHandler = ({ onInteract }: { onInteract: () => void }) => {
-  useMapEvents({
-    dragstart: () => onInteract(),
-    zoomstart: () => onInteract(),
-    click: () => onInteract(),
-    mousedown: () => onInteract(),
-  });
   return null;
 };
 
@@ -163,12 +154,51 @@ const StoryModal = ({ story, onClose }: { story: Story, onClose: () => void }) =
 };
 
 const Home: React.FC = () => {
+  // STATE CHỨA DANH SÁCH DÂN TỘC (Mặc định lấy từ mockData để phòng hờ)
+  const [ethnicList, setEthnicList] = useState<EthnicGroup[]>(ethnicData);
+  
   const [selectedEthnic, setSelectedEthnic] = useState<EthnicGroup | null>(null);
   const [hoveredEthnicName, setHoveredEthnicName] = useState<string | null>(null);
   const [scrollY, setScrollY] = useState(0);
   const [activeStory, setActiveStory] = useState<Story | null>(null);
   const navigate = useNavigate();
   const mapSectionRef = useRef<HTMLElement>(null);
+
+  // --- LUỒNG KẾT NỐI SUPABASE ---
+
+  useEffect(() => {
+    const fetchEthnicData = async () => {
+      try {
+        // 1. Gọi đúng tên bảng 'dan_toc' trên Supabase
+        const { data, error } = await supabase
+          .from('dan_toc')
+          .select('*');
+        
+        if (error) throw error;
+        
+        if (data && data.length > 0) {
+          // 2. "Dịch" các cột tiếng Việt sang cấu trúc tiếng Anh mà giao diện cần
+          const mappedData = data.map((item: any) => ({
+            name: item.name || item.ten || item.ten_dan_toc, // Khớp với cột tên dân tộc của bạn
+            location: item.location || item.vi_tri || item.dia_ban, 
+            population: item.population || item.dan_so,
+            // Đảm bảo tọa độ [lat, lng] được parse đúng định dạng mảng
+            coords: typeof item.toa_do === 'string' ? JSON.parse(item.toa_do) : item.toa_do, 
+            description: item.mo_ta,
+            heritage: item.di_san,
+            img: item.anh_dai_dien
+          }));
+
+          setEthnicList(mappedData);
+          console.log("Đã tải thành công dữ liệu từ bảng dan_toc!");
+        }
+      } catch (error) {
+        console.error("Lỗi khi tải dữ liệu từ Supabase:", error);
+      }
+    };
+
+    fetchEthnicData();
+  }, []);
 
   useEffect(() => {
     let ticking = false;
@@ -224,7 +254,7 @@ const Home: React.FC = () => {
         <section className="relative py-16 max-w-[1800px] mx-auto px-4">
           <RevealSection>
             <div className="text-center mb-16">
-               <h3 className="text-primary font-bold uppercase tracking-widest text-sm mb-4">Sứ mệnh của chúng tôi</h3>
+               <h2 className="text-primary font-bold uppercase tracking-widest text-sm mb-6">Sứ mệnh của chúng tôi</h2>
                <h2 className="text-2xl md:text-4xl font-black text-text-main max-w-4xl mx-auto">Chúng tôi kết nối những giá trị truyền thống với hiện đại, bảo tồn bản sắc văn hóa dân tộc.</h2>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -261,8 +291,8 @@ const Home: React.FC = () => {
                     <ZoomControl position="bottomright" />
                     {selectedEthnic && <ChangeView coords={selectedEthnic.coords} />}
                     
-                    {/* FIX LỖI TRÙNG KEY TẠI ĐÂY */}
-                    {ethnicData.map((ethnic, idx) => (
+                    {/* ĐÃ THAY BẰNG ETHNICLIST LẤY TỪ DB */}
+                    {ethnicList.map((ethnic, idx) => (
                       <Marker 
                         key={`marker-${ethnic.name}-${idx}`} 
                         position={ethnic.coords} 
@@ -282,8 +312,8 @@ const Home: React.FC = () => {
               <div className="w-full lg:w-[480px] bg-[#F7F3E9] rounded-[3rem] lg:rounded-[5rem] flex flex-col overflow-hidden border-[8px] border-gold/20 shadow-2xl relative h-[500px] lg:h-auto">
                 <div className="p-10 bg-primary shrink-0 text-white"><h2 className="text-3xl font-black italic uppercase">CỘNG ĐỒNG <br/><span className="text-gold">VIỆT NAM</span></h2></div>
                 <div className="flex-1 overflow-y-auto p-6 space-y-5 custom-scrollbar">
-                  {/* FIX LỖI TRÙNG KEY TẠI ĐÂY */}
-                  {ethnicData.map((ethnic, idx) => (
+                  {/* ĐÃ THAY BẰNG ETHNICLIST LẤY TỪ DB */}
+                  {ethnicList.map((ethnic, idx) => (
                     <EthnicButton 
                       key={`list-${ethnic.name}-${idx}`}
                       ethnic={ethnic}
@@ -298,7 +328,10 @@ const Home: React.FC = () => {
                   <div className="absolute inset-0 z-[100] bg-background-light p-8 animate-slide-up-slow flex flex-col overflow-y-auto custom-scrollbar">
                      <button onClick={() => setSelectedEthnic(null)} className="self-end size-14 rounded-full border-2 border-gold/20 flex items-center justify-center bg-white shadow-xl hover:bg-primary hover:text-white transition-all"><span className="material-symbols-outlined text-3xl">close</span></button>
                      <div className="mt-6 space-y-8 text-left">
-                        <div className="rounded-[3rem] overflow-hidden aspect-[4/3] border-[6px] border-white shadow-2xl"><img src={selectedEthnic.img} alt={selectedEthnic.name} className="w-full h-full object-cover" /></div>
+                        <div className="rounded-[3rem] overflow-hidden aspect-[4/3] border-[6px] border-white shadow-2xl">
+                          {/* ẢNH DÂN TỘC TẠI ĐÂY */}
+                          <img src={selectedEthnic.img} alt={selectedEthnic.name} className="w-full h-full object-cover" />
+                        </div>
                         <h3 className="text-5xl font-black text-text-main italic uppercase leading-none">DÂN TỘC <br/><span className="text-primary">{selectedEthnic.name}</span></h3>
                         <div className="bg-white p-8 rounded-[2.5rem] border-2 border-gold/10"><p className="text-text-soft font-bold italic text-lg">"{selectedEthnic.description}"</p></div>
                         <div className="bg-primary p-10 rounded-[3rem] text-white shadow-2xl border-2 border-gold/40">

@@ -1,9 +1,6 @@
-
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 
-// ... (Giữ nguyên Helpers, Interfaces, Data) ...
-// NOTE: Re-include all helpers and data to ensure compilation.
 const getLunarDate = (solarDate: Date) => {
   const anchorDate = new Date(2026, 1, 17); 
   const diffTime = solarDate.getTime() - anchorDate.getTime();
@@ -43,12 +40,10 @@ const INITIAL_POSTS: Post[] = [
 ];
 const RAW_QUIZ_DATA: QuizQuestion[] = [
   { id: 1, question: "Lễ hội 'Cấp Sắc' là nghi lễ trưởng thành của người đàn ông dân tộc nào?", options: ["H'Mông", "Dao", "Tày", "Thái"], correctAnswerStr: "Dao", explanation: "Lễ Cấp Sắc là nghi lễ quan trọng nhất của đàn ông Dao." },
-  // ... (Full data assumed preserved)
 ];
 const FESTIVAL_LIBRARY: FestivalDef[] = [
   { id: 'tet-nguyen-dan', name: 'Tết Nguyên Đán', lunarDateStr: '01/01 Âm lịch', location: 'Toàn quốc', solarDates: { 2025: '2025-01-29', 2026: '2026-02-17' } },
   { id: 'tet-nguyen-tieu', name: 'Tết Nguyên Tiêu', lunarDateStr: '15/01 Âm lịch', location: 'Toàn quốc', solarDates: { 2025: '2025-02-12', 2026: '2026-03-03' } },
-  // ... (Full data assumed preserved)
 ];
 
 const CalendarModal = ({ onClose, initialDate, festivals }: { onClose: () => void, initialDate: Date, festivals: FestivalDisplay[] }) => {
@@ -121,8 +116,6 @@ const CalendarModal = ({ onClose, initialDate, festivals }: { onClose: () => voi
   );
 };
 
-// ... (Giữ nguyên FestivalWidget, QuizWidget, PostComposer, PostCard, Community Component) ...
-// Re-export full logic for Community
 const FestivalWidget = () => {
   const [showCalendar, setShowCalendar] = useState(false);
   const [today, setToday] = useState(new Date());
@@ -238,9 +231,28 @@ const QuizWidget = () => {
   );
 };
 
-const PostComposer = ({ onPost }: { onPost: (content: string) => void }) => {
-  const [content, setContent] = useState(''); const [isPosting, setIsPosting] = useState(false);
-  const handleSubmit = () => { if (!content.trim()) return; setIsPosting(true); setTimeout(() => { onPost(content); setContent(''); setIsPosting(false); }, 800); };
+const PostComposer = ({ onPost }: { onPost: (content: string, image?: string) => void }) => {
+  const [content, setContent] = useState(''); 
+  const [imageUrl, setImageUrl] = useState('');
+  const [isPosting, setIsPosting] = useState(false);
+
+  // ĐÃ THÊM CHỨC NĂNG NHẬP LINK ẢNH
+  const handleAddImage = () => {
+    const url = prompt("Nhập đường dẫn hình ảnh (URL):");
+    if (url) setImageUrl(url);
+  };
+
+  const handleSubmit = () => { 
+    if (!content.trim() && !imageUrl) return; 
+    setIsPosting(true); 
+    setTimeout(() => { 
+      onPost(content, imageUrl); 
+      setContent(''); 
+      setImageUrl('');
+      setIsPosting(false); 
+    }, 800); 
+  };
+
   return (
     <div className="bg-white border-2 border-gold/10 rounded-[2rem] p-6 mb-10 shadow-xl relative overflow-hidden group hover:border-gold/30 transition-colors animate-fade-in">
       <div className="absolute -right-20 -bottom-20 size-60 bg-gold/5 rounded-full pointer-events-none"></div>
@@ -248,9 +260,23 @@ const PostComposer = ({ onPost }: { onPost: (content: string) => void }) => {
          <div className="size-12 rounded-full bg-primary flex items-center justify-center text-white shrink-0 font-black shadow-lg border-2 border-white">{MOCK_CURRENT_USER.avatar}</div>
          <div className="flex-1">
            <textarea value={content} onChange={(e) => setContent(e.target.value)} className="w-full bg-background-light border-2 border-gold/10 rounded-2xl p-4 text-text-main placeholder:text-text-soft/40 focus:ring-2 focus:ring-primary focus:border-transparent outline-none resize-none min-h-[100px] text-sm font-medium transition-all" placeholder={`Chào ${MOCK_CURRENT_USER.name}, bạn có câu chuyện di sản nào muốn chia sẻ hôm nay?`} disabled={isPosting}></textarea>
+           
+           {/* NẾU CÓ ẢNH THÌ HIỂN THỊ TRƯỚC (PREVIEW) */}
+           {imageUrl && (
+             <div className="relative mt-2 rounded-xl overflow-hidden h-32 md:h-48 border border-gold/20">
+               <img src={imageUrl} alt="Preview" className="w-full h-full object-cover" />
+               <button onClick={() => setImageUrl('')} className="absolute top-2 right-2 bg-black/50 text-white rounded-full p-1 hover:bg-red-500 transition-colors"><span className="material-symbols-outlined text-sm">close</span></button>
+             </div>
+           )}
+
            <div className="flex items-center justify-between mt-4">
-              <div className="flex gap-2"><button className="p-2 text-gold hover:bg-gold/10 rounded-lg transition-colors tooltip" title="Thêm ảnh"><span className="material-symbols-outlined text-xl">image</span></button><button className="p-2 text-gold hover:bg-gold/10 rounded-lg transition-colors tooltip" title="Check-in"><span className="material-symbols-outlined text-xl">location_on</span></button></div>
-              <button onClick={handleSubmit} disabled={!content.trim() || isPosting} className={`bg-primary px-8 py-2.5 rounded-xl font-black text-white uppercase text-[10px] tracking-widest shadow-lg shadow-primary/20 transition-all active:scale-95 flex items-center gap-2 ${(!content.trim() || isPosting) ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gold hover:text-text-main'}`}> {isPosting ? (<span className="size-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>) : (<>Đăng bài <span className="material-symbols-outlined text-sm">send</span></>)}</button>
+              <div className="flex gap-2">
+                <button onClick={handleAddImage} className="p-2 text-gold hover:bg-gold/10 rounded-lg transition-colors tooltip" title="Thêm ảnh">
+                  <span className="material-symbols-outlined text-xl">image</span>
+                </button>
+                <button className="p-2 text-gold hover:bg-gold/10 rounded-lg transition-colors tooltip" title="Check-in"><span className="material-symbols-outlined text-xl">location_on</span></button>
+              </div>
+              <button onClick={handleSubmit} disabled={(!content.trim() && !imageUrl) || isPosting} className={`bg-primary px-8 py-2.5 rounded-xl font-black text-white uppercase text-[10px] tracking-widest shadow-lg shadow-primary/20 transition-all active:scale-95 flex items-center gap-2 ${((!content.trim() && !imageUrl) || isPosting) ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gold hover:text-text-main'}`}> {isPosting ? (<span className="size-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>) : (<>Đăng bài <span className="material-symbols-outlined text-sm">send</span></>)}</button>
            </div>
          </div>
       </div>
@@ -268,7 +294,15 @@ const PostCard = React.memo(({ post }: { post: Post }) => {
           <button className="text-text-soft/30 hover:text-primary transition-colors"><span className="material-symbols-outlined">more_horiz</span></button>
        </div>
        <div className="px-5 pb-4"><p className="text-sm text-text-soft leading-relaxed font-medium whitespace-pre-wrap">{post.content}</p>{post.tags.length > 0 && (<div className="flex flex-wrap gap-2 mt-3">{post.tags.map(tag => (<span key={tag} className="text-[10px] font-bold text-primary bg-primary/5 px-2 py-1 rounded-md">#{tag}</span>))}</div>)}</div>
-       {post.image && (<div className="w-full overflow-hidden relative"><img src={post.image} alt="Post" className="w-full h-auto object-cover transition-transform duration-[2s] group-hover:scale-105" loading="lazy" /><div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div></div>)}
+       
+       {/* ĐÃ FIX HIỂN THỊ ẢNH POST: DÙNG ASPECT-VIDEO ĐỂ ẢNH KHÔNG BỊ DÀI/MÉO */}
+       {post.image && (
+         <div className="w-full overflow-hidden relative">
+           <img src={post.image} alt="Post" onError={(e) => e.currentTarget.style.display = 'none'} className="w-full aspect-video object-cover transition-transform duration-[2s] group-hover:scale-105" loading="lazy" />
+           <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+         </div>
+       )}
+
        <div className="p-4 flex items-center gap-6 border-t border-gold/5 bg-background-light/30"><button onClick={handleLike} className={`flex items-center gap-1.5 font-black text-xs transition-colors ${liked ? 'text-primary' : 'text-text-soft hover:text-primary'}`}><span className={`material-symbols-outlined text-lg ${liked ? 'fill-1 animate-ping-once' : ''}`}>favorite</span> {likeCount}</button><button className="flex items-center gap-1.5 text-text-soft font-black text-xs hover:text-primary transition-colors"><span className="material-symbols-outlined text-lg">chat_bubble</span> {post.comments}</button><button className="flex items-center gap-1.5 text-text-soft font-black text-xs ml-auto hover:text-primary transition-colors"><span className="material-symbols-outlined text-lg">share</span></button></div>
     </article>
   );
@@ -276,7 +310,25 @@ const PostCard = React.memo(({ post }: { post: Post }) => {
 
 const Community: React.FC = () => {
   const [posts, setPosts] = useState<Post[]>(INITIAL_POSTS);
-  const handleCreatePost = useCallback((content: string) => { const newPost: Post = { id: Date.now().toString(), author: MOCK_CURRENT_USER.name, avatar: MOCK_CURRENT_USER.avatar, time: 'Vừa xong', timestamp: Date.now(), location: 'Việt Nam', content: content, likes: 0, comments: 0, tags: ['ChiaSe', 'DiSan'] }; setPosts(prev => [newPost, ...prev]); }, []);
+  
+  // ĐÃ UPDATE ĐỂ TRUYỀN ĐƯỢC ẢNH VÀO BÀI ĐĂNG
+  const handleCreatePost = useCallback((content: string, imageUrl?: string) => { 
+    const newPost: Post = { 
+      id: Date.now().toString(), 
+      author: MOCK_CURRENT_USER.name, 
+      avatar: MOCK_CURRENT_USER.avatar, 
+      time: 'Vừa xong', 
+      timestamp: Date.now(), 
+      location: 'Việt Nam', 
+      content: content, 
+      image: imageUrl, // Gắn ảnh vào post
+      likes: 0, 
+      comments: 0, 
+      tags: ['ChiaSe', 'DiSan'] 
+    }; 
+    setPosts(prev => [newPost, ...prev]); 
+  }, []);
+
   return (
     <div className="relative min-h-screen font-display bg-[#F7F3E9]">
       <div className="absolute inset-0 opacity-5 pointer-events-none" style={{ backgroundImage: "url('https://www.transparenttextures.com/patterns/black-scales.png')" }}></div>
@@ -288,7 +340,7 @@ const Community: React.FC = () => {
         </header>
         <div className="flex flex-col lg:flex-row gap-10 items-start">
           <div className="flex-1 w-full"><PostComposer onPost={handleCreatePost} /><div className="columns-1 md:columns-2 gap-6 space-y-6">{posts.map((post) => (<PostCard key={post.id} post={post} />))}</div><div className="mt-10 text-center animate-fade-in"><button className="px-8 py-3 rounded-full border-2 border-primary text-primary font-black uppercase text-xs tracking-widest hover:bg-primary hover:text-white transition-all">Tải thêm bài viết</button></div></div>
-          <aside className="w-full lg:w-80 shrink-0 space-y-8 sticky top-24"><QuizWidget /><FestivalWidget /><div className="text-center pt-8 border-t border-gold/10"><p className="text-[10px] text-text-soft/40 uppercase tracking-widest font-bold">© 2026 Sắc Nối Community</p></div></aside>
+          <aside className="w-full lg:w-80 shrink-0 space-y-8 sticky top-24"><QuizWidget /><FestivalWidget /><div className="text-center pt-8 border-t border-gold/10"><p className="text-[10px] text-text-soft/40 uppercase tracking-widest font-bold">© 2026 Sắc Việt Community</p></div></aside>
         </div>
       </div>
       <style>{` .text-shadow-glow { text-shadow: 0 0 20px rgba(212,175,55,0.5); } .fill-1 { font-variation-settings: 'FILL' 1; } @keyframes ping-once { 0% { transform: scale(1); } 50% { transform: scale(1.2); } 100% { transform: scale(1); } } .animate-ping-once { animation: ping-once 0.3s ease-out; } @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } } .animate-fade-in { animation: fade-in 0.5s ease-out forwards; } @keyframes slide-up { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } } .animate-slide-up { animation: slide-up 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; } .delay-100 { animation-delay: 100ms; } .delay-200 { animation-delay: 200ms; } `}</style>

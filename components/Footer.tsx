@@ -12,8 +12,8 @@ const Footer: React.FC = () => {
           <div className="col-span-1 lg:col-span-2 space-y-8">
             <div className="flex items-center gap-4">
               <img 
-                src="https://lh3.googleusercontent.com/d/18IzzMdMCckjzNcMpkhqp52zhXw72K9js" 
-                alt="Logo Sắc Nối" 
+                src="https://cazllsidgvysyxbvrftq.supabase.co/storage/v1/object/public/images-sacviet/logo.png" 
+                alt="Logo Sắc Việt" 
                 className="h-14 w-14 rounded-full object-cover border-2 border-gold shadow-lg"
               />
               <div>

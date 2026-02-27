@@ -1,30 +1,23 @@
-
 import React, { useState, useRef, useEffect, useMemo } from 'react';
-import { GoogleGenAI } from "@google/genai";
 import { useNavigate } from 'react-router-dom';
-import { ethnicData, marketplaceData } from '../data/mockData.ts'; // Sửa dòng này
-// Xóa bỏ các dòng import marketplaceData hay ethnicData cũ từ Home/Marketplace
-import { heritageData } from '../pages/MapPage.tsx';
-import { contentService, LibraryItem } from '../services/contentService';
+import { ethnicData, marketplaceData } from '../data/mockData.ts';
+import { heritageData } from '../pages/MapPage.tsx'; // Đảm bảo đường dẫn này đúng với dự án của bạn
+import { contentService, LibraryItem } from '../services/contentService'; // Đảm bảo đường dẫn này đúng
 
 interface Message {
   id: string;
   role: 'user' | 'model';
   text: string;
-  actionLink?: string; // Link điều hướng nếu có
-  actionLabel?: string; // Nhãn nút bấm
+  actionLink?: string;
+  actionLabel?: string;
 }
 
-// Component để hiển thị text với định dạng đặc biệt (Bỏ ** và thay bằng chữ đậm đỏ)
 const FormattedMessageText: React.FC<{ text: string }> = ({ text }) => {
-  // Tách chuỗi dựa trên dấu **
   const parts = text.split(/(\*\*.*?\*\*)/g);
-  
   return (
     <span>
       {parts.map((part, index) => {
         if (part.startsWith('**') && part.endsWith('**')) {
-          // Loại bỏ dấu ** và render với style đậm + đỏ (Màu Primary của web)
           return (
             <span key={index} className="font-black text-primary">
               {part.slice(2, -2)}
@@ -54,8 +47,12 @@ const AIChatWidget: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ isOp
 
   useEffect(() => {
     const fetchLibData = async () => {
-      const data = await contentService.getLibraryItems();
-      setLibraryData(data);
+      try {
+         const data = await contentService.getLibraryItems();
+         setLibraryData(data);
+      } catch (e) {
+         console.error("Lỗi lấy dữ liệu thư viện", e);
+      }
     };
     fetchLibData();
   }, []);
@@ -68,117 +65,92 @@ const AIChatWidget: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ isOp
     scrollToBottom();
   }, [messages, isOpen, isLoading]);
 
-  // Tạo Context String từ dữ liệu website
   const systemContext = useMemo(() => {
-    let context = "DƯỚI ĐÂY LÀ DỮ LIỆU CÓ TRÊN WEBSITE SẮC NỐI:\n\n";
+    let context = "DƯỚI ĐÂY LÀ DỮ LIỆU CÓ TRÊN WEBSITE SẮC VIỆT:\n\n";
 
-    // 1. Thêm dữ liệu sản phẩm Chợ Phiên
-    context += "=== 1. DANH SÁCH SẢN PHẨM BÁN TẠI CHỢ PHIÊN (MARKETPLACE) ===\n";
+    context += "=== 1. SẢN PHẨM CHỢ PHIÊN ===\n";
     marketplaceData.forEach(group => {
        group.items.forEach(item => {
-          context += `- Dân tộc: ${group.e} | Sản phẩm: ${item.n} | Giá: ${item.p} | Mô tả: ${item.d || 'Không có mô tả'}\n`;
+          context += `- Dân tộc: ${group.e} | Sản phẩm: ${item.n} | Giá: ${item.p}\n`;
        });
     });
 
-    // 2. Thêm dữ liệu Di sản trên bản đồ
-    context += "\n=== 2. DANH SÁCH DI SẢN TRÊN BẢN ĐỒ ===\n";
-    heritageData.forEach(site => {
-       context += `- Di sản: ${site.name} | Loại: ${site.type} | Địa điểm: ${site.location} | Mô tả: ${site.description}\n`;
-    });
+    context += "\n=== 2. DI SẢN ===\n";
+    if (heritageData) {
+        heritageData.forEach(site => {
+           context += `- ${site.name} | ${site.location}\n`;
+        });
+    }
 
-    // 3. Thêm dữ liệu Dân tộc
-    context += "\n=== 3. THÔNG TIN 54 DÂN TỘC ===\n";
+    context += "\n=== 3. DÂN TỘC ===\n";
     ethnicData.forEach(ethnic => {
-       context += `- Dân tộc: ${ethnic.name} | Nơi sống: ${ethnic.location} | Di sản: ${ethnic.heritage} | Mô tả: ${ethnic.description}\n`;
+       context += `- ${ethnic.name} | Nơi sống: ${ethnic.location}\n`;
     });
 
-    // 4. Thêm dữ liệu Thư viện (Kiến trúc, Lễ hội...)
-    context += "\n=== 4. THƯ VIỆN DI SẢN (KIẾN TRÚC/LỄ HỘI) ===\n";
+    context += "\n=== 4. THƯ VIỆN ===\n";
     libraryData.forEach(lib => {
-       context += `- ${lib.title} (${lib.category}): ${lib.desc}. Nội dung: ${lib.content.substring(0, 150)}...\n`;
+       context += `- ${lib.title}: ${lib.desc}\n`;
     });
 
     return context;
   }, [libraryData]);
 
   const handleSendMessage = async () => {
-    if (!inputText.trim()) return;
+    if (!inputText.trim() || isLoading) return;
 
-    const userMsg: Message = { id: Date.now().toString(), role: 'user', text: inputText };
-    setMessages(prev => [...prev, userMsg]);
+    const userMsg: Message = { id: Date.now().toString(), role: "user", text: inputText };
+    const aiMsgId = (Date.now() + 1).toString();
+    const updatedMessages = [...messages, userMsg];
+
+    setMessages([...updatedMessages, { id: aiMsgId, role: "model", text: "" }]);
     setInputText('');
     setIsLoading(true);
 
-    // Tạo tin nhắn placeholder cho AI để stream vào
-    const aiMsgId = (Date.now() + 1).toString();
-    setMessages(prev => [...prev, { id: aiMsgId, role: 'model', text: '' }]);
-
     try {
-      const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-      
-      const result = await ai.models.generateContentStream({
-        model: 'gemini-3-flash-preview',
-        contents: [
-            { role: 'user', parts: [{ text: inputText }] }
-        ],
-        config: {
-          systemInstruction: `Bạn là 'Già làng Di Sản' - chuyên gia am hiểu văn hóa của website Sắc Nối.
-          
-          ${systemContext}
-
-          NHIỆM VỤ CỦA BẠN:
-          1. Dùng dữ liệu trên để trả lời.
-          2. QUAN TRỌNG: Hãy dùng dấu ** (hai dấu sao) bao quanh những từ khóa quan trọng, tên sản phẩm, giá tiền hoặc tên dân tộc để làm nổi bật chúng. Ví dụ: **Gùi Tre**, **150.000 VNĐ**. (Frontend sẽ tự chuyển đổi nó thành chữ Đỏ Đậm).
-          3. NẾU NGƯỜI DÙNG HỎI MUA SẢN PHẨM HOẶC HỎI VỀ SẢN PHẨM CỦA DÂN TỘC CỤ THỂ:
-             - Bước 1: Liệt kê chi tiết các sản phẩm của dân tộc đó có trong dữ liệu (Tên, Giá).
-             - Bước 2: Ở cuối câu trả lời, BẮT BUỘC thêm dòng mã đặc biệt này để tạo nút dẫn đường: 
-               <<<NAVIGATE:/marketplace?ethnic=TEN_DAN_TOC>>>
-               (Trong đó TEN_DAN_TOC viết hoa, ví dụ: BA NA, BO Y, TAY, THAI...).
-          4. Phong cách: Giọng văn già làng, ấm áp, xưng "Ta" - gọi "con". Trả lời ngắn gọn, đi vào trọng tâm.`,
-        },
+      const response = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          message: inputText,
+          context: systemContext,
+          history: updatedMessages.map(m => ({
+            role: m.role === "model" ? "assistant" : "user",
+            content: m.text
+          }))
+        })
       });
 
-      let fullText = '';
-      let actionLink: string | undefined = undefined;
-      let actionLabel: string | undefined = undefined;
+      const data = await response.json();
+      let fullText = data.reply || "Già làng chưa nghĩ ra câu trả lời.";
 
-      for await (const chunk of result) {
-        // FIX: Tắt loading ngay khi nhận được chunk đầu tiên để tránh hiện trùng
-        setIsLoading(false);
+      let actionLink: string | undefined;
+      let actionLabel: string | undefined;
 
-        const chunkText = chunk.text || '';
-        fullText += chunkText;
+      const navigateMatch = fullText.match(/<<<NAVIGATE:(.*?)>>>/);
+      if (navigateMatch) {
+        fullText = fullText.replace(navigateMatch[0], "").trim();
+        actionLink = navigateMatch[1];
 
-        let displayText = fullText;
-        const navigateMatch = fullText.match(/<<<NAVIGATE:(.*?)>>>/);
-        
-        if (navigateMatch) {
-          displayText = fullText.replace(navigateMatch[0], '').trim();
-          actionLink = navigateMatch[1];
-          if (actionLink.includes('marketplace')) {
-            const ethnicParam = actionLink.split('ethnic=')[1];
-            const ethnicName = ethnicParam ? decodeURIComponent(ethnicParam) : 'Chợ Phiên';
-            actionLabel = `Đến gian hàng ${ethnicName}`;
-          } else {
-            actionLabel = "Xem chi tiết";
-          }
+        if (actionLink.includes("marketplace")) {
+          const ethnicParam = actionLink.split("ethnic=")[1];
+          const ethnicName = ethnicParam ? decodeURIComponent(ethnicParam) : "Chợ Phiên";
+          actionLabel = `Đến gian hàng ${ethnicName}`;
+        } else {
+          actionLabel = "Xem chi tiết";
         }
-
-        setMessages(prev => prev.map(msg => 
-          msg.id === aiMsgId 
-            ? { ...msg, text: displayText, actionLink, actionLabel } 
-            : msg
-        ));
       }
-      
+
+      setMessages(prev => prev.map(msg => 
+        msg.id === aiMsgId ? { ...msg, text: fullText, actionLink, actionLabel } : msg
+      ));
+
     } catch (error) {
       console.error("Lỗi API:", error);
-      const errorMsg: Message = { 
-        id: (Date.now() + 1).toString(), 
-        role: 'model', 
-        text: "Mạng của già làng đang chập chờn quá (Lỗi kết nối). Con hãy thử hỏi lại sau nhé." 
-      };
-      setMessages(prev => prev.filter(msg => msg.id !== aiMsgId).concat(errorMsg));
+      setMessages(prev => prev.map(msg => 
+        msg.id === aiMsgId 
+          ? { ...msg, text: "Mạng của già làng đang chập chờn quá. Con thử lại sau nhé." } 
+          : msg
+      ));
     } finally {
       setIsLoading(false);
     }
@@ -226,7 +198,6 @@ const AIChatWidget: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ isOp
       {/* Chat Area */}
       <div className="flex-1 overflow-y-auto p-4 space-y-5 custom-scrollbar bg-[url('https://www.transparenttextures.com/patterns/handmade-paper.png')]">
          {messages.map((msg) => {
-            // FIX: Không hiển thị bong bóng chat nếu nội dung rỗng (tránh hộp trắng thừa)
             if (!msg.text && msg.role === 'model') return null;
 
             return (
@@ -236,11 +207,9 @@ const AIChatWidget: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ isOp
                     ? 'bg-primary text-white rounded-br-none' 
                     : 'bg-white text-text-main border border-gold/20 rounded-bl-none'
                  }`}>
-                    {/* Sử dụng component định dạng text */}
                     {msg.role === 'user' ? msg.text : <FormattedMessageText text={msg.text} />}
                  </div>
                  
-                 {/* Nút điều hướng nếu có */}
                  {msg.actionLink && msg.actionLabel && (
                    <button 
                      onClick={() => handleNavigate(msg.actionLink!)}
@@ -268,7 +237,7 @@ const AIChatWidget: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ isOp
          <div ref={messagesEndRef} />
       </div>
 
-      {/* Input Area */}
+      {/* Input Area - FIX LỖI NÚT LỆCH */}
       <div className="p-4 bg-white border-t border-gold/20 shrink-0 shadow-[0_-5px_15px_rgba(0,0,0,0.05)]">
          <div className="flex items-end gap-2 bg-background-light border-2 border-gold/20 rounded-2xl p-2 focus-within:border-primary transition-all shadow-inner">
             <textarea
@@ -292,7 +261,7 @@ const AIChatWidget: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ isOp
             </button>
          </div>
          <p className="text-[9px] text-center text-text-soft/60 mt-2 font-bold uppercase tracking-wide">
-            Sắc Nối AI - Kết nối di sản Việt
+            Sắc Việt - Nền tảng kết nối Chợ Phiên đến với Muôn Phương
          </p>
       </div>
     </div>
