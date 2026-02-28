@@ -13,7 +13,7 @@ export const userService = {
       const adminDefault = {
         id: 'admin-local',
         fullName: 'Quản Trị Viên (Mặc định)',
-        email: 'admin@sacviet.vn',
+        email: 'sacvietadleylhu@gmail.com',
         role: 'admin' as const
       };
       

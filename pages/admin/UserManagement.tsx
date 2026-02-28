@@ -36,10 +36,27 @@ const UserManagement: React.FC = () => {
 
     if (window.confirm(`Bạn có chắc muốn cấp quyền ${newRole === 'admin' ? 'QUẢN TRỊ' : 'NGƯỜI DÙNG'} cho tài khoản này?`)) {
       try {
-        await userService.updateUserRole(userId, newRole);
-        fetchUsers(); 
+        // ĐÃ THAY THẾ BẰNG LUỒNG GỌI BACKEND VERCEL
+        const res = await fetch('/api/update-role', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ 
+            targetUserId: userId, 
+            newRole: newRole 
+          })
+        });
+        
+        const data = await res.json();
+        
+        if (res.ok) {
+          alert('Cập nhật quyền thành công!');
+          fetchUsers(); // Load lại danh sách ngay lập tức để thấy sự thay đổi
+        } else {
+          alert('Lỗi từ Server: ' + (data.error || 'Không rõ nguyên nhân'));
+        }
       } catch (error) {
-        alert('Có lỗi xảy ra khi đổi quyền!');
+        alert('Lỗi kết nối mạng khi cập nhật quyền!');
+        console.error(error);
       }
     }
   };
