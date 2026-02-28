@@ -31,6 +31,7 @@ const getDanTocId = async (tenDanToc: string) => {
 };
 
 export const contentService = {
+  // Lấy dữ liệu Thư viện trực tiếp từ Supabase
   getLibraryItems: async (): Promise<LibraryItem[]> => {
     if (!isSupabaseConfigured) return [];
     
@@ -42,24 +43,17 @@ export const contentService = {
         
         if (error) throw error;
         
-        return (data || []).map(item => {
-           // 🛑 CHỐT CHẶN: Ép chuẩn từ khóa để khớp 100% với 3 Tab trên giao diện
-           let cat = String(item.danh_muc || '').toLowerCase().trim();
-           let finalCat = 'architecture'; // Mặc định là Kiến trúc
-           if (cat.includes('ritual') || cat === 'nghi lễ') finalCat = 'ritual';
-           if (cat.includes('festival') || cat === 'lễ hội') finalCat = 'festival';
-
-           return {
+        return (data || []).map(item => ({
               id: item.id,
-              category: finalCat,
+              // Lấy thẳng danh mục (architecture, ritual, festival) từ DB
+              category: item.danh_muc || 'architecture', 
               ethnic: item.dan_toc?.ten_dan_toc || 'Khác',
               title: item.tieu_de || 'Chưa có tiêu đề',
               desc: item.mo_ta_ngan || '',
               content: item.noi_dung || '',
               image: fixImagePath(item.anh_thu_vien),
               created_at: item.created_at
-           };
-        });
+        }));
     } catch (error) {
         console.error("Lỗi tải thư viện:", error);
         return [];
