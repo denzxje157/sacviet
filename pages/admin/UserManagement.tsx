@@ -3,7 +3,7 @@ import AdminLayout from './AdminLayout';
 import { userService } from '../../services/userService';
 import { User } from '../../services/authService';
 import { useAuth } from '../../context/AuthContext';
-
+import { supabase } from '../../services/supabaseClient';
 const UserManagement: React.FC = () => {
   const { user: currentUser } = useAuth() || {};
   const [users, setUsers] = useState<User[]>([]);

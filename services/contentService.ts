@@ -34,7 +34,7 @@ export const contentService = {
     }
 
     const { data, error } = await supabase
-      .from('library')
+      .from('thu_vien') // Giả định tên bảng là 'thu_vien'
       .select('*')
       .order('created_at', { ascending: false });
     
@@ -57,7 +57,7 @@ export const contentService = {
     }
 
     const { data, error } = await supabase
-      .from('library')
+      .from('thu_vien')
       .insert([newItem])
       .select()
       .single();
@@ -76,7 +76,7 @@ export const contentService = {
     }
 
     const { error } = await supabase
-      .from('library')
+      .from('thu_vien')
       .update(updates)
       .eq('id', id);
     
@@ -93,7 +93,7 @@ export const contentService = {
     }
 
     const { error } = await supabase
-      .from('library')
+      .from('thu_vien')
       .delete()
       .eq('id', id);
     
