@@ -2,7 +2,7 @@ import { supabase, isSupabaseConfigured } from './supabaseClient';
 
 export interface LibraryItem {
   id: string;
-  category: 'architecture' | 'ritual' | 'festival' | string;
+  category: string;
   ethnic: string;
   title: string;
   desc: string;
@@ -10,6 +10,17 @@ export interface LibraryItem {
   image: string;
   created_at?: string;
 }
+
+// 🎯 ĐỊA CHỈ KHO ẢNH SUPABASE CỦA BẠN
+const SUPABASE_STORAGE_URL = 'https://cazllsidgvysyxbvrftq.supabase.co/storage/v1/object/public/images-sacviet/';
+
+// 💡 HÀM MA THUẬT: Tự động biến đường dẫn ngắn thành đường dẫn Cloud
+const fixImagePath = (path: string) => {
+  if (!path) return '';
+  if (path.startsWith('http')) return path;
+  const cleanPath = path.startsWith('/') ? path.substring(1) : path;
+  return SUPABASE_STORAGE_URL + cleanPath;
+};
 
 // Hàm trợ giúp lấy ID dân tộc
 const getDanTocId = async (tenDanToc: string) => {
@@ -42,7 +53,6 @@ export const contentService = {
       return [];
     }
     
-    // Dịch từ Tiếng Việt (Database) sang Tiếng Anh (Giao diện)
     return (data || []).map(item => ({
       id: item.id,
       category: item.danh_muc || 'architecture',
@@ -50,7 +60,7 @@ export const contentService = {
       title: item.tieu_de || 'Chưa có tiêu đề',
       desc: item.mo_ta_ngan || '',
       content: item.noi_dung || '',
-      image: item.anh_thu_vien || '',
+      image: fixImagePath(item.anh_thu_vien), // 👈 Tự sửa lỗi ảnh thư viện
       created_at: item.created_at
     }));
   },
@@ -58,14 +68,12 @@ export const contentService = {
   // Thêm bài viết mới
   addLibraryItem: async (item: Omit<LibraryItem, 'id' | 'created_at'>) => {
     const dtId = await getDanTocId(item.ethnic);
-    
-    // Dịch từ Tiếng Anh (Giao diện) sang Tiếng Việt (Database)
     const payload = {
       danh_muc: item.category,
       tieu_de: item.title,
       mo_ta_ngan: item.desc,
       noi_dung: item.content,
-      anh_thu_vien: item.image,
+      anh_thu_vien: fixImagePath(item.image),
       id_dan_toc: dtId
     };
 
@@ -84,20 +92,19 @@ export const contentService = {
     if (updates.title) payload.tieu_de = updates.title;
     if (updates.desc) payload.mo_ta_ngan = updates.desc;
     if (updates.content) payload.noi_dung = updates.content;
-    if (updates.image) payload.anh_thu_vien = updates.image;
+    if (updates.image) payload.anh_thu_vien = fixImagePath(updates.image);
     if (dtId !== undefined) payload.id_dan_toc = dtId;
 
     const { error } = await supabase.from('thu_vien').update(payload).eq('id', id);
     if (error) throw error;
   },
 
-  // Xóa bài viết
   deleteLibraryItem: async (id: string) => {
     const { error } = await supabase.from('thu_vien').delete().eq('id', id);
     if (error) throw error;
   },
 
-  // Nạp dữ liệu mẫu cho Thư viện
+  // 🚀 Nạp dữ liệu mẫu cho Thư viện
   seedLibraryItems: async (items: any[]) => {
     if (!isSupabaseConfigured) return;
     const { data: danTocList } = await supabase.from('dan_toc').select('id, ten_dan_toc');
@@ -109,7 +116,7 @@ export const contentService = {
         tieu_de: i.title,
         mo_ta_ngan: i.desc,
         noi_dung: i.content,
-        anh_thu_vien: i.image,
+        anh_thu_vien: fixImagePath(i.image), // 👈 Tự sửa link ảnh
         id_dan_toc: dt?.id || null
       };
     });

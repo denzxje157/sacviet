@@ -2,7 +2,9 @@ import React, { useState, useEffect } from 'react';
 import AdminLayout from './AdminLayout';
 import { productService, Product } from '../../services/productService';
 import { rawData } from '../Marketplace'; 
-import { ethnicData } from '../../data/mockData'; // Đã sửa đường dẫn cực chuẩn ở đây!
+import { ethnicData, libraryData } from '../../data/mockData';
+import { contentService } from '../../services/contentService';
+import { supabase } from '../../services/supabaseClient';
 
 const ProductManagement: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
@@ -30,15 +32,21 @@ const ProductManagement: React.FC = () => {
   };
 
   // NÚT CỨU HỘ: Nạp Dân Tộc + Sản Phẩm
+  // NÚT CỨU HỘ TỐI THƯỢNG: Nạp Dân Tộc + Sản Phẩm + Thư Viện
   const handleSeedData = async () => {
-    if (!window.confirm('Hệ thống sẽ nạp lại bảng Dân Tộc và bảng Sản phẩm. Bấm OK để tiếp tục!')) return;
+    if (!window.confirm('Hệ thống sẽ dọn sạch và nạp lại Bảng Dân Tộc, Sản Phẩm và Thư Viện. Bấm OK để tiếp tục!')) return;
     setIsLoading(true);
     try {
-      // 1. Cứu hộ bảng Dân Tộc trước
+      // 1. Quét dọn sạch sẽ trước khi nạp để không bị trùng lặp
+      await supabase.from('san_pham').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+      await supabase.from('thu_vien').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+      await supabase.from('dan_toc').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+
+      // 2. Nạp bảng Dân Tộc (Bắt buộc phải có trước)
       console.log("Đang nạp bảng Dân Tộc...");
       await productService.seedDanToc(ethnicData);
 
-      // 2. Gom dữ liệu sản phẩm
+      // 3. Gom và Nạp dữ liệu sản phẩm
       console.log("Đang nạp bảng Sản Phẩm...");
       const allItems: any[] = [];
       rawData.forEach(group => {
@@ -58,10 +66,15 @@ const ProductManagement: React.FC = () => {
           });
         });
       });
-
-      // 3. Bơm sản phẩm lên Supabase
       await productService.seedProducts(allItems);
-      alert('CỨU HỘ THÀNH CÔNG! Đã nạp lại 54 Dân tộc, Sản phẩm và tự động sửa link ảnh!');
+
+      // 4. BƠM DỮ LIỆU THƯ VIỆN 👈 (Đây chính là chìa khóa bạn đang thiếu)
+      console.log("Đang nạp bảng Thư Viện...");
+      if (libraryData && libraryData.length > 0) {
+         await contentService.seedLibraryItems(libraryData);
+      }
+
+      alert('🎉 CỨU HỘ THÀNH CÔNG! Đã nạp lại 54 Dân tộc, Sản phẩm và Thư viện với hình ảnh rực rỡ!');
       fetchProducts();
     } catch (error) {
       console.error('Lỗi seed data:', error);
