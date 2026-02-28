@@ -13,21 +13,31 @@ export interface Product {
 }
 
 export const productService = {
+  // Lấy sản phẩm
   getAllProducts: async (): Promise<Product[]> => {
     if (!isSupabaseConfigured) return [];
+    
     const { data, error } = await supabase
       .from('san_pham')
-      .select('*, dan_toc(ten_dan_toc)')
+      .select(`
+        *,
+        dan_toc (
+          ten_dan_toc
+        )
+      `)
       .order('created_at', { ascending: false });
     
-    if (error) throw error;
+    if (error) {
+      console.error("Lỗi fetch:", error);
+      return [];
+    }
     
     return (data || []).map(p => ({
       id: p.id,
-      name: p.ten_san_pham || 'Sản phẩm không tên',
+      name: p.ten_san_pham || 'Sản phẩm mới',
       ethnic: p.dan_toc?.ten_dan_toc || 'Khác',
       price: parseInt(String(p.gia || '0').replace(/\D/g, '')) || 0,
-      price_display: p.gia || 'Liên hệ',
+      price_display: String(p.gia || 'Liên hệ'),
       description: p.mo_ta || '',
       image: p.anh_san_pham || '',
       category: 'Thủ công',
@@ -35,24 +45,31 @@ export const productService = {
     }));
   },
 
-  deleteProduct: async (id: string) => {
-    const { error } = await supabase.from('san_pham').delete().eq('id', id);
-    if (error) throw error;
-  },
-
+  // Nạp dữ liệu mẫu (Seed)
   seedProducts: async (products: any[]) => {
+    if (!isSupabaseConfigured) return;
+
+    // Lấy danh sách dân tộc để khớp ID
     const { data: danTocList } = await supabase.from('dan_toc').select('id, ten_dan_toc');
+
     const payloads = products.map(p => {
-      const dt = danTocList?.find(d => d.ten_dan_toc.includes(p.ethnic));
+      const dt = danTocList?.find(d => p.ethnic && d.ten_dan_toc.toLowerCase().includes(p.ethnic.toLowerCase()));
       return {
         ten_san_pham: p.name,
-        gia: p.price_display || `${p.price?.toLocaleString('vi-VN')} đ`,
+        gia: p.price_display || `${(p.price || 0).toLocaleString('vi-VN')} đ`,
         mo_ta: p.description || '',
         anh_san_pham: p.image || '',
         id_dan_toc: dt?.id || null
       };
     });
+
     const { error } = await supabase.from('san_pham').insert(payloads);
+    if (error) throw error;
+    return true;
+  },
+
+  deleteProduct: async (id: string) => {
+    const { error } = await supabase.from('san_pham').delete().eq('id', id);
     if (error) throw error;
   }
 };
