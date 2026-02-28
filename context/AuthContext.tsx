@@ -18,23 +18,46 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
 
   useEffect(() => {
-    // Check initial session
     const checkAuth = async () => {
-      const currentUser = await authService.getCurrentUser();
-      setUser(currentUser);
+      try {
+        // Lấy thông tin user hiện tại
+        let currentUser = await authService.getCurrentUser();
+        
+        // NÂNG CẤP: Ép lấy dữ liệu tươi nhất từ Server để cập nhật quyền Admin tức thời (tránh kẹt token cũ)
+        if (isSupabaseConfigured && currentUser) {
+           const { data: { user: freshUser }, error } = await supabase.auth.getUser();
+           
+           if (freshUser && !error) {
+               currentUser = {
+                   id: freshUser.id,
+                   fullName: freshUser.user_metadata?.full_name || freshUser.email?.split('@')[0] || 'User',
+                   email: freshUser.email || '',
+                   role: freshUser.user_metadata?.role || 'user' // Bắt lấy quyền mới nhất
+               };
+           }
+        }
+        
+        setUser(currentUser);
+      } catch (error) {
+        console.error("Lỗi xác thực phiên:", error);
+      }
     };
+    
     checkAuth();
 
-    // Listen for auth changes ONLY if configured
     if (isSupabaseConfigured) {
+      // Thêm lắng nghe sự kiện USER_UPDATED
       const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-        if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
-           if (session?.user) {
+        if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED' || event === 'USER_UPDATED') {
+           // Luôn lấy data tươi từ máy chủ khi có thay đổi trạng thái
+           const { data: { user: freshUser } } = await supabase.auth.getUser();
+           
+           if (freshUser) {
                setUser({
-                   id: session.user.id,
-                   fullName: session.user.user_metadata?.full_name || session.user.email?.split('@')[0] || 'User',
-                   email: session.user.email || '',
-                   role: session.user.user_metadata?.role || 'user'
+                   id: freshUser.id,
+                   fullName: freshUser.user_metadata?.full_name || freshUser.email?.split('@')[0] || 'User',
+                   email: freshUser.email || '',
+                   role: freshUser.user_metadata?.role || 'user'
                });
            }
         } else if (event === 'SIGNED_OUT') {
@@ -51,8 +74,23 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const toggleAuthModal = () => setIsAuthModalOpen(!isAuthModalOpen);
 
   const login = async (email: string, password: string) => {
-    const loggedInUser = await authService.login(email, password);
-    setUser(loggedInUser);
+    await authService.login(email, password);
+    
+    // NÂNG CẤP: Cập nhật state User ngay lập tức với dữ liệu mới nhất từ server
+    if (isSupabaseConfigured) {
+       const { data: { user: freshUser } } = await supabase.auth.getUser();
+       if (freshUser) {
+           setUser({
+               id: freshUser.id,
+               fullName: freshUser.user_metadata?.full_name || freshUser.email?.split('@')[0] || 'User',
+               email: freshUser.email || '',
+               role: freshUser.user_metadata?.role || 'user'
+           });
+           return;
+       }
+    }
+    const currentUser = await authService.getCurrentUser();
+    setUser(currentUser);
   };
 
   const register = async (fullName: string, email: string, password: string) => {
