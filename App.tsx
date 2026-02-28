@@ -3,7 +3,6 @@ import React, { useEffect } from 'react';
 import { HashRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import Navbar from './components/Navbar.tsx';
 import Home from './pages/Home.tsx';
-import MapPage from './pages/MapPage.tsx';
 import Marketplace from './pages/Marketplace.tsx';
 import Library from './pages/Library.tsx';
 import Community from './pages/Community.tsx';
@@ -13,13 +12,15 @@ import { CartProvider } from './context/CartContext.tsx';
 import { AuthProvider } from './context/AuthContext.tsx';
 import CartDrawer from './components/CartDrawer.tsx';
 import AuthModal from './components/AuthModal.tsx';
-
+import Blog from './pages/Blog';
+import BlogDetail from './pages/BlogDetail';
 // Admin Pages
 import AdminDashboard from './pages/admin/AdminDashboard.tsx';
 import ProductManagement from './pages/admin/ProductManagement.tsx';
 import OrderManagement from './pages/admin/OrderManagement.tsx';
 import UserManagement from './pages/admin/UserManagement.tsx';
 import ContentManagement from './pages/admin/ContentManagement.tsx';
+
 
 // Component phụ trợ: Tự động cuộn lên đầu trang khi đổi route
 const ScrollToTop = () => {
@@ -73,9 +74,10 @@ const App: React.FC = () => {
                   <PageWrapper>
                     <Routes>
                       <Route path="/" element={<Home />} />
-                      <Route path="/map" element={<MapPage />} />
                       <Route path="/marketplace" element={<Marketplace />} />
                       <Route path="/library" element={<Library />} />
+                      <Route path="/blog" element={<Blog />} />
+                      <Route path="/blog/:slug" element={<BlogDetail />} />
                       <Route path="/community" element={<Community />} />
                       <Route path="/orders" element={<OrdersPage />} />
                     </Routes>

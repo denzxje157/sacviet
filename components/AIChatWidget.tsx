@@ -1,7 +1,6 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ethnicData, marketplaceData } from '../data/mockData.ts';
-import { heritageData } from '../pages/MapPage.tsx'; // Đảm bảo đường dẫn này đúng với dự án của bạn
 import { contentService, LibraryItem } from '../services/contentService'; // Đảm bảo đường dẫn này đúng
 
 interface Message {
@@ -75,12 +74,6 @@ const AIChatWidget: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ isOp
        });
     });
 
-    context += "\n=== 2. DI SẢN ===\n";
-    if (heritageData) {
-        heritageData.forEach(site => {
-           context += `- ${site.name} | ${site.location}\n`;
-        });
-    }
 
     context += "\n=== 3. DÂN TỘC ===\n";
     ethnicData.forEach(ethnic => {

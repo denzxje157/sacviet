@@ -3,7 +3,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { useCart } from '../context/CartContext.tsx';
 import { useAuth } from '../context/AuthContext.tsx';
 import AIChatWidget from './AIChatWidget.tsx';
-import { User, LogOut, UserCircle2, ShoppingBag, MessageSquare, ShieldCheck } from 'lucide-react';
+import { User, LogOut, UserCircle2, ShoppingBag, MessageSquare, ShieldCheck, Home, Route } from 'lucide-react';
 
 const Navbar: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -15,9 +15,9 @@ const Navbar: React.FC = () => {
 
   const navLinks = [
     { name: 'Trang chủ', path: '/' },
-    { name: 'Bản đồ', path: '/map' },
     { name: 'Chợ Phiên', path: '/marketplace' },
     { name: 'Thư viện', path: '/library' },
+    { name: 'Góc Nhìn', path: '/blog' },
     { name: 'Cộng đồng', path: '/community' },
   ];
 
