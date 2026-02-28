@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import AdminLayout from './AdminLayout';
 import { productService, Product } from '../../services/productService';
 import { rawData } from '../Marketplace'; 
+import { ethnicData } from '../../data/mockData'; // Đã sửa đường dẫn cực chuẩn ở đây!
 
 const ProductManagement: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
@@ -28,17 +29,17 @@ const ProductManagement: React.FC = () => {
     setIsLoading(false);
   };
 
+  // NÚT CỨU HỘ: Nạp Dân Tộc + Sản Phẩm
   const handleSeedData = async () => {
-    // 🚧 THÊM CHỐT CHẶN Ở ĐÂY: Nếu đã có sản phẩm thì cấm nạp thêm!
-    if (products.length > 0) {
-      alert('⚠️ Dữ liệu mẫu đã được nạp rồi! Để tránh bị trùng lặp 1000 sản phẩm như trước, hệ thống đã chặn thao tác này. Nếu muốn nạp lại từ đầu, bạn phải xóa hết các sản phẩm bên dưới.');
-      return;
-    }
-
-    if (!window.confirm('Bạn có chắc muốn nạp dữ liệu mẫu vào Database? Hành động này sẽ thêm nhiều sản phẩm.')) return;
-    
+    if (!window.confirm('Hệ thống sẽ nạp lại bảng Dân Tộc và bảng Sản phẩm. Bấm OK để tiếp tục!')) return;
     setIsLoading(true);
     try {
+      // 1. Cứu hộ bảng Dân Tộc trước
+      console.log("Đang nạp bảng Dân Tộc...");
+      await productService.seedDanToc(ethnicData);
+
+      // 2. Gom dữ liệu sản phẩm
+      console.log("Đang nạp bảng Sản Phẩm...");
       const allItems: any[] = [];
       rawData.forEach(group => {
         (group.items || []).forEach(item => {
@@ -47,25 +48,24 @@ const ProductManagement: React.FC = () => {
              const priceMatch = item.p.match(/(\d+)\./);
              if (priceMatch) priceNum = parseInt(priceMatch[1]) * 1000;
           }
-
           allItems.push({
             name: item?.n || 'Sản phẩm',
             ethnic: group?.e || 'Khác',
             price: priceNum || 100000, 
             price_display: item?.p || 'Liên hệ',
             description: item?.d || 'Chưa có mô tả',
-            image: item?.img || '',
-            category: 'Thủ công'
+            image: item?.img || ''
           });
         });
       });
 
+      // 3. Bơm sản phẩm lên Supabase
       await productService.seedProducts(allItems);
-      alert('Đã nạp dữ liệu thành công! Chỉ nạp 1 lần duy nhất thôi nhé!');
+      alert('CỨU HỘ THÀNH CÔNG! Đã nạp lại 54 Dân tộc, Sản phẩm và tự động sửa link ảnh!');
       fetchProducts();
     } catch (error) {
       console.error('Lỗi seed data:', error);
-      alert('Lỗi khi nạp dữ liệu. Hãy kiểm tra console.');
+      alert('Lỗi nạp dữ liệu! Vui lòng kiểm tra Console.');
     }
     setIsLoading(false);
   };
@@ -83,9 +83,8 @@ const ProductManagement: React.FC = () => {
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault(); // Ngăn chặn load lại trang
+    e.preventDefault(); 
     
-    // Đảm bảo có price_display để không bị lỗi trống trên Marketplace
     const payload = {
       ...formData,
       price_display: formData.price_display || `${(formData.price || 0).toLocaleString('vi-VN')} VNĐ`
@@ -193,7 +192,6 @@ const ProductManagement: React.FC = () => {
               <button onClick={() => setIsModalOpen(false)} className="text-text-soft hover:text-red-500 bg-white size-8 flex items-center justify-center rounded-full shadow-sm border border-gold/10 transition-colors"><span className="material-symbols-outlined text-xl">close</span></button>
             </div>
             
-            {/* Form bọc toàn bộ Nội dung và Nút Submit */}
             <form onSubmit={handleSubmit} className="flex flex-col flex-1 overflow-hidden">
               <div className="p-5 md:p-6 space-y-4 md:space-y-5 overflow-y-auto custom-scrollbar flex-1">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-5">
@@ -213,7 +211,7 @@ const ProductManagement: React.FC = () => {
                   </div>
                   <div>
                     <label className="block text-[10px] font-black text-text-soft uppercase tracking-widest mb-1.5">Link Ảnh (URL)</label>
-                    <input required type="text" value={formData.image || ''} onChange={e => setFormData({...formData, image: e.target.value})} className="w-full border border-gold/20 bg-white rounded-xl p-3 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none font-medium text-text-main transition-all shadow-sm" placeholder="https://..." />
+                    <input required type="text" value={formData.image || ''} onChange={e => setFormData({...formData, image: e.target.value})} className="w-full border border-gold/20 bg-white rounded-xl p-3 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none font-medium text-text-main transition-all shadow-sm" placeholder="/pictures-sanpham/..." />
                   </div>
                 </div>
                 
@@ -229,7 +227,6 @@ const ProductManagement: React.FC = () => {
                 </div>
               </div>
 
-              {/* Nút Submit ĐÃ ĐƯỢC ĐƯA VÀO TRONG FORM */}
               <div className="p-5 md:p-6 border-t border-gold/10 bg-white shrink-0 flex justify-end gap-3 shadow-[0_-5px_15px_rgba(0,0,0,0.02)]">
                   <button type="button" onClick={() => setIsModalOpen(false)} className="px-6 py-3 border border-gold/20 text-text-main font-bold rounded-xl hover:bg-background-light transition-colors text-xs uppercase tracking-widest">Hủy</button>
                   <button type="submit" className="px-6 py-3 bg-primary text-white font-black rounded-xl hover:brightness-110 shadow-lg shadow-primary/20 transition-all active:scale-95 text-xs uppercase tracking-widest flex items-center gap-2">
