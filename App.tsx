@@ -13,13 +13,14 @@ import CartDrawer from './components/CartDrawer.tsx';
 import AuthModal from './components/AuthModal.tsx';
 import Blog from './pages/Blog';
 import BlogDetail from './pages/BlogDetail';
+import SeoManagement from './pages/admin/SeoManagement.tsx';
 // Admin Pages
 import AdminDashboard from './pages/admin/AdminDashboard.tsx';
 import ProductManagement from './pages/admin/ProductManagement.tsx';
 import OrderManagement from './pages/admin/OrderManagement.tsx';
 import UserManagement from './pages/admin/UserManagement.tsx';
 import ContentManagement from './pages/admin/ContentManagement.tsx';
-import SeoManagement from './pages/admin/SeoManagement.tsx'; // THÊM DÒNG NÀY
+<Route path="/admin/seo" element={<SeoManagement />} />
 
 
 // Component phụ trợ: Tự động cuộn lên đầu trang khi đổi route

@@ -12,7 +12,6 @@ export interface Product {
   created_at?: string;
 }
 
-// 💡 HÀM TRỢ GIÚP: Tìm ID của dân tộc dựa vào tên (VD: "Thái" -> lấy ID của dân tộc Thái)
 const getDanTocId = async (tenDanToc: string) => {
   if (!tenDanToc || tenDanToc === 'Khác' || tenDanToc === 'TẤT CẢ') return null;
   try {
@@ -29,7 +28,6 @@ const getDanTocId = async (tenDanToc: string) => {
 };
 
 export const productService = {
-  // 1. LẤY TOÀN BỘ SẢN PHẨM
   getAllProducts: async (): Promise<Product[]> => {
     if (!isSupabaseConfigured) return [];
     
@@ -38,16 +36,11 @@ export const productService = {
       .select('*, dan_toc(ten_dan_toc)')
       .order('created_at', { ascending: false });
     
-    if (error) {
-      console.error("Lỗi lấy sản phẩm:", error);
-      throw error;
-    }
+    if (error) throw error;
     
-    // Ép kiểu dữ liệu từ DB (Tiếng Việt) sang chuẩn UI (Tiếng Anh) để không phải sửa Code giao diện
     return (data || []).map(p => {
       const giaStr = String(p.gia || '0');
       const numericPrice = parseInt(giaStr.replace(/\D/g, '')) || 0;
-
       return {
         id: p.id,
         name: p.ten_san_pham || 'Sản phẩm chưa có tên',
@@ -62,12 +55,8 @@ export const productService = {
     });
   },
 
-  // 2. THÊM SẢN PHẨM MỚI
   addProduct: async (product: Omit<Product, 'id' | 'created_at'>) => {
-    if (!isSupabaseConfigured) throw new Error("Chưa kết nối Supabase");
-
     const dtId = await getDanTocId(product.ethnic);
-
     const payload = {
       ten_san_pham: product.name,
       gia: product.price_display || `${product.price.toLocaleString('vi-VN')} đ`,
@@ -75,21 +64,13 @@ export const productService = {
       anh_san_pham: product.image,
       id_dan_toc: dtId 
     };
-
     const { data, error } = await supabase.from('san_pham').insert([payload]).select();
     if (error) throw error;
     return data;
   },
 
-  // 3. CẬP NHẬT SẢN PHẨM
   updateProduct: async (id: string, updates: Partial<Product>) => {
-    if (!isSupabaseConfigured) throw new Error("Chưa kết nối Supabase");
-
-    let dtId = undefined;
-    if (updates.ethnic) {
-      dtId = await getDanTocId(updates.ethnic);
-    }
-
+    let dtId = updates.ethnic ? await getDanTocId(updates.ethnic) : undefined;
     const payload: any = {};
     if (updates.name !== undefined) payload.ten_san_pham = updates.name;
     if (updates.price_display !== undefined) payload.gia = updates.price_display;
@@ -102,18 +83,12 @@ export const productService = {
     return data;
   },
 
-  // 4. XÓA SẢN PHẨM
   deleteProduct: async (id: string) => {
-    if (!isSupabaseConfigured) return;
     const { error } = await supabase.from('san_pham').delete().eq('id', id);
     if (error) throw error;
   },
 
-  // 5. NẠP DỮ LIỆU MẪU (Seed)
   seedProducts: async (products: any[]) => {
-    if (!isSupabaseConfigured) throw new Error("Chưa kết nối Supabase");
-    
-    // Xử lý nạp hàng loạt
     const payloads = await Promise.all(products.map(async (p) => {
        const dtId = await getDanTocId(p.ethnic);
        return {
@@ -124,10 +99,8 @@ export const productService = {
          id_dan_toc: dtId
        };
     }));
-
     const { error } = await supabase.from('san_pham').insert(payloads);
     if (error) throw error;
   },
-
   getProductsByEthnic: async () => { return []; }
 };
