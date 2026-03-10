@@ -12,20 +12,20 @@ const Footer: React.FC = () => {
           <div className="col-span-1 lg:col-span-2 space-y-8">
            <div className="flex items-center gap-4">
   {/* LỒNG CHỨA LOGO - ĐÃ CÂN CHỈNH LẠI TỪNG MILIMET */}
-  <div 
-    className="h-14 w-14 md:h-16 md:w-16 rounded-full border-2 border-gold shadow-lg shrink-0 bg-white"
-    style={{
-      backgroundImage: "url('https://cazllsidgvysyxbvrftq.supabase.co/storage/v1/object/public/images-sacviet/logo.png')",
-      backgroundRepeat: "no-repeat",
-      
-      /* 1. GIẢM ĐỘ ZOOM: Từ 350% xuống 280% để vừa khít, không bị cắt mép dưới */
-      backgroundSize: "300%", 
-      
-      /* 2. KÉO ẢNH XUỐNG: Số 50% đầu là trái/phải. Số 56% sau là kéo ảnh tụt xuống dưới lấp chỗ trắng */
-      backgroundPosition: "46% 20%" 
-    }}
-  />
-  
+    <div className="h-14 w-14 md:h-16 md:w-16 rounded-full overflow-hidden shrink-0 bg-transparent flex items-center justify-center">
+      <img
+        src="https://cazllsidgvysyxbvrftq.supabase.co/storage/v1/object/public/images-sacviet/logo.png"
+        alt="Logo Sắc Việt"
+        className="max-w-none"
+        style={{
+          /* 1. Phóng to ảnh (Chiều cao chiếm 280% khung) */
+          height: "160%", 
+          
+          /* 2. CHIẾC VÔ LĂNG ĐIỀU CHỈNH: Nhích sang phải 3%, nhích lên trên 2% */
+          transform: "translate(2.4%, 12%)" 
+        }}
+      />
+  </div>
   {/* Phần chữ bên cạnh */}
   <div className="flex flex-col">
     <span className="font-black text-white text-2xl md:text-3xl leading-none tracking-tight">SẮC VIỆT</span>
