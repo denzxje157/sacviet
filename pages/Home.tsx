@@ -242,10 +242,14 @@ const Home: React.FC = () => {
             <img src="https://cdn.nhandan.vn/assets/web/styles/img/54dantoc/zone-1-1.png" className="w-full h-full object-cover opacity-60 mix-blend-overlay" alt="Vietnam Heritage" />
             <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-transparent to-black/40"></div>
           </div>
-          <div className="relative z-30 h-full flex flex-col items-center justify-center text-center px-6" style={{ transform: `translate3d(0, ${scrollY * -0.1}px, 0)`, opacity: Math.max(0, 1 - scrollY / 500) }}>
+         <div className="relative z-30 h-full flex flex-col items-center justify-center text-center px-6" style={{ transform: `translate3d(0, ${scrollY * -0.1}px, 0)`, opacity: Math.max(0, 1 - scrollY / 500) }}>
             <RevealSection>
-              <h1 className="text-6xl sm:text-8xl lg:text-[12rem] font-black text-gold italic tracking-tighter uppercase leading-none drop-shadow-[0_20px_50px_rgba(0,0,0,0.5)] mb-12">SẮC VIỆT</h1>
-              <button onClick={() => navigate('/marketplace')} className="px-10 py-4 border-2 border-white/30 text-white font-black uppercase tracking-widest rounded-[2rem] hover:bg-white hover:text-text-main transition-all active:scale-95 text-xs backdrop-blur-sm">Ghé thăm chợ phiên</button>
+              <h1 className="text-6xl sm:text-7xl lg:text-[9rem] font-black text-gold italic tracking-tight uppercase leading-none drop-shadow-[0_10px_30px_rgba(0,0,0,0.8)] mb-8">
+                SẮC VIỆT
+              </h1>
+              <button onClick={() => navigate('/marketplace')} className="px-10 py-4 border-2 border-white/30 text-white font-black uppercase tracking-widest rounded-[2rem] hover:bg-white hover:text-text-main transition-all active:scale-95 text-xs backdrop-blur-sm">
+                Ghé thăm chợ phiên
+              </button>
             </RevealSection>
           </div>
         </section>

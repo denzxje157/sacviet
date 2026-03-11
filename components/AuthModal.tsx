@@ -143,7 +143,7 @@ const AuthModal: React.FC = () => {
         <div className="relative p-6 pb-4 text-center shrink-0">
           <button 
             onClick={toggleAuthModal}
-            className="absolute top-4 right-4 p-2 text-text-soft hover:text-primary hover:bg-gold/10 rounded-full transition-colors"
+            className="absolute top-4 right-4 z-50 p-2 text-text-soft hover:text-primary hover:bg-gold/10 rounded-full transition-colors cursor-pointer"
           >
             <X size={20} />
           </button>
