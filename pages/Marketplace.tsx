@@ -90,7 +90,7 @@ const ProductModal = ({ product, onClose }: { product: Product, onClose: () => v
     <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 font-display">
       <div className="absolute inset-0 bg-black/70 backdrop-blur-sm animate-fade-in" onClick={onClose}></div>
       <div className="bg-white w-full max-w-5xl h-[85vh] md:h-auto md:max-h-[90vh] rounded-[2rem] shadow-2xl relative z-10 animate-slide-up flex flex-col md:flex-row overflow-hidden border-4 border-gold/30">
-        <button onClick={onClose} className="absolute top-4 right-4 z-50 bg-white/80 hover:bg-white text-text-soft hover:text-red-600 p-2 rounded-full shadow-lg backdrop-blur-sm transition-all active:scale-95 border border-gold/10 group">
+        <button onClick={onClose} className="absolute top-4 right-4 z-50 w-10 h-10 flex items-center justify-center bg-white/30 hover:bg-white text-text-soft hover:text-red-800 rounded-full shadow-lg backdrop-blur-sm transition-all active:scale-95 group">
           <span className="material-symbols-outlined text-xl group-hover:rotate-90 transition-transform">close</span>
         </button>
         <div className="w-full md:w-[60%] h-1/2 md:h-auto relative bg-[#F2EFE6] border-b md:border-b-0 md:border-r border-gold/10">
