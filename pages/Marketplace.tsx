@@ -25,32 +25,63 @@ export { marketplaceData };
 export const rawData = marketplaceData;
 
 const ProductCard = React.memo(({ product, onOpenDetail }: { product: Product, onOpenDetail: (p: Product) => void }) => {
-  const isOutOfStock = product?.stock <= 0; // 👈 Kiểm tra kho
+  const isOutOfStock = product?.stock <= 0; 
 
   return (
-    <div className="group rounded-2xl md:rounded-[2.5rem] overflow-hidden transition-all duration-500 hover:shadow-[0_40px_80px_rgba(209,77,77,0.15)] hover:-translate-y-2 border border-gold/10 bg-white flex flex-col h-full cursor-pointer relative" onClick={() => onOpenDetail(product)}>
-      <div className="relative h-40 md:h-72 overflow-hidden shrink-0 bg-[#F9F7F2]">
-        <img src={product?.img || 'https://placehold.co/600x600?text=No+Image'} alt={product?.name || 'Sản phẩm'} loading="lazy" className="w-full h-full object-cover transition-transform duration-[2s] group-hover:scale-110" />
+    <div 
+      className="group rounded-xl md:rounded-2xl overflow-hidden transition-all duration-500 hover:shadow-[0_40px_80px_rgba(209,77,77,0.15)] hover:-translate-y-2 border border-gold/10 bg-white flex flex-col h-full cursor-pointer relative" 
+      onClick={() => onOpenDetail(product)}
+    >
+      {/* KHUNG ẢNH: Dùng aspect-square để ảnh vuông vức, giữ nguyên hiệu ứng hover scale */}
+      <div className="relative aspect-square w-full overflow-hidden shrink-0 bg-[#F9F7F2]">
+        <img 
+          src={product?.img || 'https://placehold.co/600x600?text=No+Image'} 
+          alt={product?.name || 'Sản phẩm'} 
+          loading="lazy" 
+          className="w-full h-full object-cover transition-transform duration-[2s] group-hover:scale-110" 
+        />
         
-        {/* 👈 LỚP PHỦ HẾT HÀNG */}
         {isOutOfStock && (
           <div className="absolute inset-0 bg-white/60 backdrop-blur-[1px] z-20 flex items-center justify-center">
-            <span className="bg-text-main text-white px-4 py-2 rounded-full font-black text-xs uppercase tracking-widest border border-white/50 shadow-lg rotate-[-10deg]">Đã hết hàng</span>
+            <span className="bg-text-main text-white px-3 py-1.5 rounded-full font-black text-[10px] uppercase tracking-widest border border-white/50 shadow-lg rotate-[-10deg]">
+              Đã hết hàng
+            </span>
           </div>
         )}
 
-        <div className="absolute top-2 left-2 md:top-4 md:left-4 bg-primary/90 text-white text-[8px] md:text-[9px] font-black px-2 md:px-4 py-1 md:py-1.5 rounded-full uppercase tracking-widest backdrop-blur-sm border border-gold/30 shadow-md">{product?.ethnic || 'Khác'}</div>
+        {/* Tag dân tộc */}
+        <div className="absolute top-2 left-2 bg-primary/90 text-white text-[9px] font-black px-2 md:px-3 py-1 rounded-full uppercase tracking-widest backdrop-blur-sm border border-gold/30 shadow-md">
+          {product?.ethnic || 'Khác'}
+        </div>
       </div>
-      <div className="p-3 md:p-6 text-left flex-grow flex flex-col">
-        <h3 className="text-sm md:text-lg font-black text-text-main tracking-tight mb-1 md:mb-2 group-hover:text-primary transition-colors line-clamp-2 min-h-[2.5rem] md:min-h-[3.5rem]">{product?.name || 'Sản phẩm đang cập nhật'}</h3>
-        <div className="mt-auto pt-2 md:pt-4 border-t border-gold/5 space-y-2 md:space-y-4">
-          <div className="flex items-center justify-between"><span className="text-primary font-black text-sm md:text-lg">{product?.price || 'Liên hệ'}</span></div>
-          <div className="grid grid-cols-2 gap-2 md:gap-3">
-             <button onClick={(e) => { e.stopPropagation(); onOpenDetail(product); }} className="border border-gold/30 rounded-lg md:rounded-xl py-2 md:py-2.5 text-[8px] md:text-[10px] font-black uppercase text-text-soft hover:bg-gold/10 transition-colors z-10">Tìm hiểu</button>
-             {/* 👈 ĐỔI NÚT ĐẶT MUA NẾU HẾT HÀNG */}
-             <button disabled={isOutOfStock} onClick={(e) => { e.stopPropagation(); onOpenDetail(product); }} className={`rounded-lg md:rounded-xl py-2 md:py-2.5 text-[8px] md:text-[10px] font-black uppercase text-white transition-all z-10 ${isOutOfStock ? 'bg-gray-400 cursor-not-allowed' : 'bg-primary hover:brightness-110 shadow-lg shadow-primary/20 active:scale-95'}`}>
-               {isOutOfStock ? 'Tạm hết' : 'Đặt mua'}
-             </button>
+
+      {/* NỘI DUNG: Ép padding nhỏ lại (p-2 md:p-3), bỏ các khoảng min-h dư thừa */}
+      <div className="p-2 md:p-3 text-left flex-grow flex flex-col">
+        <h3 className="text-xs md:text-sm font-black text-text-main tracking-tight mb-1 group-hover:text-primary transition-colors line-clamp-2 min-h-[2.25rem]">
+          {product?.name || 'Sản phẩm đang cập nhật'}
+        </h3>
+        
+        <div className="mt-auto pt-2 border-t border-gold/5 flex flex-col gap-2">
+          {/* Giá */}
+          <span className="text-primary font-black text-sm md:text-base line-clamp-1">
+            {product?.price || 'Liên hệ'}
+          </span>
+          
+          {/* 2 Nút bấm: Giữ nguyên style nhưng ép mỏng lại (py-1.5 md:py-2) */}
+          <div className="grid grid-cols-2 gap-1.5 md:gap-2">
+            <button 
+              onClick={(e) => { e.stopPropagation(); onOpenDetail(product); }} 
+              className="border border-gold/30 rounded-lg py-1.5 md:py-2 text-[9px] font-black uppercase text-text-soft hover:bg-gold/10 transition-colors z-10"
+            >
+              Tìm hiểu
+            </button>
+            <button 
+              disabled={isOutOfStock} 
+              onClick={(e) => { e.stopPropagation(); onOpenDetail(product); }} 
+              className={`rounded-lg py-1.5 md:py-2 text-[9px] font-black uppercase text-white transition-all z-10 ${isOutOfStock ? 'bg-gray-400 cursor-not-allowed' : 'bg-primary hover:brightness-110 shadow-lg shadow-primary/20 active:scale-95'}`}
+            >
+              {isOutOfStock ? 'Tạm hết' : 'Đặt mua'}
+            </button>
           </div>
         </div>
       </div>
@@ -163,7 +194,7 @@ const Marketplace: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const scrollRef = useRef<HTMLDivElement>(null);
-  const ITEMS_PER_PAGE = 12;
+  const ITEMS_PER_PAGE = 15;
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -226,25 +257,35 @@ const Marketplace: React.FC = () => {
     <div className="min-h-screen font-display bg-background-light relative overflow-x-hidden">
       {selectedProduct && <ProductModal product={selectedProduct} onClose={() => setSelectedProduct(null)} />}
       <div className="w-[96%] max-w-[1920px] mx-auto px-4 py-8 md:py-12 relative z-10">
+        
+        {/* SECTION BANNER - ĐÃ BỎ MÀU ĐỎ */}
         <section className="relative rounded-[2rem] md:rounded-[3.5rem] overflow-hidden mb-8 md:mb-12 h-48 md:h-80 flex items-center shadow-2xl border-4 border-white">
           <div className="absolute inset-0 bg-cover bg-center" style={{backgroundImage: "url('https://topsapa.vn/uploads/2023/04/07/nguoi-dan-o-cho-phien-bac-ha-rat-chat-phac-va-gian-di-mac-nh_cufz0_042151300.png')"}}>
-            <div className="absolute inset-0 bg-primary/70 mix-blend-multiply"></div>
-            <div className="absolute inset-0 bg-gradient-to-r from-primary/90 via-primary/40 to-transparent"></div>
+            {/* Thay bg-primary/70 bằng bg-black/60 để bỏ màu đỏ mờ */}
+            <div className="absolute inset-0 bg-black/60 mix-blend-multiply"></div>
+            {/* Thay gradient đỏ bằng gradient đen xám */}
+            <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/20 to-transparent"></div>
           </div>
+          
           <div className="relative z-10 px-6 md:px-16 max-w-3xl text-left">
-            <h2 className="text-2xl sm:text-3xl md:text-5xl lg:text-7xl font-black text-white mb-2 md:mb-4 italic uppercase tracking-tighter drop-shadow-2xl">CHỢ <span className="text-gold">PHIÊN</span></h2>
+            <h2 className="text-2xl sm:text-3xl md:text-5xl lg:text-7xl font-black text-white mb-2 md:mb-4 italic uppercase tracking-tighter drop-shadow-2xl">
+              CHỢ <span className="text-gold">PHIÊN</span>
+            </h2>
             <div className="flex items-start gap-4">
                <div className="w-1 md:w-1.5 h-8 md:h-12 bg-gold/80 rounded-full mt-1 shrink-0"></div>
-               <p className="text-white text-xs sm:text-sm md:text-xl lg:text-2xl font-bold italic tracking-tight opacity-90 drop-shadow-md leading-tight">"Kết nối di sản với thương mại công bằng cho các nghệ nhân dân tộc thiểu số vùng cao Việt Nam."</p>
+               <p className="text-white text-xs sm:text-sm md:text-xl lg:text-2xl font-bold italic tracking-tight opacity-90 drop-shadow-md leading-tight">
+                 "Kết nối di sản với thương mại công bằng cho các nghệ nhân dân tộc thiểu số vùng cao Việt Nam."
+               </p>
             </div>
           </div>
         </section>
 
+        {/* THANH TÌM KIẾM - ĐÃ BỎ MÀU ĐỎ */}
         <div className="sticky top-20 md:top-24 z-40 mb-6 md:mb-10 space-y-4 md:space-y-6">
-          {/* ĐÃ FIX: Chỉ giữ lại 1 div bọc ngoài và 1 icon kính lúp */}
           <div className="max-w-3xl mx-auto relative group z-20">
             <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
-              <span className="material-symbols-outlined text-gold group-hover:text-primary transition-colors text-xl md:text-2xl leading-none">
+              {/* Thay đổi hover từ text-primary sang text-gold */}
+              <span className="material-symbols-outlined text-gold group-hover:text-[#8B5A2B] transition-colors text-xl md:text-2xl leading-none">
                 search
               </span>
             </div>
@@ -253,7 +294,8 @@ const Marketplace: React.FC = () => {
               placeholder="Tìm kiếm sản phẩm..." 
               value={searchTerm} 
               onChange={(e) => { setSearchTerm(e.target.value); setCurrentPage(1); }} 
-              className="w-full bg-white/95 backdrop-blur border-2 border-gold/20 rounded-full py-4 pl-14 pr-6 text-text-main shadow-xl text-lg font-medium focus:outline-none focus:border-primary transition-all block" 
+              /* Thay focus:border-primary sang focus:border-gold */
+              className="w-full bg-white/95 backdrop-blur border-2 border-gold/20 rounded-full py-4 pl-14 pr-6 text-text-main shadow-xl text-lg font-medium focus:outline-none focus:border-gold transition-all block" 
             />
           </div>
 
@@ -268,7 +310,7 @@ const Marketplace: React.FC = () => {
           </div>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-8 min-h-[600px] content-start">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 md:gap-8 min-h-[600px] content-start">
           {isLoading ? (
             <div className="col-span-full py-20 text-center text-gold font-black text-2xl animate-pulse">Đang kết nối chợ phiên...</div>
           ) : currentProducts.map((p) => <ProductCard key={p.id} product={p} onOpenDetail={setSelectedProduct} />)}

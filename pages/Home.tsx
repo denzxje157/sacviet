@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { createPortal } from 'react-dom';
-import { MapContainer, TileLayer, Marker, ZoomControl, Tooltip, useMap, useMapEvents } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, ZoomControl, Tooltip, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import { useNavigate } from 'react-router-dom';
 import { ethnicData, EthnicGroup } from '../data/mockData.ts'; 
-import { supabase } from '../services/supabaseClient.ts'; // ĐÃ THÊM KẾT NỐI SUPABASE
+import { supabase } from '../services/supabaseClient.ts';
 
 interface Story {
   id: string;
@@ -154,50 +154,50 @@ const StoryModal = ({ story, onClose }: { story: Story, onClose: () => void }) =
 };
 
 const Home: React.FC = () => {
-  // STATE CHỨA DANH SÁCH DÂN TỘC (Mặc định lấy từ mockData để phòng hờ)
   const [ethnicList, setEthnicList] = useState<EthnicGroup[]>(ethnicData);
-  
   const [selectedEthnic, setSelectedEthnic] = useState<EthnicGroup | null>(null);
   const [hoveredEthnicName, setHoveredEthnicName] = useState<string | null>(null);
   const [scrollY, setScrollY] = useState(0);
   const [activeStory, setActiveStory] = useState<Story | null>(null);
+  const [trendingProducts, setTrendingProducts] = useState<any[]>([]); // State sản phẩm nổi bật
+  
   const navigate = useNavigate();
   const mapSectionRef = useRef<HTMLElement>(null);
 
-  // --- LUỒNG KẾT NỐI SUPABASE ---
-
   useEffect(() => {
-    const fetchEthnicData = async () => {
+    const fetchData = async () => {
       try {
-        // 1. Gọi đúng tên bảng 'dan_toc' trên Supabase
-        const { data, error } = await supabase
-          .from('dan_toc')
-          .select('*');
-        
-        if (error) throw error;
-        
-        if (data && data.length > 0) {
-          // 2. "Dịch" các cột tiếng Việt sang cấu trúc tiếng Anh mà giao diện cần
-          const mappedData = data.map((item: any) => ({
-            name: item.name || item.ten || item.ten_dan_toc, // Khớp với cột tên dân tộc của bạn
+        // Tải dữ liệu dân tộc
+        const { data: ethnicDataRes, error: ethnicError } = await supabase.from('dan_toc').select('*');
+        if (ethnicError) throw ethnicError;
+        if (ethnicDataRes && ethnicDataRes.length > 0) {
+          const mappedData = ethnicDataRes.map((item: any) => ({
+            name: item.name || item.ten || item.ten_dan_toc,
             location: item.location || item.vi_tri || item.dia_ban, 
             population: item.population || item.dan_so,
-            // Đảm bảo tọa độ [lat, lng] được parse đúng định dạng mảng
             coords: typeof item.toa_do === 'string' ? JSON.parse(item.toa_do) : item.toa_do, 
             description: item.mo_ta,
             heritage: item.di_san,
             img: item.anh_dai_dien
           }));
-
           setEthnicList(mappedData);
-          console.log("Đã tải thành công dữ liệu từ bảng dan_toc!");
+        }
+
+        // Tải 5 sản phẩm nổi bật
+        const { data: productData, error: productError } = await supabase
+          .from('san_pham')
+          .select('*, dan_toc(ten_dan_toc)')
+          .limit(5);
+        if (productError) throw productError;
+        if (productData) {
+          setTrendingProducts(productData);
         }
       } catch (error) {
         console.error("Lỗi khi tải dữ liệu từ Supabase:", error);
       }
     };
 
-    fetchEthnicData();
+    fetchData();
   }, []);
 
   useEffect(() => {
@@ -237,20 +237,45 @@ const Home: React.FC = () => {
       {activeStory && <StoryModal story={activeStory} onClose={() => setActiveStory(null)} />}
 
       <div className="pt-20 px-3 md:px-6 pb-8 bg-background-light min-h-screen">
-        <section className="relative h-[65vh] md:h-[75vh] w-full max-w-[1800px] mx-auto rounded-[2rem] md:rounded-[3.5rem] overflow-hidden shadow-2xl bg-text-main mb-8">
-          <div className="absolute inset-0 z-0" style={{ transform: `translate3d(0, ${scrollY * 0.3}px, 0) scale(${1 + scrollY * 0.0002})` }}>
-            <img src="https://cdn.nhandan.vn/assets/web/styles/img/54dantoc/zone-1-1.png" className="w-full h-full object-cover opacity-60 mix-blend-overlay" alt="Vietnam Heritage" />
-            <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-transparent to-black/40"></div>
-          </div>
-         <div className="relative z-30 h-full flex flex-col items-center justify-center text-center px-6" style={{ transform: `translate3d(0, ${scrollY * -0.1}px, 0)`, opacity: Math.max(0, 1 - scrollY / 500) }}>
-            <RevealSection>
-              <h1 className="text-6xl sm:text-7xl lg:text-[9rem] font-black text-gold italic tracking-tight uppercase leading-none drop-shadow-[0_10px_30px_rgba(0,0,0,0.8)] mb-8">
-                SẮC VIỆT
+        
+        {/* HERO SECTION - FIX TRÀN VIỀN KHÔNG DƯ THỪA */}
+        <section className="px-4 md:px-8 lg:px-20 py-0 max-w-[1800px] mx-auto"> 
+          {/* Đã đổi py-8 thành py-0 để sát viền */}
+          <div className="relative w-full h-[65vh] min-h-[500px] rounded-[2.5rem] md:rounded-[3.5rem] overflow-hidden shadow-2xl mt-4">
+            
+            {/* Lớp nền: Dùng object-cover để ép ảnh luôn đầy khung */}
+            <div className="absolute inset-0 w-full h-full">
+              <img 
+                src="https://cdn.nhandan.vn/assets/web/styles/img/54dantoc/zone-1-1.png" 
+                alt="Vietnam Heritage" 
+                className="w-full h-full object-cover block"
+              />
+              {/* Overlay tối nhẹ để chữ nổi bật (có thể xóa nếu muốn ảnh sáng trưng) */}
+              <div className="absolute inset-0 bg-black/20"></div>
+            </div>
+            
+            {/* Nội dung chữ */}
+            <div className="relative z-10 h-full flex flex-col justify-center items-start px-8 md:px-16 lg:px-24 max-w-4xl">
+              <span className="text-white font-bold tracking-[0.2em] uppercase mb-4 text-[10px] md:text-xs drop-shadow-md">
+                Gìn giữ bản sắc Việt
+              </span>
+              
+              <h1 className="text-white text-4xl sm:text-5xl lg:text-7xl font-black leading-[1.1] tracking-tight mb-6 drop-shadow-[0_4px_12px_rgba(0,0,0,0.8)]">
+                Mỗi sản phẩm là<br />một câu chuyện<br />văn hóa
               </h1>
-              <button onClick={() => navigate('/marketplace')} className="px-10 py-4 border-2 border-white/30 text-white font-black uppercase tracking-widest rounded-[2rem] hover:bg-white hover:text-text-main transition-all active:scale-95 text-xs backdrop-blur-sm">
-                Ghé thăm chợ phiên
+              
+              <p className="text-white text-sm md:text-base mb-8 leading-relaxed max-w-xl font-medium drop-shadow-[0_4px_10px_rgba(0,0,0,0.8)]">
+                Kết nối di sản với thương mại công bằng cho các nghệ nhân<br className="hidden md:block"/> dân tộc thiểu số vùng cao Việt Nam.
+              </p>
+              
+              {/* Nút màu Đỏ hoặc Vàng theo ý bạn test */}
+              <button 
+                onClick={() => navigate('/marketplace')} 
+                className="bg-[#990000] text-white px-8 py-3.5 rounded-full font-bold hover:bg-[#7a0000] hover:scale-105 shadow-xl transition-all duration-300 active:scale-95 text-sm inline-flex items-center justify-center"
+              >
+                Khám phá ngay
               </button>
-            </RevealSection>
+            </div>
           </div>
         </section>
 
@@ -277,25 +302,63 @@ const Home: React.FC = () => {
           </RevealSection>
         </section>
 
+        {/* SẢN PHẨM NỔI BẬT SECTION (MỚI THÊM) */}
+        <section className="relative py-16 max-w-[1800px] mx-auto px-4 border-t border-gold/20">
+          <RevealSection>
+            <div className="flex justify-between items-end mb-10">
+              <div>
+                <h2 className="text-primary font-bold uppercase tracking-widest text-sm mb-2">Chợ phiên vùng cao</h2>
+                <h3 className="text-3xl md:text-4xl font-black text-text-main italic uppercase tracking-tighter">Sản phẩm nổi bật</h3>
+              </div>
+              <button onClick={() => navigate('/marketplace')} className="text-sm font-bold text-text-soft hover:text-primary transition-colors flex items-center gap-1 group">
+                Xem tất cả <span className="material-symbols-outlined text-lg group-hover:translate-x-1 transition-transform">arrow_forward</span>
+              </button>
+            </div>
+
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 md:gap-6">
+              {trendingProducts.map(product => (
+                <div key={product.id} onClick={() => navigate('/marketplace')} className="group rounded-xl md:rounded-2xl overflow-hidden transition-all duration-500 hover:shadow-[0_40px_80px_rgba(209,77,77,0.15)] hover:-translate-y-2 border border-gold/10 bg-white flex flex-col h-full cursor-pointer relative">
+                  <div className="relative aspect-square w-full overflow-hidden shrink-0 bg-[#F9F7F2]">
+                    <img src={product.anh_san_pham?.replace('/public/images/', '/public/images-sacviet/')} alt={product.ten_san_pham} className="w-full h-full object-cover transition-transform duration-[2s] group-hover:scale-110" />
+                    <div className="absolute top-2 left-2 bg-primary/90 text-white text-[9px] font-black px-2 md:px-3 py-1 rounded-full uppercase tracking-widest backdrop-blur-sm border border-gold/30 shadow-md">
+                      {product.dan_toc?.ten_dan_toc || 'Khác'}
+                    </div>
+                  </div>
+                  <div className="p-3 md:p-4 flex-grow flex flex-col">
+                    <h4 className="text-xs md:text-sm font-black text-text-main tracking-tight mb-1 group-hover:text-primary transition-colors line-clamp-2 min-h-[2.25rem]">
+                      {product.ten_san_pham}
+                    </h4>
+                    <div className="mt-auto pt-2 border-t border-gold/5 flex flex-col gap-2">
+                      <span className="text-primary font-black text-sm md:text-base line-clamp-1">{product.gia}</span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </RevealSection>
+        </section>
+
         {/* MAP SECTION */}
         <section ref={mapSectionRef} className="py-20 border-t border-gold/20">
-          <div className="max-w-[1700px] mx-auto px-6">
+          <div className="max-w-[1500px] mx-auto px-6">
             <RevealSection>
-              <div className="mb-12 text-center lg:text-left lg:px-14">
-                <h2 className="text-5xl lg:text-[9rem] font-black text-primary italic uppercase tracking-tighter leading-none mb-6">BẢN ĐỒ <br/><span className="text-text-main block mt-4">54 DÂN TỘC</span></h2>
-                <p className="text-bronze font-black uppercase text-[12px] tracking-[0.6em]">Hội tụ và lan tỏa sức mạnh dòng máu Lạc Hồng</p>
+              {/* Căn giữa Tiêu đề phía trên Bản đồ */}
+              <div className="mb-8 text-center flex flex-col items-center">
+                <h2 className="text-5xl lg:text-7xl font-black italic uppercase tracking-tighter leading-none mb-2 flex flex-col gap-2">
+                  <span className="text-text-main">BẢN ĐỒ 54 DÂN TỘC</span>
+                </h2>
               </div>
             </RevealSection>
             
-            <div className="flex flex-col lg:flex-row h-[700px] lg:h-[900px] gap-12">
-              <div className="flex-1 relative rounded-[3rem] lg:rounded-[5rem] overflow-hidden border-[8px] border-primary/10 shadow-2xl bg-[#e4e9f0] z-0 isolate">
+            {/* Thu nhỏ chiều cao (h-[500px] lg:h-[600px]) */}
+            <div className="flex flex-col lg:flex-row h-[500px] lg:h-[600px] gap-8 lg:gap-10">
+              <div className="flex-1 relative rounded-[2.5rem] lg:rounded-[3rem] overflow-hidden border-[6px] border-primary/10 shadow-2xl bg-[#e4e9f0] z-0 isolate">
                  <MapContainer center={MAP_CENTER} zoom={6} className="w-full h-full" zoomControl={false} attributionControl={false}>
                     <MapFixer />
                     <TileLayer url="https://mt1.google.com/vt/lyrs=m&hl=vi&x={x}&y={y}&z={z}" />
                     <ZoomControl position="bottomright" />
                     {selectedEthnic && <ChangeView coords={selectedEthnic.coords} />}
                     
-                    {/* ĐÃ THAY BẰNG ETHNICLIST LẤY TỪ DB */}
                     {ethnicList.map((ethnic, idx) => (
                       <Marker 
                         key={`marker-${ethnic.name}-${idx}`} 
@@ -313,10 +376,12 @@ const Home: React.FC = () => {
                  </MapContainer>
               </div>
 
-              <div className="w-full lg:w-[480px] bg-[#F7F3E9] rounded-[3rem] lg:rounded-[5rem] flex flex-col overflow-hidden border-[8px] border-gold/20 shadow-2xl relative h-[500px] lg:h-auto">
-                <div className="p-10 bg-primary shrink-0 text-white"><h2 className="text-3xl font-black italic uppercase">CỘNG ĐỒNG <br/><span className="text-gold">VIỆT NAM</span></h2></div>
-                <div className="flex-1 overflow-y-auto p-6 space-y-5 custom-scrollbar">
-                  {/* ĐÃ THAY BẰNG ETHNICLIST LẤY TỪ DB */}
+              {/* Thu hẹp chiều rộng cột danh sách cho giống chiếc điện thoại */}
+              <div className="w-full lg:w-[400px] bg-[#F7F3E9] rounded-[2.5rem] lg:rounded-[3rem] flex flex-col overflow-hidden border-[6px] border-gold/20 shadow-2xl relative h-[450px] lg:h-auto">
+                <div className="p-8 bg-primary shrink-0 text-white text-center">
+                  <h2 className="text-2xl font-black italic uppercase">CỘNG ĐỒNG <br/><span className="text-gold">VIỆT NAM</span></h2>
+                </div>
+                <div className="flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar bg-white">
                   {ethnicList.map((ethnic, idx) => (
                     <EthnicButton 
                       key={`list-${ethnic.name}-${idx}`}
@@ -329,20 +394,19 @@ const Home: React.FC = () => {
                 </div>
 
                 {selectedEthnic && (
-                  <div className="absolute inset-0 z-[100] bg-background-light p-8 animate-slide-up-slow flex flex-col overflow-y-auto custom-scrollbar">
-                     <button onClick={() => setSelectedEthnic(null)} className="self-end size-14 rounded-full border-2 border-gold/20 flex items-center justify-center bg-white shadow-xl hover:bg-primary hover:text-white transition-all"><span className="material-symbols-outlined text-3xl">close</span></button>
-                     <div className="mt-6 space-y-8 text-left">
-                        <div className="rounded-[3rem] overflow-hidden aspect-[4/3] border-[6px] border-white shadow-2xl">
-                          {/* ẢNH DÂN TỘC TẠI ĐÂY */}
+                  <div className="absolute inset-0 z-[100] bg-background-light p-6 animate-slide-up-slow flex flex-col overflow-y-auto custom-scrollbar">
+                     <button onClick={() => setSelectedEthnic(null)} className="self-end size-12 rounded-full border-2 border-gold/20 flex items-center justify-center bg-white shadow-xl hover:bg-primary hover:text-white transition-all"><span className="material-symbols-outlined text-2xl">close</span></button>
+                     <div className="mt-4 space-y-6 text-left">
+                        <div className="rounded-[2rem] overflow-hidden aspect-[4/3] border-[4px] border-white shadow-xl">
                           <img src={selectedEthnic.img} alt={selectedEthnic.name} className="w-full h-full object-cover" />
                         </div>
-                        <h3 className="text-5xl font-black text-text-main italic uppercase leading-none">DÂN TỘC <br/><span className="text-primary">{selectedEthnic.name}</span></h3>
-                        <div className="bg-white p-8 rounded-[2.5rem] border-2 border-gold/10"><p className="text-text-soft font-bold italic text-lg">"{selectedEthnic.description}"</p></div>
-                        <div className="bg-primary p-10 rounded-[3rem] text-white shadow-2xl border-2 border-gold/40">
-                           <p className="text-gold/80 text-[10px] font-black uppercase mb-2 tracking-widest">Sản phẩm tiêu biểu:</p>
-                           <p className="font-black italic text-2xl uppercase">{selectedEthnic.heritage}</p>
+                        <h3 className="text-3xl font-black text-text-main italic uppercase leading-none">DÂN TỘC <br/><span className="text-primary">{selectedEthnic.name}</span></h3>
+                        <div className="bg-white p-6 rounded-[2rem] border-2 border-gold/10"><p className="text-text-soft font-bold italic text-base">"{selectedEthnic.description}"</p></div>
+                        <div className="bg-primary p-6 rounded-[2rem] text-white shadow-xl border-2 border-gold/40">
+                           <p className="text-gold/80 text-[10px] font-black uppercase mb-1 tracking-widest">Sản phẩm tiêu biểu:</p>
+                           <p className="font-black italic text-xl uppercase">{selectedEthnic.heritage}</p>
                         </div>
-                        <button onClick={() => navigate(`/marketplace?ethnic=${encodeURIComponent(selectedEthnic.name.toUpperCase())}`)} className="w-full bg-gold py-6 rounded-[2.5rem] font-black text-primary uppercase text-sm tracking-widest shadow-xl active:scale-95 mb-10">VÀO CHỢ PHIÊN</button>
+                        <button onClick={() => navigate(`/marketplace?ethnic=${encodeURIComponent(selectedEthnic.name.toUpperCase())}`)} className="w-full bg-gold py-4 rounded-[2rem] font-black text-primary uppercase text-sm tracking-widest shadow-xl active:scale-95 mb-6">VÀO CHỢ PHIÊN</button>
                      </div>
                   </div>
                 )}
