@@ -1,6 +1,7 @@
 /// <reference types="vite/client" />
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { Link } from 'react-router-dom';
+// Thay thế bằng service thật của bạn nếu có
 import { communityService } from '../services/communityService.ts'; 
 import { useAuth } from '../context/AuthContext.tsx'; 
 
@@ -45,9 +46,10 @@ interface FestivalDisplay { id: string; name: string; solarDate: string; lunarDa
 
 const MOCK_CURRENT_USER = { name: "Khách", avatar: "K" };
 
+// Đã fix lại link ảnh để không bị lỗi icon hỏng
 const INITIAL_POSTS: Post[] = [
-  { id: '1', author: 'Minh Nguyễn', avatar: 'M', time: '2 giờ trước', timestamp: Date.now() - 7200000, location: 'Làng cổ Đường Lâm', content: 'Về Đường Lâm một chiều nắng nhạt, cảm giác như thời gian ngưng đọng.', image: 'https://images.vietnamtourism.gov.vn/vn/images/2020/thang_5/2805_duong_lam_2.jpg', likes: 156, commentsCount: 2, tags: ['KienTruc', 'BacBo'], localComments: [{ id: 'c1', user: 'Hải Phạm', avatar: 'H', text: 'Đẹp quá bạn ơi, cho mình xin kinh nghiệm di chuyển với!', time: '1 giờ trước' }, { id: 'c2', user: 'Minh Nguyễn', avatar: 'M', text: 'Bạn đi xe buýt số 20A từ Cầu Giấy là tới thẳng cổng làng nhé.', time: '30 phút trước' }] },
-  { id: '2', author: "H'Hen Niê", avatar: 'H', time: '5 giờ trước', timestamp: Date.now() - 18000000, location: 'Buôn Đôn, Đắk Lắk', content: 'Tiếng cồng chiêng vang vọng giữa đại ngàn...', image: 'https://cdn.tuoitre.vn/thumb_w/730/2022/3/13/le-hoi-dam-trau-164716265738676239105.jpg', likes: 342, commentsCount: 0, tags: ['TayNguyen', 'LeHoi'], localComments: [] }
+  { id: '1', author: 'Minh Nguyễn', avatar: 'M', time: '2 giờ trước', timestamp: Date.now() - 7200000, location: 'Làng cổ Đường Lâm', content: 'Về Đường Lâm một chiều nắng nhạt, cảm giác như thời gian ngưng đọng.', image: 'https://images.unsplash.com/photo-1599708153386-62bf21c4b4a1?q=80&w=1000&auto=format&fit=crop', likes: 156, commentsCount: 2, tags: ['KienTruc', 'BacBo'], localComments: [{ id: 'c1', user: 'Hải Phạm', avatar: 'H', text: 'Đẹp quá bạn ơi, cho mình xin kinh nghiệm di chuyển với!', time: '1 giờ trước' }, { id: 'c2', user: 'Minh Nguyễn', avatar: 'M', text: 'Bạn đi xe buýt số 20A từ Cầu Giấy là tới thẳng cổng làng nhé.', time: '30 phút trước' }] },
+  { id: '2', author: "H'Hen Niê", avatar: 'H', time: '5 giờ trước', timestamp: Date.now() - 18000000, location: 'Buôn Đôn, Đắk Lắk', content: 'Tiếng cồng chiêng vang vọng giữa đại ngàn...', image: 'https://images.unsplash.com/photo-1528127269322-539801943592?q=80&w=1000&auto=format&fit=crop', likes: 342, commentsCount: 0, tags: ['TayNguyen', 'LeHoi'], localComments: [] }
 ];
 
 const FALLBACK_QUIZ = [{ id: 1, question: "Lễ hội 'Cấp Sắc' là của dân tộc nào?", options: ["H'Mông", "Dao", "Tày", "Thái"], correctAnswerStr: "Dao", explanation: "Lễ quan trọng của đàn ông Dao." }];
@@ -137,25 +139,31 @@ const FestivalWidget = () => {
     try {
       if (!API_KEY) throw new Error("Missing API Key");
       const today = new Date();
-      const prompt = `Bạn là Già làng am hiểu văn hóa. Dựa vào thời điểm hiện tại là năm ${today.getFullYear()}, hãy liệt kê 10 lễ hội văn hóa lớn của các dân tộc Việt Nam diễn ra rải rác trong năm. 
-      Trả về định dạng JSON array CHÍNH XÁC như sau, không có text dư thừa, không kèm markdown:
-      [{"id": "le-hoi-1", "name": "Tên lễ hội", "solarDate": "YYYY-MM-DD", "lunarDateStr": "Ngày/Tháng Âm lịch", "location": "Tỉnh/Thành phố"}]`;
+      const prompt = `Bạn là Già làng am hiểu văn hóa. Dựa vào thời điểm hiện tại là năm ${today.getFullYear()}, hãy liệt kê 10 lễ hội văn hóa lớn của các dân tộc Việt Nam diễn ra rải rác trong năm. Trả về JSON array: [{"id": "le-hoi-1", "name": "Tên lễ hội", "solarDate": "YYYY-MM-DD", "lunarDateStr": "Ngày/Tháng Âm lịch", "location": "Tỉnh/Thành phố"}]`;
 
-      const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`, {
+      const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${API_KEY}`, {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }], generationConfig: { temperature: 0.7 } })
       });
+      
+      // ÁO GIÁP 1: Bắt lỗi nếu Google trả về 404/400
+      if (!res.ok) throw new Error(`API Error: ${res.status}`);
+      
       const data = await res.json();
+      
+      // ÁO GIÁP 2: Kiểm tra dữ liệu có bị hỏng không
+      if (!data.candidates || !data.candidates[0]) throw new Error("Dữ liệu Gemini trả về bị rỗng");
+
       const rawEvents = JSON.parse(data.candidates[0].content.parts[0].text.replace(/```json/g, '').replace(/```/g, '').trim());
       
       const processed = rawEvents.map((f: any) => {
         const d = new Date(f.solarDate);
         return { ...f, daysLeft: Math.ceil((d.getTime() - today.getTime()) / 86400000) };
-      }).sort((a: any, b: any) => a.daysLeft - b.daysLeft);
+      }).sort((a: any, b: any) => a.daysLeft - b.daysLeft); 
       
       setEvents(processed.length ? processed : processFallback(today));
     } catch (e) {
-      console.warn("Dùng fallback cho lễ hội.", e);
+      console.warn("Lỗi tải Lễ hội, tự động chuyển về giao diện dự phòng.", e);
       setEvents(processFallback(new Date()));
     } finally { setLoading(false); }
   }, []);
@@ -215,10 +223,21 @@ const QuizWidget = () => {
     try {
       if (!API_KEY) throw new Error("Missing API Key");
       const prompt = `Đóng vai "Già làng Di Sản", tạo 5 câu hỏi trắc nghiệm ĐỘC ĐÁO về văn hóa, phong tục, lễ hội của 54 dân tộc Việt Nam. Trả về JSON array chính xác: [{"id": 1, "question": "...", "options": ["A", "B", "C", "D"], "correctAnswerStr": "A", "explanation": "..."}]`;
-      const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }], generationConfig: { temperature: 0.9 } }) });
+      const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${API_KEY}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }], generationConfig: { temperature: 0.9 } }) });
+      
+      // ÁO GIÁP 1: Bắt lỗi fetch
+      if (!res.ok) throw new Error(`API Error: ${res.status}`);
+      
       const data = await res.json();
+      
+      // ÁO GIÁP 2: Bắt lỗi dữ liệu trống
+      if (!data.candidates || !data.candidates[0]) throw new Error("Dữ liệu trả về rỗng");
+
       setQuestions(JSON.parse(data.candidates[0].content.parts[0].text.replace(/```json/g, '').replace(/```/g, '').trim()));
-    } catch { setQuestions([...FALLBACK_QUIZ]); } 
+    } catch (e) { 
+      console.warn("Lỗi tải Câu hỏi, tự động chuyển về câu hỏi dự phòng.", e);
+      setQuestions([...FALLBACK_QUIZ]); 
+    } 
     finally { setGenerating(false); }
   }, []);
 
