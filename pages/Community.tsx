@@ -220,7 +220,7 @@ const QuizWidget = () => {
       if (!API_KEY || API_KEY === '') throw new Error("Chưa có API Key");
       const prompt = `Đóng vai "Già làng Di Sản", tạo 5 câu hỏi trắc nghiệm ĐỘC ĐÁO về văn hóa, phong tục, lễ hội của 54 dân tộc Việt Nam. Trả về JSON array chính xác: [{"id": 1, "question": "...", "options": ["A", "B", "C", "D"], "correctAnswerStr": "A", "explanation": "..."}]`;
       
-      const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`, { 
+      const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${API_KEY}`, { 
         method: 'POST', 
         headers: { 'Content-Type': 'application/json' }, 
         body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }], generationConfig: { temperature: 0.9 } }) 
