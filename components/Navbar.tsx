@@ -48,7 +48,7 @@ const Navbar: React.FC = () => {
 
               {/* PHẦN CHỮ BÊN CẠNH */}
               <div className="flex flex-col">
-                <span className="font-black text-primary text-xl md:text-3xl leading-none">SẮC VIỆT</span>
+                <span className="font-black text-primary text-xl md:text-2xl leading-none">SẮC VIỆT</span>
                 <span className="text-[10px] md:text-xs text-text-soft font-bold tracking-[0.2em] uppercase mt-1">
                   Kết nối bản sắc
                 </span>

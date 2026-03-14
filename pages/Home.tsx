@@ -159,7 +159,7 @@ const Home: React.FC = () => {
   const [hoveredEthnicName, setHoveredEthnicName] = useState<string | null>(null);
   const [scrollY, setScrollY] = useState(0);
   const [activeStory, setActiveStory] = useState<Story | null>(null);
-  const [trendingProducts, setTrendingProducts] = useState<any[]>([]); // State sản phẩm nổi bật
+  const [trendingProducts, setTrendingProducts] = useState<any[]>([]); 
   
   const navigate = useNavigate();
   const mapSectionRef = useRef<HTMLElement>(null);
@@ -167,7 +167,6 @@ const Home: React.FC = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // Tải dữ liệu dân tộc
         const { data: ethnicDataRes, error: ethnicError } = await supabase.from('dan_toc').select('*');
         if (ethnicError) throw ethnicError;
         if (ethnicDataRes && ethnicDataRes.length > 0) {
@@ -183,7 +182,6 @@ const Home: React.FC = () => {
           setEthnicList(mappedData);
         }
 
-        // Tải 5 sản phẩm nổi bật
         const { data: productData, error: productError } = await supabase
           .from('san_pham')
           .select('*, dan_toc(ten_dan_toc)')
@@ -238,37 +236,28 @@ const Home: React.FC = () => {
 
       <div className="pt-20 px-3 md:px-6 pb-8 bg-background-light min-h-screen">
         
-        {/* HERO SECTION - FIX TRÀN VIỀN KHÔNG DƯ THỪA */}
+        {/* HERO SECTION */}
         <section className="px-4 md:px-8 lg:px-20 py-0 max-w-[1800px] mx-auto"> 
-          {/* Đã đổi py-8 thành py-0 để sát viền */}
           <div className="relative w-full h-[65vh] min-h-[500px] rounded-[2.5rem] md:rounded-[3.5rem] overflow-hidden shadow-2xl mt-4">
-            
-            {/* Lớp nền: Dùng object-cover để ép ảnh luôn đầy khung */}
             <div className="absolute inset-0 w-full h-full">
               <img 
                 src="https://cdn.nhandan.vn/assets/web/styles/img/54dantoc/zone-1-1.png" 
                 alt="Vietnam Heritage" 
                 className="w-full h-full object-cover block"
               />
-              {/* Overlay tối nhẹ để chữ nổi bật (có thể xóa nếu muốn ảnh sáng trưng) */}
               <div className="absolute inset-0 bg-black/20"></div>
             </div>
             
-            {/* Nội dung chữ */}
             <div className="relative z-10 h-full flex flex-col justify-center items-start px-8 md:px-16 lg:px-24 max-w-4xl">
               <span className="text-white font-bold tracking-[0.2em] uppercase mb-4 text-[10px] md:text-xs drop-shadow-md">
                 Gìn giữ bản sắc Việt
               </span>
-              
               <h1 className="text-white text-4xl sm:text-5xl lg:text-7xl font-black leading-[1.1] tracking-tight mb-6 drop-shadow-[0_4px_12px_rgba(0,0,0,0.8)]">
                 Mỗi sản phẩm là<br />một câu chuyện<br />văn hóa
               </h1>
-              
               <p className="text-white text-sm md:text-base mb-8 leading-relaxed max-w-xl font-medium drop-shadow-[0_4px_10px_rgba(0,0,0,0.8)]">
                 Kết nối di sản với thương mại công bằng cho các nghệ nhân<br className="hidden md:block"/> dân tộc thiểu số vùng cao Việt Nam.
               </p>
-              
-              {/* Nút màu Đỏ hoặc Vàng theo ý bạn test */}
               <button 
                 onClick={() => navigate('/marketplace')} 
                 className="bg-[#990000] text-white px-8 py-3.5 rounded-full font-bold hover:bg-[#7a0000] hover:scale-105 shadow-xl transition-all duration-300 active:scale-95 text-sm inline-flex items-center justify-center"
@@ -302,35 +291,65 @@ const Home: React.FC = () => {
           </RevealSection>
         </section>
 
-        {/* SẢN PHẨM NỔI BẬT SECTION (MỚI THÊM) */}
-        <section className="relative py-16 max-w-[1800px] mx-auto px-4 border-t border-gold/20">
+        {/* SẢN PHẨM NỔI BẬT SECTION (ĐÃ CẬP NHẬT UI CHUẨN ẢNH) */}
+        <section className="relative py-16 max-w-[1800px] mx-auto px-4 border-t border-gold/20 bg-[#FDFBF7]">
           <RevealSection>
             <div className="flex justify-between items-end mb-10">
               <div>
-                <h2 className="text-primary font-bold uppercase tracking-widest text-sm mb-2">Chợ phiên vùng cao</h2>
-                <h3 className="text-3xl md:text-4xl font-black text-text-main italic uppercase tracking-tighter">Sản phẩm nổi bật</h3>
+                <h2 className="text-[#8B1A1A] font-bold uppercase tracking-widest text-sm mb-2">Chợ phiên vùng cao</h2>
+                <h3 className="text-3xl md:text-4xl font-black text-[#4A2511] italic uppercase tracking-tighter">Sản phẩm nổi bật</h3>
               </div>
-              <button onClick={() => navigate('/marketplace')} className="text-sm font-bold text-text-soft hover:text-primary transition-colors flex items-center gap-1 group">
+              <button onClick={() => navigate('/marketplace')} className="text-sm font-bold text-text-soft hover:text-[#8B1A1A] transition-colors flex items-center gap-1 group">
                 Xem tất cả <span className="material-symbols-outlined text-lg group-hover:translate-x-1 transition-transform">arrow_forward</span>
               </button>
             </div>
 
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 md:gap-6">
               {trendingProducts.map(product => (
-                <div key={product.id} onClick={() => navigate('/marketplace')} className="group rounded-xl md:rounded-2xl overflow-hidden transition-all duration-500 hover:shadow-[0_40px_80px_rgba(209,77,77,0.15)] hover:-translate-y-2 border border-gold/10 bg-white flex flex-col h-full cursor-pointer relative">
-                  <div className="relative aspect-square w-full overflow-hidden shrink-0 bg-[#F9F7F2]">
+                <div key={product.id} onClick={() => navigate('/marketplace')} className="group rounded-2xl overflow-hidden transition-all duration-500 hover:shadow-2xl hover:-translate-y-2 border border-gold/20 bg-white flex flex-col h-full cursor-pointer relative">
+                  
+                  <div className="relative aspect-[4/3] w-full overflow-hidden shrink-0 bg-[#F9F7F2]">
                     <img src={product.anh_san_pham?.replace('/public/images/', '/public/images-sacviet/')} alt={product.ten_san_pham} className="w-full h-full object-cover transition-transform duration-[2s] group-hover:scale-110" />
-                    <div className="absolute top-2 left-2 bg-primary/90 text-white text-[9px] font-black px-2 md:px-3 py-1 rounded-full uppercase tracking-widest backdrop-blur-sm border border-gold/30 shadow-md">
-                      {product.dan_toc?.ten_dan_toc || 'Khác'}
+                    
+                    {/* TAG DÂN TỘC CHUẨN UI (ĐỎ MẬN BO TRÒN) */}
+                    <div className="absolute top-3 left-3 bg-[#8B1A1A] text-white text-[10px] font-black px-4 py-1.5 rounded-full uppercase tracking-widest shadow-md">
+                      {product.dan_toc?.ten_dan_toc || 'BA NA'}
                     </div>
                   </div>
-                  <div className="p-3 md:p-4 flex-grow flex flex-col">
-                    <h4 className="text-xs md:text-sm font-black text-text-main tracking-tight mb-1 group-hover:text-primary transition-colors line-clamp-2 min-h-[2.25rem]">
+                  
+                  <div className="p-4 flex-grow flex flex-col">
+                    {/* TIÊU ĐỀ */}
+                    <h4 className="text-sm font-black text-text-main tracking-tight mb-2 group-hover:text-[#8B1A1A] transition-colors line-clamp-2 min-h-[2.5rem]">
                       {product.ten_san_pham}
                     </h4>
-                    <div className="mt-auto pt-2 border-t border-gold/5 flex flex-col gap-2">
-                      <span className="text-primary font-black text-sm md:text-base line-clamp-1">{product.gia}</span>
+                    
+                    {/* LIKE & THỦ CÔNG CHUẨN UI */}
+                    <div className="flex items-center gap-2 mb-3">
+                       <span className="text-[10px] font-bold text-text-soft flex items-center gap-1">
+                         <span className="material-symbols-outlined text-xs text-[#8B1A1A]" style={{ fontVariationSettings: "'FILL' 1" }}>favorite</span>
+                         {Math.floor(Math.random() * 200) + 50}
+                       </span>
+                       <span className="text-gray-300 text-[10px]">|</span>
+                       <span className="text-[10px] font-bold text-green-700 flex items-center gap-0.5">
+                         <span className="material-symbols-outlined text-[12px]">eco</span> Thủ công
+                       </span>
                     </div>
+
+                    <div className="mt-auto pt-3 border-t border-gold/10 flex flex-col gap-3">
+                      {/* GIÁ TIỀN MÀU ĐỎ MẬN */}
+                      <span className="text-[#8B1A1A] font-black text-base line-clamp-1">{product.gia}</span>
+                      
+                      {/* 2 NÚT BẤM CHUẨN UI */}
+                      <div className="grid grid-cols-2 gap-2">
+                        <button onClick={(e) => { e.stopPropagation(); navigate('/marketplace'); }} className="border border-gold text-text-main rounded-lg py-2 text-[10px] font-black uppercase hover:bg-gold/10 transition-colors z-10">
+                          Tìm hiểu
+                        </button>
+                        <button onClick={(e) => { e.stopPropagation(); navigate('/marketplace'); }} className="rounded-lg py-2 text-[10px] font-black uppercase text-white transition-all z-10 bg-[#8B1A1A] hover:brightness-110 shadow-lg shadow-[#8B1A1A]/30 active:scale-95">
+                          Đặt mua
+                        </button>
+                      </div>
+                    </div>
+
                   </div>
                 </div>
               ))}
@@ -342,7 +361,6 @@ const Home: React.FC = () => {
         <section ref={mapSectionRef} className="py-20 border-t border-gold/20">
           <div className="max-w-[1500px] mx-auto px-6">
             <RevealSection>
-              {/* Căn giữa Tiêu đề phía trên Bản đồ */}
               <div className="mb-8 text-center flex flex-col items-center">
                 <h2 className="text-5xl lg:text-7xl font-black italic uppercase tracking-tighter leading-none mb-2 flex flex-col gap-2">
                   <span className="text-text-main">BẢN ĐỒ 54 DÂN TỘC</span>
@@ -350,7 +368,6 @@ const Home: React.FC = () => {
               </div>
             </RevealSection>
             
-            {/* Thu nhỏ chiều cao (h-[500px] lg:h-[600px]) */}
             <div className="flex flex-col lg:flex-row h-[500px] lg:h-[600px] gap-8 lg:gap-10">
               <div className="flex-1 relative rounded-[2.5rem] lg:rounded-[3rem] overflow-hidden border-[6px] border-primary/10 shadow-2xl bg-[#e4e9f0] z-0 isolate">
                  <MapContainer center={MAP_CENTER} zoom={6} className="w-full h-full" zoomControl={false} attributionControl={false}>
@@ -376,7 +393,6 @@ const Home: React.FC = () => {
                  </MapContainer>
               </div>
 
-              {/* Thu hẹp chiều rộng cột danh sách cho giống chiếc điện thoại */}
               <div className="w-full lg:w-[400px] bg-[#F7F3E9] rounded-[2.5rem] lg:rounded-[3rem] flex flex-col overflow-hidden border-[6px] border-gold/20 shadow-2xl relative h-[450px] lg:h-auto">
                 <div className="p-8 bg-primary shrink-0 text-white text-center">
                   <h2 className="text-2xl font-black italic uppercase">CỘNG ĐỒNG <br/><span className="text-gold">VIỆT NAM</span></h2>
