@@ -29,7 +29,7 @@ const Library: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
-  const [bookmarks, setBookmarks] = useState<Set<string>>(new Set()); // TÍNH NĂNG BOOKMARK
+  const [bookmarks, setBookmarks] = useState<Set<string>>(new Set()); 
   const scrollRef = useRef<HTMLDivElement>(null);
   const ITEMS_PER_PAGE = 12;
 
@@ -79,7 +79,6 @@ const Library: React.FC = () => {
 
   const currentData = filteredData.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
 
-  // TÍNH NĂNG NEXT/PREV TRONG MODAL
   const currentIndex = selectedItem ? filteredData.findIndex(i => i.id === selectedItem.id) : -1;
   const handlePrev = () => { if (currentIndex > 0) setSelectedItem(filteredData[currentIndex - 1]); };
   const handleNext = () => { if (currentIndex < filteredData.length - 1) setSelectedItem(filteredData[currentIndex + 1]); };
@@ -90,10 +89,11 @@ const Library: React.FC = () => {
         <header className="mb-8 lg:mb-12 text-center">
           <h2 className="text-4xl lg:text-7xl font-black text-text-main italic mb-6">Tiếng Vọng <span className="text-gold">Tiền Nhân</span></h2>
           <div className="max-w-md mx-auto relative group z-20">
-            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-              <span className="material-symbols-outlined text-gold group-hover:text-primary transition-colors text-xl">search</span>
+            {/* Đã thêm z-10 và đổi màu thành Đỏ mận (#8B1A1A) */}
+            <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none z-10">
+              <span className="material-symbols-outlined text-[#8B1A1A] group-hover:scale-110 transition-transform text-xl">search</span>
             </div>
-            <input type="text" placeholder="Tìm kiếm di sản..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="w-full bg-white/80 backdrop-blur-sm border-2 border-gold/20 rounded-full py-3 pl-12 pr-6 text-text-main focus:outline-none focus:border-primary transition-colors shadow-lg text-sm block" />
+            <input type="text" placeholder="Tìm kiếm di sản..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="w-full bg-white backdrop-blur-sm border-2 border-gold/20 rounded-full py-3 pl-12 pr-6 text-text-main focus:outline-none focus:border-[#8B1A1A] transition-colors shadow-lg text-sm block" />
           </div>
         </header>
 
@@ -106,7 +106,7 @@ const Library: React.FC = () => {
             ))}
           </div>
           <div className="relative">
-            <select value={selectedEthnicFilter} onChange={(e) => setSelectedEthnicFilter(e.target.value)} className="w-full bg-white border-2 border-gold/20 rounded-xl px-4 py-3 text-sm font-bold text-text-main focus:outline-none focus:border-primary appearance-none shadow-sm">
+            <select value={selectedEthnicFilter} onChange={(e) => setSelectedEthnicFilter(e.target.value)} className="w-full bg-white bg-none border-2 border-gold/20 rounded-xl px-4 py-3 text-sm font-bold text-text-main focus:outline-none focus:border-primary appearance-none shadow-sm">
               {availableEthnics.map(ethnic => <option key={ethnic} value={ethnic}>{ethnic === 'ALL' ? 'Tất cả dân tộc' : `Dân tộc ${ethnic}`}</option>)}
             </select>
             <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none"><span className="material-symbols-outlined text-gold">expand_more</span></div>
@@ -142,7 +142,6 @@ const Library: React.FC = () => {
                 {currentData.map((item) => (
                   <div key={item.id} onClick={() => setSelectedItem(item)} className="group bg-white rounded-[2rem] overflow-hidden border border-gold/15 shadow-md hover:shadow-2xl hover:-translate-y-2 transition-all cursor-pointer flex flex-col h-[380px] relative">
                     
-                    {/* NÚT LƯU TRỮ TRÊN CARD */}
                     <button onClick={(e) => toggleBookmark(item.id, e)} className="absolute top-3 right-3 z-20 bg-white/50 backdrop-blur hover:bg-white p-2 rounded-full shadow-md transition-colors">
                       <span className={`material-symbols-outlined text-sm ${bookmarks.has(item.id) ? 'text-primary fill-1' : 'text-text-main'}`} style={{ fontVariationSettings: bookmarks.has(item.id) ? "'FILL' 1" : "'FILL' 0" }}>favorite</span>
                     </button>
@@ -169,7 +168,6 @@ const Library: React.FC = () => {
           <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
             <div className="absolute inset-0 bg-black/80 backdrop-blur-sm animate-fade-in" onClick={() => setSelectedItem(null)}></div>
             
-            {/* NÚT CHUYỂN PREV/NEXT TẠI MÀN HÌNH LỚN */}
             {currentIndex > 0 && <button onClick={handlePrev} className="hidden md:flex absolute left-4 z-20 w-12 h-12 bg-white/20 hover:bg-white text-white hover:text-primary rounded-full items-center justify-center transition-all backdrop-blur"><span className="material-symbols-outlined">arrow_back_ios_new</span></button>}
             {currentIndex < filteredData.length - 1 && <button onClick={handleNext} className="hidden md:flex absolute right-4 z-20 w-12 h-12 bg-white/20 hover:bg-white text-white hover:text-primary rounded-full items-center justify-center transition-all backdrop-blur"><span className="material-symbols-outlined">arrow_forward_ios</span></button>}
 
@@ -178,18 +176,21 @@ const Library: React.FC = () => {
                
                <div className="w-full md:w-[60%] h-1/2 md:h-auto relative bg-[#F2EFE6] border-b md:border-b-0 md:border-r border-gold/10 group">
                  <img src={selectedItem.image} alt={selectedItem.title} className="w-full h-full object-cover" />
-                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
-                 <div className="absolute bottom-6 left-6 md:bottom-8 md:left-8 text-white max-w-lg pr-4">
-                    <div className="inline-block px-4 py-1.5 bg-primary border border-white/20 text-white text-[10px] font-black uppercase tracking-widest rounded-full mb-3 shadow-lg">
+                 
+                 <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black/90 to-transparent"></div>
+                 
+                 <div className="absolute bottom-4 left-4 md:bottom-5 md:left-5 text-white max-w-lg pr-4">
+                    <div className="inline-block px-3 py-1 bg-primary border border-white/20 text-white text-[9px] md:text-[10px] font-black uppercase tracking-widest rounded-full mb-1.5 shadow-lg">
                       Dân tộc {selectedItem.ethnic}
                     </div>
-                    <h2 className="text-3xl md:text-5xl font-black italic leading-tight drop-shadow-lg">{selectedItem.title}</h2>
+                    <h2 className="text-2xl md:text-3xl font-black italic leading-tight drop-shadow-lg">{selectedItem.title}</h2>
                  </div>
                </div>
 
                <div className="w-full md:w-[40%] h-1/2 md:h-auto flex flex-col bg-white relative">
                   <div className="flex-1 overflow-y-auto custom-scrollbar p-6 md:p-8">
-                    <p className="font-bold text-lg md:text-xl italic text-primary mb-6 border-l-4 border-gold pl-4 py-1">"{selectedItem.desc}"</p>
+                    {/* ĐÃ FIX: Thêm thuộc tính pr-12 md:pr-14 (padding-right) để tạo vùng trống cho nút X */}
+                    <p className="font-bold text-lg md:text-xl italic text-primary mb-6 border-l-4 border-gold pl-4 py-1 pr-12 md:pr-14">"{selectedItem.desc}"</p>
                     <div className="prose text-sm text-text-main leading-loose font-medium text-justify">
                       {selectedItem.content.split('\n').map((p, i) => (
                         <p key={i} className="mb-4">{p}</p>
@@ -197,7 +198,6 @@ const Library: React.FC = () => {
                     </div>
                   </div>
                   
-                  {/* THANH ĐIỀU HƯỚNG PREV/NEXT CHO MOBILE */}
                   <div className="md:hidden flex justify-between p-4 border-t border-gold/10 bg-background-light">
                      <button disabled={currentIndex === 0} onClick={handlePrev} className="text-primary font-bold text-xs flex items-center disabled:opacity-30"><span className="material-symbols-outlined text-sm">chevron_left</span> Bài trước</button>
                      <button disabled={currentIndex === filteredData.length - 1} onClick={handleNext} className="text-primary font-bold text-xs flex items-center disabled:opacity-30">Bài sau <span className="material-symbols-outlined text-sm">chevron_right</span></button>

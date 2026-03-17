@@ -255,10 +255,16 @@ const Marketplace: React.FC = () => {
   return (
     <div className="min-h-screen font-display bg-background-light relative overflow-x-hidden">
       
-      <div className={`fixed top-24 right-5 z-[99999] bg-primary text-white px-6 py-4 rounded-xl shadow-2xl flex items-center gap-3 transition-all duration-300 ${toast.show ? 'translate-x-0 opacity-100' : 'translate-x-full opacity-0'}`}>
-        <span className="material-symbols-outlined font-black">check_circle</span>
-        <span className="text-sm font-bold">{toast.msg}</span>
-      </div>
+      {/* TOAST THÔNG BÁO BẤT TỬ (CĂN GIỮA TUYỆT ĐỐI BẰNG FLEXBOX) */}
+      {createPortal(
+        <div className={`fixed inset-x-0 top-12 md:top-24 z-[9999999] flex justify-center pointer-events-none transition-all duration-500 ${toast.show ? 'translate-y-0 opacity-100' : '-translate-y-32 opacity-0'}`}>
+          <div className="bg-[#8B1A1A] text-white px-5 py-3 md:px-8 md:py-4 rounded-full shadow-[0_10px_40px_rgba(139,26,26,0.4)] flex items-center gap-2 md:gap-3 max-w-[90vw] border border-white/10">
+            <span className="material-symbols-outlined font-black text-lg md:text-xl shrink-0">check_circle</span>
+            <span className="text-[11px] md:text-sm font-bold leading-tight line-clamp-1">{toast.msg}</span>
+          </div>
+        </div>,
+        document.body
+      )}
 
       {selectedProduct && <ProductModal product={selectedProduct} onClose={() => setSelectedProduct(null)} showToastMsg={showToastMsg} />}
       
@@ -281,9 +287,9 @@ const Marketplace: React.FC = () => {
         <div className="sticky top-20 md:top-24 z-40 mb-6 md:mb-10 space-y-4 md:space-y-6">
           <div className="flex flex-col md:flex-row gap-4 max-w-5xl mx-auto">
             <div className="relative group flex-1">
-              <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
-                <span className="material-symbols-outlined text-gold group-hover:text-[#8B5A2B] transition-colors text-xl md:text-2xl">search</span>
-              </div>
+              <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none z-10">
+              <span className="material-symbols-outlined text-[#8B1A1A] group-hover:scale-110 transition-transform text-xl">search</span>
+            </div>
               <input type="text" placeholder="Tìm kiếm sản phẩm..." value={searchTerm} onChange={(e) => { setSearchTerm(e.target.value); setCurrentPage(1); }} className="w-full bg-white/95 backdrop-blur border-2 border-gold/20 rounded-full py-3.5 pl-14 pr-6 text-text-main shadow-xl text-base md:text-lg font-medium focus:outline-none focus:border-gold transition-all" />
             </div>
             

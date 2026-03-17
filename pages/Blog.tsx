@@ -50,8 +50,8 @@ const Blog: React.FC = () => {
           
           {/* THANH TÌM KIẾM BÀI VIẾT */}
           <div className="max-w-xl mx-auto relative group">
-            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-              <span className="material-symbols-outlined text-gold group-hover:text-primary transition-colors">search</span>
+            <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none z-10">
+              <span className="material-symbols-outlined text-[#8B1A1A] group-hover:scale-110 transition-transform text-xl">search</span>
             </div>
             <input 
               type="text" 
