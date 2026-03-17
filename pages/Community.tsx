@@ -312,9 +312,50 @@ const PostCard = React.memo(({ post, currentUser, isAdmin, onDelete }: { post: P
      setNewComment('');
   };
 
-  const handleShare = () => {
-    navigator.clipboard.writeText(window.location.href);
-    alert("Đã sao chép liên kết bài viết. Hãy gửi cho bạn bè nhé!");
+  const handleShare = async () => {
+    // Link muốn chia sẻ (Sau này có thể đổi thành link bài viết cụ thể nếu có)
+    const urlToShare = window.location.href; 
+    
+    // Dữ liệu sẽ hiển thị khi share qua FB, Zalo...
+    const shareData = {
+      title: 'Sắc Việt - Mạng Xã Hội Di Sản',
+      text: `Đọc bài viết của ${post.author} trên Sắc Việt: "${post.content.substring(0, 60)}..."`,
+      url: urlToShare,
+    };
+
+    // 1. Nếu trình duyệt/điện thoại hỗ trợ chia sẻ gốc (Native Share)
+    if (navigator.share) {
+      try {
+        await navigator.share(shareData);
+      } catch (err) {
+        console.log('Hủy chia sẻ');
+      }
+    } 
+    // 2. Nếu máy tính không hỗ trợ Native Share -> Quay về chế độ Copy Link
+    else {
+      if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(urlToShare)
+          .then(() => alert("Đã sao chép liên kết! Bạn có thể dán lên Facebook, Zalo..."))
+          .catch(() => alert("Không thể sao chép. Vui lòng thử lại!"));
+      } else {
+        // Fallback cho HTTP Localhost
+        const textArea = document.createElement("textarea");
+        textArea.value = urlToShare;
+        textArea.style.position = "fixed";
+        textArea.style.left = "-999999px";
+        textArea.style.top = "-999999px";
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        try {
+          document.execCommand('copy');
+          alert("Đã sao chép liên kết! Bạn có thể dán lên Facebook, Zalo...");
+        } catch (err) {
+          alert("Trình duyệt không hỗ trợ tự động sao chép.");
+        }
+        textArea.remove();
+      }
+    }
   };
 
   return (
