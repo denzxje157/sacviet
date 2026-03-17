@@ -33,7 +33,6 @@ interface FestivalDisplay { id: string; name: string; solarDate: string; lunarDa
 
 const MOCK_CURRENT_USER = { name: "Khách thăm", avatar: "K" };
 
-// --- BÀI VIẾT MẪU (DU LỊCH VĂN HÓA) CÓ SẴN BÌNH LUẬN ---
 const INITIAL_POSTS: Post[] = [
   { id: 'm1', author: 'Hoàng Anh', avatar: 'H', time: '1 giờ trước', timestamp: Date.now() - 3600000, location: 'Mèo Vạc, Hà Giang', content: 'Lần đầu tiên được tham gia chợ tình Khau Vai của đồng bào H\'Mông. Sắc màu thổ cẩm rực rỡ khắp núi rừng, tiếng khèn gọi bạn tình vang vọng nghe xao xuyến thực sự! Khuyên thật lòng mọi người nên đến đây một lần trong đời nhé.', image: 'https://images.unsplash.com/photo-1559592413-7cea4ee8e8cb?q=80&w=1000&auto=format&fit=crop', likes: 124, commentsCount: 1, tags: ['HaGiang', 'HMong'], localComments: [{ id: 'c1', user: 'Lê Vy', avatar: 'L', text: 'Đẹp quá, cho mình xin kinh nghiệm di chuyển với!', time: '30 phút trước' }] },
   { id: 'm2', author: 'Nguyễn Khoa', avatar: 'N', time: '3 giờ trước', timestamp: Date.now() - 10800000, location: 'Buôn Ma Thuột, Đắk Lắk', content: 'Đêm nay say men rượu cần cùng các già làng người Ê Đê. Ngồi quanh bếp lửa nhà dài, nghe kể sử thi Đam San và thưởng thức tiếng cồng chiêng Tây Nguyên. Cảm giác thiêng liêng vô cùng 🌿🔥', image: 'https://images.unsplash.com/photo-1528127269322-539801943592?q=80&w=1000&auto=format&fit=crop', likes: 312, commentsCount: 2, tags: ['TayNguyen', 'EDe'], localComments: [{ id: 'c2', user: 'Minh Tuấn', avatar: 'M', text: 'Rượu cần Ê Đê ngon số dách!', time: '1 giờ trước' }, { id: 'c3', user: 'Hoàng Anh', avatar: 'H', text: 'Nhớ thử món gà nướng sa lửa nha bạn ơi.', time: '45 phút trước' }] },
@@ -119,7 +118,6 @@ const FestivalWidget = () => {
          setEvents(JSON.parse(cached)); setLoading(false); return;
       }
 
-      // FIX LỖI 429: NẾU BỊ CHẶN TRƯỚC ĐÓ THÌ DỪNG LẠI, KHÔNG GỌI API NỮA ĐỂ CHỐNG LỖI CONSOLE
       if (localStorage.getItem('gemini_429_blocked')) {
          throw new Error("API Limit Blocked");
       }
@@ -131,7 +129,6 @@ const FestivalWidget = () => {
         body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }], generationConfig: { temperature: 0.7, responseMimeType: "application/json" } })
       });
 
-      // NẾU GOOGLE TRẢ VỀ 429, KHÓA LUÔN VIỆC GỌI API BẰNG BIẾN LOCALSTORAGE
       if (res.status === 429) {
         localStorage.setItem('gemini_429_blocked', 'true');
         throw new Error("Quota Exceeded");
@@ -161,7 +158,6 @@ const FestivalWidget = () => {
            <h3 className="font-black text-text-main text-sm uppercase tracking-widest flex items-center gap-2"><span className="material-symbols-outlined text-primary">event_upcoming</span>Mùa Lễ Hội</h3>
            <div className="flex items-center gap-2">
                <button onClick={() => setShowCalendar(true)} className="text-[10px] md:text-xs text-primary font-bold hover:bg-background-light px-2 py-1 rounded-lg border border-gold/20 shadow-sm transition-all active:scale-95 flex items-center gap-1">Xem lịch <span className="material-symbols-outlined text-[12px] md:text-[14px]">calendar_month</span></button>
-               {/* RESET NẾU BẤM ĐỒNG BỘ */}
                <button onClick={() => { localStorage.removeItem('sacviet_festivals_time'); localStorage.removeItem('gemini_429_blocked'); fetchFestivals(); }} className="text-primary hover:rotate-180 transition-transform p-1"><span className="material-symbols-outlined text-sm md:text-base">sync</span></button>
            </div>
         </div>
@@ -201,7 +197,6 @@ const QuizWidget = () => {
          setQuestions(JSON.parse(cached)); setGenerating(false); return;
       }
       
-      // FIX LỖI 429: CHẶN GỌI LẠI NẾU ĐÃ BỊ GOOGLE CHẶN
       if (localStorage.getItem('gemini_429_blocked')) {
          throw new Error("API Limit Blocked");
       }
@@ -270,8 +265,10 @@ const QuizWidget = () => {
   );
 };
 
+// --- GIAO DIỆN ĐĂNG BÀI MỚI (HỖ TRỢ UPLOAD VÀ LINK) ---
 const PostComposer = ({ onPost, currentUser }: { onPost: (content: string, image?: string) => void, currentUser: any }) => {
-  const [content, setContent] = useState(''); const [img, setImg] = useState('');
+  const [content, setContent] = useState(''); 
+  const [img, setImg] = useState('');
   const [isPosting, setIsPosting] = useState(false);
   
   const submit = async () => { 
@@ -281,16 +278,59 @@ const PostComposer = ({ onPost, currentUser }: { onPost: (content: string, image
     setContent(''); setImg(''); setIsPosting(false);
   };
 
+  // Hàm xử lý upload ảnh từ máy tính / điện thoại
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Giới hạn dung lượng 3MB để tránh lag
+    if (file.size > 3 * 1024 * 1024) {
+      alert("Vui lòng chọn ảnh có dung lượng dưới 3MB để đảm bảo tốc độ tải trang!");
+      return;
+    }
+
+    // Đọc file thành chuỗi Base64
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setImg(reader.result as string);
+    };
+    reader.readAsDataURL(file);
+  };
+
   return (
     <div className="bg-white border-2 border-gold/10 rounded-2xl md:rounded-[2rem] p-5 shadow-xl w-full">
       <div className="flex gap-3">
          <div className="size-10 rounded-full bg-primary flex items-center justify-center text-white shrink-0 font-black">{currentUser.avatar}</div>
          <div className="flex-1">
            <textarea value={content} onChange={e => setContent(e.target.value)} className="w-full bg-background-light rounded-xl p-3 text-sm font-medium outline-none resize-none min-h-[80px]" placeholder={`Chuyến đi của bạn thế nào, ${currentUser.name}?`} disabled={isPosting}></textarea>
-           {img && <div className="relative mt-2 h-32 bg-black/5 rounded-xl overflow-hidden"><img src={img} className="h-full w-full object-cover"/><button onClick={()=>setImg('')} className="absolute top-2 right-2 text-white bg-black/50 p-1 rounded-full"><span className="material-symbols-outlined text-xs">close</span></button></div>}
-           <div className="flex justify-between mt-2 items-center">
-              <button onClick={() => { const url = prompt("Nhập URL ảnh (Nếu có):"); if(url) setImg(url); }} className="p-1 text-gold hover:bg-gold/10 rounded-lg transition-colors"><span className="material-symbols-outlined">image</span></button>
-              <button onClick={submit} disabled={(!content && !img) || isPosting} className="bg-primary px-6 py-2.5 rounded-xl text-white font-black text-[10px] uppercase tracking-widest disabled:opacity-50 active:scale-95 transition-transform">{isPosting ? 'Đang tải...' : 'Đăng bài'}</button>
+           
+           {/* Khu vực hiển thị ảnh xem trước */}
+           {img && (
+             <div className="relative mt-2 h-32 bg-black/5 rounded-xl overflow-hidden border border-gold/20">
+               <img src={img} className="h-full w-full object-cover"/>
+               <button onClick={()=>setImg('')} className="absolute top-2 right-2 text-white bg-black/50 hover:bg-red-600 transition-colors p-1 rounded-full shadow-md">
+                 <span className="material-symbols-outlined text-xs">close</span>
+               </button>
+             </div>
+           )}
+
+           <div className="flex justify-between mt-3 items-center">
+              <div className="flex items-center gap-1 md:gap-3">
+                {/* 1. NÚT UPLOAD TỪ THIẾT BỊ */}
+                <input type="file" id="post-image-upload" accept="image/*" className="hidden" onChange={handleImageUpload} />
+                <label htmlFor="post-image-upload" className="cursor-pointer flex items-center gap-1.5 p-1.5 md:px-3 md:py-2 text-gold hover:bg-gold/10 rounded-lg transition-colors text-[11px] md:text-xs font-bold border border-transparent hover:border-gold/20" title="Tải ảnh từ máy">
+                  <span className="material-symbols-outlined text-[18px]">add_photo_alternate</span>
+                  <span className="hidden sm:inline">Tải ảnh lên</span>
+                </label>
+
+                {/* 2. NÚT NHẬP LINK ẢNH */}
+                <button onClick={() => { const url = prompt("Nhập URL ảnh (Nếu có):"); if(url) setImg(url); }} className="flex items-center gap-1.5 p-1.5 md:px-3 md:py-2 text-gold hover:bg-gold/10 rounded-lg transition-colors text-[11px] md:text-xs font-bold border border-transparent hover:border-gold/20" title="Nhập link ảnh">
+                  <span className="material-symbols-outlined text-[18px]">link</span>
+                  <span className="hidden sm:inline">Dán Link</span>
+                </button>
+              </div>
+
+              <button onClick={submit} disabled={(!content && !img) || isPosting} className="bg-primary px-6 py-2.5 rounded-xl text-white font-black text-[10px] uppercase tracking-widest disabled:opacity-50 active:scale-95 transition-transform shadow-md">{isPosting ? 'Đang tải...' : 'Đăng bài'}</button>
            </div>
          </div>
       </div>
@@ -304,6 +344,8 @@ const PostCard = React.memo(({ post, currentUser, isAdmin, onDelete }: { post: P
   const [showComments, setShowComments] = useState(false); 
   const [commentsList, setCommentsList] = useState<CommentDef[]>(post.localComments || []);
   const [newComment, setNewComment] = useState('');
+  
+  const [showShareOptions, setShowShareOptions] = useState(false);
 
   const sendComment = () => {
      if(!newComment.trim()) return;
@@ -312,54 +354,23 @@ const PostCard = React.memo(({ post, currentUser, isAdmin, onDelete }: { post: P
      setNewComment('');
   };
 
-  const handleShare = async () => {
-    // Link muốn chia sẻ (Sau này có thể đổi thành link bài viết cụ thể nếu có)
-    const urlToShare = window.location.href; 
-    
-    // Dữ liệu sẽ hiển thị khi share qua FB, Zalo...
-    const shareData = {
-      title: 'Sắc Việt - Mạng Xã Hội Di Sản',
-      text: `Đọc bài viết của ${post.author} trên Sắc Việt: "${post.content.substring(0, 60)}..."`,
-      url: urlToShare,
-    };
-
-    // 1. Nếu trình duyệt/điện thoại hỗ trợ chia sẻ gốc (Native Share)
-    if (navigator.share) {
-      try {
-        await navigator.share(shareData);
-      } catch (err) {
-        console.log('Hủy chia sẻ');
-      }
-    } 
-    // 2. Nếu máy tính không hỗ trợ Native Share -> Quay về chế độ Copy Link
-    else {
-      if (navigator.clipboard && window.isSecureContext) {
-        navigator.clipboard.writeText(urlToShare)
-          .then(() => alert("Đã sao chép liên kết! Bạn có thể dán lên Facebook, Zalo..."))
-          .catch(() => alert("Không thể sao chép. Vui lòng thử lại!"));
-      } else {
-        // Fallback cho HTTP Localhost
-        const textArea = document.createElement("textarea");
-        textArea.value = urlToShare;
-        textArea.style.position = "fixed";
-        textArea.style.left = "-999999px";
-        textArea.style.top = "-999999px";
-        document.body.appendChild(textArea);
-        textArea.focus();
-        textArea.select();
-        try {
-          document.execCommand('copy');
-          alert("Đã sao chép liên kết! Bạn có thể dán lên Facebook, Zalo...");
-        } catch (err) {
-          alert("Trình duyệt không hỗ trợ tự động sao chép.");
-        }
-        textArea.remove();
-      }
-    }
+  const copyToClipboard = () => {
+    const urlToShare = window.location.href;
+    const textArea = document.createElement("textarea");
+    textArea.value = urlToShare;
+    textArea.style.position = "fixed"; textArea.style.left = "-999999px";
+    document.body.appendChild(textArea);
+    textArea.select();
+    try {
+      document.execCommand('copy');
+      alert("Đã sao chép liên kết thành công!");
+    } catch (err) { }
+    textArea.remove();
+    setShowShareOptions(false); 
   };
 
   return (
-    <article className="break-inside-avoid mb-6 bg-white border border-gold/15 rounded-2xl md:rounded-[2rem] overflow-hidden shadow-md w-full animate-slide-up group hover:shadow-xl transition-all">
+    <article className="break-inside-avoid mb-6 bg-white border border-gold/15 rounded-2xl md:rounded-[2rem] overflow-hidden shadow-md w-full animate-slide-up group hover:shadow-xl transition-all relative">
        <div className="p-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="size-10 rounded-full bg-gold-light border border-gold/20 flex items-center justify-center font-black text-text-main shadow-sm">{post.avatar}</div>
@@ -372,6 +383,7 @@ const PostCard = React.memo(({ post, currentUser, isAdmin, onDelete }: { post: P
           </div>
           {isAdmin && !post.id.startsWith('m') && <button onClick={() => onDelete(post.id)} className="text-red-400 hover:text-red-600 transition-colors p-1"><span className="material-symbols-outlined">delete</span></button>}
        </div>
+       
        <div className="px-4 pb-4">
          <p className="text-sm font-medium whitespace-pre-wrap leading-relaxed text-text-main">{post.content}</p>
          {post.tags && post.tags.length > 0 && (
@@ -380,6 +392,7 @@ const PostCard = React.memo(({ post, currentUser, isAdmin, onDelete }: { post: P
            </div>
          )}
        </div>
+       
        {post.image && <div className="w-full bg-black/5 relative"><img src={post.image} className="w-full max-h-[400px] object-cover transition-transform duration-[2s] group-hover:scale-[1.02]" loading="lazy" /></div>}
        
        <div className="p-3 flex items-center gap-6 border-t border-gold/5 bg-background-light/30">
@@ -391,10 +404,34 @@ const PostCard = React.memo(({ post, currentUser, isAdmin, onDelete }: { post: P
             <span className={`material-symbols-outlined text-lg ${showComments ? 'fill-1' : ''}`}>chat_bubble</span> {commentsList.length}
          </button>
          
-         <button onClick={handleShare} className="flex items-center gap-1.5 text-text-soft font-black text-xs ml-auto hover:text-primary transition-colors active:scale-95">
+         <button onClick={() => setShowShareOptions(!showShareOptions)} className={`flex items-center gap-1.5 font-black text-xs ml-auto transition-colors active:scale-95 ${showShareOptions ? 'text-primary' : 'text-text-soft hover:text-primary'}`}>
             <span className="material-symbols-outlined text-lg">share</span>
          </button>
        </div>
+
+       {showShareOptions && (
+         <div className="p-4 bg-[#FDFBF7] border-t border-gold/10 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 animate-fade-in">
+            <span className="text-xs md:text-sm font-black text-[#4A2511] uppercase tracking-widest">
+              Chia sẻ bài viết này:
+            </span>
+            <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
+              <a 
+                href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}`} 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="flex-1 md:flex-none bg-[#1877F2] text-white px-5 py-2.5 rounded-xl font-black text-xs uppercase flex items-center justify-center gap-2 hover:bg-[#166FE5] transition-colors shadow-sm"
+              >
+                <span className="material-symbols-outlined text-base">public</span> Facebook
+              </a>
+              <button 
+                onClick={copyToClipboard} 
+                className="flex-1 md:flex-none bg-white border-2 border-[#4A2511]/20 text-[#4A2511] px-5 py-2.5 rounded-xl font-black text-xs uppercase flex items-center justify-center gap-2 hover:bg-gold/10 transition-colors shadow-sm active:scale-95"
+              >
+                <span className="material-symbols-outlined text-base">link</span> Copy Link
+              </button>
+            </div>
+         </div>
+       )}
 
        {showComments && (
          <div className="p-4 bg-background-light border-t border-gold/10 animate-fade-in">
