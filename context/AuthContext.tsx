@@ -58,7 +58,13 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
     if (isSupabaseConfigured) {
       const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-        if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED' || event === 'USER_UPDATED') {
+        
+        // BẮT SỰ KIỆN KHÁCH BẤM LINK QUÊN MẬT KHẨU TỪ EMAIL
+        if (event === 'PASSWORD_RECOVERY') {
+           // Bắt buộc đẩy thẳng về trang Đổi mật khẩu
+           window.location.href = '/#/reset-password';
+        } 
+        else if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED' || event === 'USER_UPDATED') {
            if (session?.user) {
                setUser({
                    id: session.user.id,

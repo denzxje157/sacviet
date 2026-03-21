@@ -184,7 +184,19 @@ const CartDrawer: React.FC = () => {
                <p className="text-[10px] text-gold-light font-bold mt-1 opacity-90">Di sản trong tay bạn</p>
             </div>
           </div>
-          <button onClick={toggleCart} className="bg-white/10 hover:bg-white/20 p-2 rounded-full transition-colors flex items-center text-white"><span className="material-symbols-outlined">close</span></button>
+          <button 
+            onClick={() => {
+              // Sửa lại đoạn này để reset giỏ hàng nếu tắt
+              if (step === 'success') {
+                clearCart();
+                setStep('cart');
+              }
+              toggleCart();
+            }} 
+            className="bg-white/10 hover:bg-white/20 p-2 rounded-full transition-colors flex items-center text-white"
+          >
+            <span className="material-symbols-outlined">close</span>
+          </button>
         </div>
 
         {/* Body Content */}
@@ -337,9 +349,23 @@ const CartDrawer: React.FC = () => {
                         <p className="text-xl font-black text-primary tracking-widest">{orderId}</p>
                       </div>
                       <p className="text-text-soft mb-6 text-sm">Cảm ơn bạn. Thông tin hóa đơn sẽ sớm được gửi qua Email.</p>
-                      <p className="text-xs font-bold text-primary animate-pulse flex items-center gap-2">
+                      
+                      <p className="text-xs font-bold text-primary animate-pulse flex items-center gap-2 mb-6">
                         Đang chuyển hướng Zalo <span className="material-symbols-outlined text-sm">open_in_new</span>
                       </p>
+
+                      {/* NÚT THOÁT VÀ TIẾP TỤC MUA SẮM MỚI THÊM */}
+                      <button 
+                        onClick={() => {
+                          clearCart();
+                          setStep('cart');
+                          toggleCart();
+                        }}
+                        className="w-full bg-white border-2 border-primary text-primary py-3 rounded-xl font-black uppercase tracking-widest hover:bg-primary/5 transition-all active:scale-95 flex items-center justify-center gap-2"
+                      >
+                        <span className="material-symbols-outlined text-lg">shopping_bag</span>
+                        Tiếp tục mua sắm
+                      </button>
                    </div>
                 )}
              </div>

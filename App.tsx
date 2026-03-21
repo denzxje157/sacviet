@@ -21,6 +21,7 @@ import OrderManagement from './pages/admin/OrderManagement.tsx';
 import UserManagement from './pages/admin/UserManagement.tsx';
 import ContentManagement from './pages/admin/ContentManagement.tsx';
 import SeoManagement from './pages/admin/SeoManagement.tsx'; // THÊM DÒNG NÀY
+import ResetPassword from './pages/ResetPassword.tsx';
 
 const ScrollToTop = () => {
   const { pathname } = useLocation();
@@ -50,7 +51,7 @@ const App: React.FC = () => {
             <Route path="/admin/users" element={<UserManagement />} />
             <Route path="/admin/content" element={<ContentManagement />} />
             <Route path="/admin/seo" element={<SeoManagement />} /> {/* THÊM DÒNG NÀY */}
-
+            <Route path="/reset-password" element={<ResetPassword />} />
             {/* Public Routes */}
             <Route path="*" element={
               <div className="flex flex-col min-h-screen">

@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext.tsx';
 import { X, Mail, Lock, User, ArrowRight, CheckCircle2, AlertCircle, Eye, EyeOff } from 'lucide-react';
+import { supabase } from '../services/supabaseClient.ts'; // Đã thêm dòng này
 
-type AuthMode = 'login' | 'register';
+type AuthMode = 'login' | 'register' | 'forgot'; // Đã thêm 'forgot'
 
 const AuthModal: React.FC = () => {
   const { isAuthModalOpen, toggleAuthModal, login, register } = useAuth();
@@ -26,7 +27,6 @@ const AuthModal: React.FC = () => {
     setErrors({});
     setSuccessMessage('');
     if (!isAuthModalOpen) {
-      // Only clear if not remembering
       const savedEmail = localStorage.getItem('sacnoi_remember_email');
       const savedPass = localStorage.getItem('sacnoi_remember_pass');
       
@@ -39,7 +39,6 @@ const AuthModal: React.FC = () => {
       setMode('login');
       setShowPassword(false);
     } else {
-       // Check for saved credentials
        const savedEmail = localStorage.getItem('sacnoi_remember_email');
        const savedPass = localStorage.getItem('sacnoi_remember_pass');
        if (savedEmail) {
@@ -56,29 +55,26 @@ const AuthModal: React.FC = () => {
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
-    
-    // Email validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    
     if (!email) {
       newErrors.email = 'Vui lòng nhập email';
     } else if (!emailRegex.test(email)) {
       newErrors.email = 'Email không hợp lệ';
     }
 
-    // Password validation
-    if (!password) {
-      newErrors.password = 'Vui lòng nhập mật khẩu';
-    } else if (password.length < 6) {
-      newErrors.password = 'Mật khẩu phải có ít nhất 6 ký tự';
+    if (mode !== 'forgot') {
+      if (!password) {
+        newErrors.password = 'Vui lòng nhập mật khẩu';
+      } else if (password.length < 6) {
+        newErrors.password = 'Mật khẩu phải có ít nhất 6 ký tự';
+      }
     }
 
     if (mode === 'register') {
-      // Full name validation
       if (!fullName.trim()) {
         newErrors.fullName = 'Vui lòng nhập họ và tên';
       }
-      
-      // Confirm password validation
       if (password !== confirmPassword) {
         newErrors.confirmPassword = 'Mật khẩu xác nhận không khớp';
       }
@@ -88,9 +84,33 @@ const AuthModal: React.FC = () => {
     return Object.keys(newErrors).length === 0;
   };
 
+  // HÀM QUÊN MẬT KHẨU
+  const handleForgotPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!validateForm()) return;
+    
+    setIsLoading(true);
+    setErrors({});
+    
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/#/reset-password`,
+      });
+      if (error) throw error;
+      setSuccessMessage('Đã gửi link khôi phục! Vui lòng kiểm tra Email.');
+      setTimeout(() => {
+        setMode('login');
+        setSuccessMessage('');
+      }, 3000);
+    } catch (err: any) {
+      setErrors({ form: 'Lỗi: Không thể gửi email khôi phục. Vui lòng thử lại.' });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
     if (!validateForm()) return;
     
     setIsLoading(true);
@@ -99,29 +119,24 @@ const AuthModal: React.FC = () => {
     try {
       if (mode === 'login') {
         await login(email, password);
-        
-        // Handle Remember Me
         if (rememberMe) {
            localStorage.setItem('sacnoi_remember_email', email);
-           localStorage.setItem('sacnoi_remember_pass', password); // Note: In real app, never store plain password
+           localStorage.setItem('sacnoi_remember_pass', password);
         } else {
            localStorage.removeItem('sacnoi_remember_email');
            localStorage.removeItem('sacnoi_remember_pass');
         }
-
         setSuccessMessage('Đăng nhập thành công!');
       } else {
         await register(fullName, email, password);
         setSuccessMessage('Đăng ký thành công! Đang đăng nhập...');
       }
       
-      // Đóng modal sau khi thành công
       setTimeout(() => {
         toggleAuthModal();
       }, 1500);
       
     } catch (err: any) {
-      // Xử lý lỗi từ backend một cách an toàn (không tiết lộ thông tin nhạy cảm)
       setErrors({ form: err.message || 'Đã có lỗi xảy ra. Vui lòng thử lại.' });
     } finally {
       setIsLoading(false);
@@ -130,16 +145,13 @@ const AuthModal: React.FC = () => {
 
   return (
     <div className="fixed inset-0 z-[300] flex items-center justify-center p-4 sm:p-6 font-display">
-      {/* Overlay */}
       <div 
         className="absolute inset-0 bg-text-main/70 backdrop-blur-sm animate-fade-in" 
         onClick={toggleAuthModal}
       ></div>
       
-      {/* Modal Container */}
       <div className="relative w-full max-w-md bg-[#F9F5EA] rounded-[2rem] shadow-2xl overflow-hidden animate-scale-up border-2 border-gold/20 flex flex-col max-h-[90vh]">
         
-        {/* Header */}
         <div className="relative p-6 pb-4 text-center shrink-0">
           <button 
             onClick={toggleAuthModal}
@@ -148,14 +160,13 @@ const AuthModal: React.FC = () => {
             <X size={20} />
           </button>
           <h2 className="text-4xl md:text-5xl font-sans font-black text-primary uppercase mb-2 drop-shadow-sm tracking-tighter">
-            {mode === 'login' ? 'Đăng Nhập' : 'Đăng Ký'}
+            {mode === 'login' ? 'Đăng Nhập' : mode === 'register' ? 'Đăng Ký' : 'Khôi Phục'}
           </h2>
           <p className="text-xs font-bold text-bronze uppercase tracking-widest">
-            {mode === 'login' ? 'Chào mừng trở lại Sắc Việt' : 'Tham gia cùng Sắc Việt'}
+            {mode === 'login' ? 'Chào mừng trở lại Sắc Việt' : mode === 'register' ? 'Tham gia cùng Sắc Việt' : 'Lấy lại mật khẩu'}
           </p>
         </div>
 
-        {/* Form Content */}
         <div className="p-6 pt-2 overflow-y-auto custom-scrollbar flex-1">
           
           {successMessage ? (
@@ -165,6 +176,52 @@ const AuthModal: React.FC = () => {
               </div>
               <p className="text-lg font-black text-text-main">{successMessage}</p>
             </div>
+          ) : mode === 'forgot' ? (
+            <form onSubmit={handleForgotPassword} className="space-y-4">
+              {errors.form && (
+                <div className="p-3 bg-red-50 border border-red-200 rounded-xl flex items-start gap-2 text-red-600 text-sm animate-shake">
+                  <AlertCircle size={18} className="shrink-0 mt-0.5" />
+                  <p className="font-medium">{errors.form}</p>
+                </div>
+              )}
+              <p className="text-sm text-text-soft font-medium mb-4 text-center">
+                Nhập email của bạn, chúng tôi sẽ gửi đường dẫn để đặt lại mật khẩu.
+              </p>
+              <div>
+                <label className="block text-[10px] font-black uppercase text-bronze mb-1 ml-2">Email</label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-text-soft/50">
+                    <Mail size={18} />
+                  </div>
+                  <input 
+                    type="email" 
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className={`w-full bg-white border ${errors.email ? 'border-red-400 focus:ring-red-400' : 'border-gold/20 focus:border-primary focus:ring-primary'} rounded-xl pl-11 pr-4 py-3 text-sm font-medium focus:outline-none focus:ring-1 transition-colors`}
+                    placeholder="email@example.com"
+                  />
+                </div>
+                {errors.email && <p className="text-red-500 text-[10px] font-bold mt-1 ml-2">{errors.email}</p>}
+              </div>
+              <button 
+                type="submit" 
+                disabled={isLoading}
+                className="w-full bg-primary text-white py-4 rounded-2xl font-black uppercase tracking-widest hover:brightness-110 shadow-xl shadow-primary/20 transition-all active:scale-95 flex items-center justify-center gap-2 mt-6 disabled:opacity-70 disabled:cursor-not-allowed"
+              >
+                {isLoading ? (
+                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                ) : (
+                  <>Gửi link khôi phục <ArrowRight size={18} /></>
+                )}
+              </button>
+              <button 
+                type="button" 
+                onClick={() => { setMode('login'); setErrors({}); }} 
+                className="w-full text-text-soft text-xs font-bold uppercase mt-4 hover:text-primary transition-colors text-center"
+              >
+                Quay lại Đăng nhập
+              </button>
+            </form>
           ) : (
             <form onSubmit={handleSubmit} className="space-y-4">
               
@@ -175,7 +232,6 @@ const AuthModal: React.FC = () => {
                 </div>
               )}
 
-              {/* Full Name Field (Register Only) */}
               <div className={`transition-all duration-300 overflow-hidden ${mode === 'register' ? 'max-h-24 opacity-100' : 'max-h-0 opacity-0'}`}>
                 <label className="block text-[10px] font-black uppercase text-bronze mb-1 ml-2">Họ và tên</label>
                 <div className="relative">
@@ -193,7 +249,6 @@ const AuthModal: React.FC = () => {
                 {errors.fullName && <p className="text-red-500 text-[10px] font-bold mt-1 ml-2">{errors.fullName}</p>}
               </div>
 
-              {/* Email Field */}
               <div>
                 <label className="block text-[10px] font-black uppercase text-bronze mb-1 ml-2">Email</label>
                 <div className="relative">
@@ -211,12 +266,15 @@ const AuthModal: React.FC = () => {
                 {errors.email && <p className="text-red-500 text-[10px] font-bold mt-1 ml-2">{errors.email}</p>}
               </div>
 
-              {/* Password Field */}
               <div>
                 <div className="flex justify-between items-end mb-1 ml-2 mr-2">
                   <label className="block text-[10px] font-black uppercase text-bronze">Mật khẩu</label>
                   {mode === 'login' && (
-                    <button type="button" className="text-[10px] font-bold text-primary hover:underline">
+                    <button 
+                      type="button" 
+                      onClick={() => { setMode('forgot'); setErrors({}); }}
+                      className="text-[10px] font-bold text-primary hover:underline"
+                    >
                       Quên mật khẩu?
                     </button>
                   )}
@@ -243,7 +301,6 @@ const AuthModal: React.FC = () => {
                 {errors.password && <p className="text-red-500 text-[10px] font-bold mt-1 ml-2">{errors.password}</p>}
               </div>
 
-              {/* Confirm Password Field (Register Only) */}
               <div className={`transition-all duration-300 overflow-hidden ${mode === 'register' ? 'max-h-24 opacity-100' : 'max-h-0 opacity-0'}`}>
                 <label className="block text-[10px] font-black uppercase text-bronze mb-1 ml-2">Xác nhận mật khẩu</label>
                 <div className="relative">
@@ -261,7 +318,6 @@ const AuthModal: React.FC = () => {
                 {errors.confirmPassword && <p className="text-red-500 text-[10px] font-bold mt-1 ml-2">{errors.confirmPassword}</p>}
               </div>
 
-              {/* Remember Me Checkbox (Login Only) */}
               {mode === 'login' && (
                 <div className="flex items-center gap-2 ml-1">
                    <input 
@@ -275,7 +331,6 @@ const AuthModal: React.FC = () => {
                 </div>
               )}
 
-              {/* Submit Button */}
               <button 
                 type="submit" 
                 disabled={isLoading}
@@ -294,8 +349,7 @@ const AuthModal: React.FC = () => {
           )}
         </div>
 
-        {/* Footer Toggle */}
-        {!successMessage && (
+        {!successMessage && mode !== 'forgot' && (
           <div className="p-6 pt-4 bg-white border-t border-gold/10 text-center shrink-0">
             <p className="text-sm text-text-soft font-medium">
               {mode === 'login' ? 'Chưa có tài khoản?' : 'Đã có tài khoản?'}
