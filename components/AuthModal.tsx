@@ -94,7 +94,8 @@ const AuthModal: React.FC = () => {
     
     try {
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/#/reset-password`,
+        // Đã khóa cứng link xịn của Vercel
+        redirectTo: 'https://sacviet.vercel.app/#/reset-password',
       });
       if (error) throw error;
       setSuccessMessage('Đã gửi link khôi phục! Vui lòng kiểm tra Email.');
