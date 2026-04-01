@@ -385,7 +385,7 @@ const Home: React.FC = () => {
               </div>
 
               {/* DANH SÁCH BÊN DƯỚI */}
-              <div className="w-full lg:w-[400px] shrink-0 bg-white rounded-[2.5rem] lg:rounded-[3rem] flex flex-col overflow-hidden border-[4px] border-gold/20 shadow-2xl relative h-[450px] lg:h-auto">
+              <div className="w-full lg:w-[400px] shrink-0 bg-white rounded-[2.5rem] lg:rounded-[3rem] flex flex-col overflow-hidden border-[4px] border-gold/20 shadow-2xl relative h-[450px] lg:h-auto isolate">
                 <div className="p-6 md:p-8 bg-[#8B1A1A] shrink-0 text-white text-center">
                   <h2 className="text-xl md:text-2xl font-black italic uppercase">CỘNG ĐỒNG <br/><span className="text-gold">VIỆT NAM</span></h2>
                 </div>
@@ -403,7 +403,7 @@ const Home: React.FC = () => {
                 </div>
 
                 {selectedEthnic && (
-                  <div className="absolute inset-0 z-[100] bg-[#FDFBF7] p-6 animate-slide-up-slow flex flex-col overflow-y-auto custom-scrollbar">
+                  <div className="absolute inset-0 z-10 bg-[#FDFBF7] p-6 animate-slide-up-slow flex flex-col overflow-y-auto custom-scrollbar">
                      <button onClick={() => setSelectedEthnic(null)} className="self-end size-10 rounded-full border-2 border-[#8B1A1A]/30 flex items-center justify-center bg-white shadow-xl hover:bg-[#8B1A1A] hover:text-white transition-all"><span className="material-symbols-outlined text-xl">close</span></button>
                      <div className="mt-4 space-y-5 text-left">
                         <div className="rounded-[2rem] overflow-hidden aspect-[4/3] border-[4px] border-white shadow-xl">
