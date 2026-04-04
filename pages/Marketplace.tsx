@@ -196,14 +196,34 @@ const Marketplace: React.FC = () => {
     setTimeout(() => setToast({ show: false, msg: '' }), 3000);
   };
 
-  useEffect(() => {
+useEffect(() => {
     const fetchProducts = async () => {
       setIsLoading(true);
       try {
+        // 1. Lấy và làm phẳng dữ liệu từ mockData.ts (Quan trọng nhất)
+        const localProducts: Product[] = marketplaceData.flatMap(group => 
+          group.items.map(item => ({
+            id: `local-${Math.random()}`, // Tạo ID tạm
+            name: item.n,
+            ethnic: group.e, // Lấy tên dân tộc từ nhóm (BA NA, BỐ Y...)
+            stock: 10,
+            price: item.p,
+            priceValue: parseInt(item.p?.replace(/\D/g, '') || '0'),
+            desc: item.d,
+            artisan: "Nghệ nhân bản địa",
+            exp: "Lâu năm",
+            img: item.img,
+            sold: Math.floor(Math.random() * 50),
+            likes: Math.floor(Math.random() * 300),
+            category: 'Thủ công'
+          }))
+        );
+        // 2. Lấy dữ liệu từ Supabase (Nếu có)
         const { data, error } = await supabase.from('san_pham').select('*, dan_toc(ten_dan_toc)');
-        if (error) throw error;
-        if (data) {
-          const mapped = data.map(p => ({
+        
+        let supabaseProducts: Product[] = [];
+        if (!error && data) {
+          supabaseProducts = data.map(p => ({
             id: p.id,
             name: p.ten_san_pham,
             ethnic: p.dan_toc?.ten_dan_toc || 'Khác',
@@ -214,18 +234,21 @@ const Marketplace: React.FC = () => {
             artisan: "Nghệ nhân bản địa",
             exp: "Lâu năm",
             img: p.anh_san_pham?.replace('/public/images/', '/public/images-sacviet/'),
-            sold: Math.floor(Math.random() * 50) + 10,
-            likes: Math.floor(Math.random() * 300) + 50, // Lượt thích tự động
+            sold: 10,
+            likes: 100,
             category: 'Thủ công'
           }));
-          setProducts(mapped);
         }
-      } catch (err) { console.error("Lỗi tải sản phẩm:", err); }
+
+        // 3. Gộp cả 2 nguồn lại (Local ưu tiên trước)
+        setProducts([...localProducts, ...supabaseProducts]);
+      } catch (err) { 
+        console.error("Lỗi tải sản phẩm:", err); 
+      }
       setIsLoading(false);
     };
     fetchProducts();
   }, []);
-
   useEffect(() => { setSelectedEthnic(initialEthnic); setCurrentPage(1); }, [initialEthnic]);
 
   const ethnicList = useMemo(() => {
@@ -235,7 +258,12 @@ const Marketplace: React.FC = () => {
 
   const filteredProducts = useMemo(() => {
     let result = products;
-    if (selectedEthnic !== 'TẤT CẢ') result = result.filter(p => p.ethnic.toUpperCase() === selectedEthnic);
+    if (selectedEthnic !== 'TẤT CẢ') {
+      result = result.filter(p => 
+        // So sánh không phân biệt hoa thường và loại bỏ khoảng trắng dư thừa
+        p.ethnic.trim().toUpperCase() === selectedEthnic.trim().toUpperCase()
+      );
+    }
     if (searchTerm.trim()) {
       const term = searchTerm.toLowerCase();
       result = result.filter(p => p.name.toLowerCase().includes(term) || p.ethnic.toLowerCase().includes(term));
