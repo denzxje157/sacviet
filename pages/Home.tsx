@@ -362,9 +362,24 @@ const Home: React.FC = () => {
               
               {/* BẢN ĐỒ: Cố định min-h-[450px] trên mobile */}
               <div className="w-full min-h-[450px] shrink-0 lg:min-h-0 lg:flex-1 relative rounded-[2.5rem] lg:rounded-[3rem] overflow-hidden border-[4px] md:border-[6px] border-[#8B1A1A]/10 shadow-2xl bg-[#e4e9f0] z-0 isolate">
-                 <MapContainer center={MAP_CENTER} zoom={6} className="absolute inset-0 w-full h-full" zoomControl={false} attributionControl={false}>
+                 <MapContainer 
+  center={MAP_CENTER} 
+  zoom={7} 
+  minZoom={2.5} 
+  maxBounds={[
+    [6.0, 100.0], // Tọa độ góc Tây Nam (phía dưới bên trái)
+    [24.0, 115.0] // Tọa độ góc Đông Bắc (phía trên bên phải)
+  ]}
+  maxBoundsViscosity={1.0} 
+  className="absolute inset-0 w-full h-full" 
+  zoomControl={false} 
+  attributionControl={false}
+>
                     <MapFixer />
-                    <TileLayer url="https://mt1.google.com/vt/lyrs=m&hl=vi&x={x}&y={y}&z={z}" />
+                    <TileLayer 
+  url="https://mt1.google.com/vt/lyrs=m&hl=vi&x={x}&y={y}&z={z}" 
+  noWrap={true} 
+/>
                     <ZoomControl position="bottomright" />
                     {selectedEthnic && <ChangeView coords={selectedEthnic.coords} />}
                     {ethnicList.map((ethnic, idx) => (

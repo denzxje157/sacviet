@@ -40,7 +40,14 @@ const INITIAL_POSTS: Post[] = [
 ];
 
 const FALLBACK_QUIZ = [{ id: 1, question: "Lễ hội 'Cấp Sắc' là của dân tộc nào?", options: ["H'Mông", "Dao", "Tày", "Thái"], correctAnswerStr: "Dao", explanation: "Lễ quan trọng của đàn ông Dao." }];
-const FALLBACK_FESTIVALS = [{ id: 'f1', name: 'Giỗ Tổ Hùng Vương', solarDate: '2026-04-26', lunarDateStr: '10/03 Âm lịch', location: 'Phú Thọ', daysLeft: 43 }];
+
+// Dữ liệu Lễ hội tĩnh (Đã thay thế cho AI)
+const STATIC_FESTIVALS: Omit<FestivalDisplay, 'daysLeft'>[] = [
+  { id: 'f1', name: 'Giỗ Tổ Hùng Vương', solarDate: '2026-04-27', lunarDateStr: 'Mùng 10 tháng 3 Âm lịch', location: 'Phú Thọ' },
+  { id: 'f2', name: 'Lễ hội Đền Gióng (Sóc Sơn)', solarDate: '2026-05-26', lunarDateStr: 'Mùng 9 tháng 4 Âm lịch', location: 'Hà Nội' },
+  { id: 'f3', name: 'Festival Huế', solarDate: '2026-06-05', lunarDateStr: 'Tháng 5 Âm lịch', location: 'Thừa Thiên Huế' },
+  { id: 'f4', name: 'Tết Trung Thu', solarDate: '2026-09-25', lunarDateStr: 'Rằm tháng 8 Âm lịch', location: 'Toàn quốc' }
+];
 
 // --- COMPONENTS ---
 const CalendarModal = ({ onClose, initialDate, festivals }: { onClose: () => void, initialDate: Date, festivals: FestivalDisplay[] }) => {
@@ -105,77 +112,57 @@ const CalendarModal = ({ onClose, initialDate, festivals }: { onClose: () => voi
 };
 
 const FestivalWidget = () => {
-  const [events, setEvents] = useState<FestivalDisplay[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [showCalendar, setShowCalendar] = useState(false); 
+  const [showCalendar, setShowCalendar] = useState(false);
 
-  const fetchFestivals = useCallback(async () => {
-    setLoading(true);
-    try {
-      const cached = localStorage.getItem('sacviet_festivals');
-      const cachedTime = localStorage.getItem('sacviet_festivals_time');
-      if (cached && cachedTime && (Date.now() - Number(cachedTime) < 3600000)) {
-         setEvents(JSON.parse(cached)); setLoading(false); return;
-      }
-
-      if (localStorage.getItem('gemini_429_blocked')) {
-         throw new Error("API Limit Blocked");
-      }
-      
-      if (!API_KEY) throw new Error("No Key");
-      const prompt = `Liệt kê 5 lễ hội văn hóa Việt Nam sắp diễn ra năm 2026. Trả về mảng JSON: [{"id": "le-hoi-1", "name": "Tên lễ hội", "solarDate": "YYYY-MM-DD", "lunarDateStr": "Ngày/Tháng Âm lịch", "location": "Tỉnh/Thành phố"}]`;
-      const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${API_KEY}`, {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }], generationConfig: { temperature: 0.7, responseMimeType: "application/json" } })
-      });
-
-      if (res.status === 429) {
-        localStorage.setItem('gemini_429_blocked', 'true');
-        throw new Error("Quota Exceeded");
-      }
-      
-      if (!res.ok) throw new Error("Lỗi API");
-      
-      const data = await res.json();
-      const rawEvents = JSON.parse(data.candidates[0].content.parts[0].text);
-      const processed = rawEvents.map((f: any) => ({ ...f, daysLeft: Math.ceil((new Date(f.solarDate).getTime() - Date.now()) / 86400000) })).filter((f: any) => f.daysLeft >= 0).sort((a: any, b: any) => a.daysLeft - b.daysLeft); 
-      
-      setEvents(processed.length ? processed : FALLBACK_FESTIVALS as any);
-      localStorage.setItem('sacviet_festivals', JSON.stringify(processed)); localStorage.setItem('sacviet_festivals_time', Date.now().toString());
-    } catch (e) {
-      setEvents(FALLBACK_FESTIVALS as any);
-      localStorage.setItem('sacviet_festivals', JSON.stringify(FALLBACK_FESTIVALS)); 
-      localStorage.setItem('sacviet_festivals_time', Date.now().toString());
-    } finally { setLoading(false); }
+  // Tính toán lại số ngày dựa trên mốc thời gian thực
+  const events = useMemo(() => {
+    const today = new Date().setHours(0, 0, 0, 0); 
+    
+    return STATIC_FESTIVALS.map(f => {
+      const fDate = new Date(f.solarDate).getTime();
+      const daysLeft = Math.ceil((fDate - today) / 86400000);
+      return { ...f, daysLeft };
+    })
+    .filter(f => f.daysLeft >= 0) 
+    .sort((a, b) => a.daysLeft - b.daysLeft); 
   }, []);
-
-  useEffect(() => { fetchFestivals(); }, [fetchFestivals]);
 
   return (
     <>
       <div className="bg-white rounded-2xl md:rounded-[2rem] border border-gold/20 shadow-lg p-4 md:p-5 w-full animate-fade-in">
         <div className="flex items-center justify-between mb-4 border-b border-gold/10 pb-3">
-           <h3 className="font-black text-text-main text-sm uppercase tracking-widest flex items-center gap-2"><span className="material-symbols-outlined text-primary">event_upcoming</span>Mùa Lễ Hội</h3>
+           <h3 className="font-black text-text-main text-sm uppercase tracking-widest flex items-center gap-2">
+             <span className="material-symbols-outlined text-primary">event_upcoming</span>Mùa Lễ Hội
+           </h3>
            <div className="flex items-center gap-2">
-               <button onClick={() => setShowCalendar(true)} className="text-[10px] md:text-xs text-primary font-bold hover:bg-background-light px-2 py-1 rounded-lg border border-gold/20 shadow-sm transition-all active:scale-95 flex items-center gap-1">Xem lịch <span className="material-symbols-outlined text-[12px] md:text-[14px]">calendar_month</span></button>
-               <button onClick={() => { localStorage.removeItem('sacviet_festivals_time'); localStorage.removeItem('gemini_429_blocked'); fetchFestivals(); }} className="text-primary hover:rotate-180 transition-transform p-1"><span className="material-symbols-outlined text-sm md:text-base">sync</span></button>
+               <button onClick={() => setShowCalendar(true)} className="text-[10px] md:text-xs text-primary font-bold hover:bg-background-light px-2 py-1 rounded-lg border border-gold/20 shadow-sm transition-all active:scale-95 flex items-center gap-1">
+                 Xem lịch <span className="material-symbols-outlined text-[12px] md:text-[14px]">calendar_month</span>
+               </button>
            </div>
         </div>
+        
         <div className="space-y-4">
-           {loading ? <div className="text-center py-4 text-xs font-bold animate-pulse text-gold">Già làng đang xem lịch...</div> : events.slice(0, 3).map(f => (
+           {events.length === 0 ? (
+             <div className="text-center py-4 text-xs font-bold text-text-soft italic">Hiện chưa có lễ hội nào sắp diễn ra.</div>
+           ) : (
+             events.slice(0, 3).map(f => (
               <div key={f.id} className="flex gap-4 items-center group cursor-pointer hover:bg-gold/5 p-2 rounded-xl transition-colors">
                  <div className="bg-primary/10 text-primary rounded-xl p-2 w-14 text-center border border-primary/20 shrink-0">
                     <span className="block text-xl font-black leading-none my-0.5">{f.daysLeft}</span>
-                    <span className="block text-[8px] font-bold uppercase">Ngày</span>
+                    <span className="block text-[8px] font-bold uppercase tracking-wider">Ngày</span>
                  </div>
                  <div className="flex-1 min-w-0">
                     <h4 className="font-bold text-sm truncate text-text-main">{f.name}</h4>
-                    <div className="flex gap-2 mt-1"><span className="text-[9px] bg-gold/20 text-text-main px-1.5 rounded font-bold">{f.lunarDateStr}</span></div>
+                    <div className="flex gap-2 mt-1">
+                      <span className="text-[10px] bg-gold/20 text-text-main px-2 py-0.5 rounded font-bold">{f.lunarDateStr}</span>
+                    </div>
                  </div>
               </div>
-           ))}
+            ))
+           )}
         </div>
       </div>
+      
       {showCalendar && <CalendarModal onClose={() => setShowCalendar(false)} initialDate={new Date()} festivals={events} />}
     </>
   );
