@@ -235,7 +235,7 @@ const Marketplace: React.FC = () => {
 
   const filteredProducts = useMemo(() => {
     let result = products;
-    if (selectedEthnic !== 'TẤT CẢ') result = result.filter(p => p.ethnic.toUpperCase() === selectedEthnic);
+    if (selectedEthnic.toUpperCase() !== 'TẤT CẢ') result = result.filter(p => p.ethnic.toUpperCase() === selectedEthnic.toUpperCase());
     if (searchTerm.trim()) {
       const term = searchTerm.toLowerCase();
       result = result.filter(p => p.name.toLowerCase().includes(term) || p.ethnic.toLowerCase().includes(term));
@@ -300,7 +300,7 @@ const Marketplace: React.FC = () => {
                 <option value="asc">Giá: Thấp đến Cao</option>
                 <option value="desc">Giá: Cao đến Thấp</option>
               </select>
-              <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none"><span className="material-symbols-outlined text-gold">sort</span></div>
+              <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none"></div>
             </div>
           </div>
 
