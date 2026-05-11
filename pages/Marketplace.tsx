@@ -155,6 +155,7 @@ const ProductModal = ({ product, onClose, showToastMsg }: { product: Product, on
                </div>
              </div>
           </div>
+          
           <div className="p-4 bg-white border-t border-gold/10 shrink-0 shadow-[0_-5px_20px_rgba(0,0,0,0.05)]">
              <div className="flex items-center justify-between mb-3 bg-background-light p-2 rounded-xl border border-gold/10">
                 <span className="text-xs font-bold text-text-soft ml-2">Số lượng:</span>

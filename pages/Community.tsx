@@ -43,10 +43,15 @@ const FALLBACK_QUIZ = [{ id: 1, question: "Lễ hội 'Cấp Sắc' là của d�
 
 // Dữ liệu Lễ hội tĩnh (Đã thay thế cho AI)
 const STATIC_FESTIVALS: Omit<FestivalDisplay, 'daysLeft'>[] = [
+  // Dữ liệu Lễ hội tĩnh (Đã bổ sung các lễ hội đặc trưng của các dân tộc)
   { id: 'f1', name: 'Giỗ Tổ Hùng Vương', solarDate: '2026-04-27', lunarDateStr: 'Mùng 10 tháng 3 Âm lịch', location: 'Phú Thọ' },
-  { id: 'f2', name: 'Lễ hội Đền Gióng (Sóc Sơn)', solarDate: '2026-05-26', lunarDateStr: 'Mùng 9 tháng 4 Âm lịch', location: 'Hà Nội' },
-  { id: 'f3', name: 'Festival Huế', solarDate: '2026-06-05', lunarDateStr: 'Tháng 5 Âm lịch', location: 'Thừa Thiên Huế' },
-  { id: 'f4', name: 'Tết Trung Thu', solarDate: '2026-09-25', lunarDateStr: 'Rằm tháng 8 Âm lịch', location: 'Toàn quốc' }
+  { id: 'f2', name: 'Lễ hội Đền Gióng', solarDate: '2026-05-25', lunarDateStr: 'Mùng 9 tháng 4 Âm lịch', location: 'Hà Nội' },
+  { id: 'f3', name: 'Lễ hội vía Bà Chúa Xứ', solarDate: '2026-06-07', lunarDateStr: '23 tháng 4 Âm lịch', location: 'An Giang' },
+  { id: 'f4', name: 'Tết Độc Lập người Mông', solarDate: '2026-09-02', lunarDateStr: 'Mùng 2 tháng 9 Dương lịch', location: 'Mộc Châu, Sơn La' },
+  { id: 'f5', name: 'Tết Trung Thu', solarDate: '2026-09-25', lunarDateStr: 'Rằm tháng 8 Âm lịch', location: 'Toàn quốc' },
+  { id: 'f6', name: 'Lễ hội Katê (người Chăm)', solarDate: '2026-10-10', lunarDateStr: 'Tháng 7 lịch Chăm', location: 'Ninh Thuận' },
+  { id: 'f7', name: 'Lễ hội Oóc Om Bóc (Khmer)', solarDate: '2026-11-23', lunarDateStr: 'Rằm tháng 10 Âm lịch', location: 'Sóc Trăng' },
+  { id: 'f8', name: 'Lễ hội Hoa Ban (người Thái)', solarDate: '2027-03-15', lunarDateStr: 'Tháng 2 Âm lịch', location: 'Điện Biên' },
 ];
 
 // --- COMPONENTS ---
@@ -76,13 +81,31 @@ const CalendarModal = ({ onClose, initialDate, festivals }: { onClose: () => voi
       const isSunday = dateForLunar.getDay() === 0;
 
       days.push(
-        <div key={day} className={`h-16 md:h-24 border border-gold/10 relative p-1 md:p-2 transition-colors hover:bg-gold/5 flex flex-col justify-between group overflow-hidden ${isToday ? 'bg-gold/10 ring-1 md:ring-2 ring-gold inset-0 shadow-inner' : 'bg-white'}`}>
-           <div className="flex justify-between items-start">
+        <div key={day} className={`h-16 md:h-24 border border-gold/10 relative p-1 md:p-2 transition-colors hover:bg-gold/5 flex flex-col group overflow-hidden ${isToday ? 'bg-gold/10 ring-1 md:ring-2 ring-gold inset-0 shadow-inner' : 'bg-white'}`}>
+           
+           {/* Hàng trên cùng: Số ngày và Ngày âm */}
+           <div className="flex justify-between items-start shrink-0">
               <span className={`text-xs md:text-lg font-black leading-none ${isSunday ? 'text-primary' : 'text-text-main'} ${isToday ? 'text-primary scale-110' : ''}`}>{day}</span>
               <div className="flex flex-col items-end hidden md:flex"><span className={`text-[8px] md:text-[10px] font-medium ${lunar.day === 1 || lunar.day === 15 ? 'text-primary font-bold' : 'text-text-soft/60'}`}>{lunar.day}/{lunar.month}</span></div>
            </div>
-           {isToday && <div className="absolute top-0 md:top-1 left-1/2 -translate-x-1/2"><span className="text-[5px] md:text-[8px] bg-primary text-white px-1 py-0.5 rounded font-bold uppercase tracking-wider">Hôm nay</span></div>}
-           {festival && <div className="mt-auto md:mt-1"><div className="bg-primary text-white text-[5px] md:text-[8px] font-bold px-1 py-0.5 rounded leading-tight truncate border border-gold/30 shadow-sm" title={festival.name}>{festival.name}</div></div>}
+
+           {/* Phần giữa: Chữ Hôm nay */}
+           <div className="flex-1 flex items-center justify-center">
+             {isToday && (
+               <span className="text-[6px] md:text-[9px] bg-primary text-white px-2 py-0.5 rounded-full font-black uppercase tracking-widest shadow-md whitespace-nowrap">
+                 Hôm nay
+               </span>
+             )}
+           </div>
+
+           {/* Hàng dưới cùng: Tên lễ hội */}
+           {festival && (
+             <div className="mt-auto">
+               <div className="bg-primary text-white text-[5px] md:text-[8px] font-bold px-1 py-0.5 rounded leading-tight truncate border border-gold/30 shadow-sm" title={festival.name}>
+                 {festival.name}
+               </div>
+             </div>
+           )}
         </div>
       );
     }
@@ -116,15 +139,19 @@ const FestivalWidget = () => {
 
   // Tính toán lại số ngày dựa trên mốc thời gian thực
   const events = useMemo(() => {
-    const today = new Date().setHours(0, 0, 0, 0); 
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Đưa về 0h00 phút để so sánh ngày chuẩn xác
     
     return STATIC_FESTIVALS.map(f => {
-      const fDate = new Date(f.solarDate).getTime();
-      const daysLeft = Math.ceil((fDate - today) / 86400000);
+      const fDate = new Date(f.solarDate);
+      fDate.setHours(0, 0, 0, 0);
+      
+      // Tính số ngày còn lại (dùng Math.round để tránh lỗi số thập phân của Javascript)
+      const daysLeft = Math.round((fDate.getTime() - today.getTime()) / 86400000);
       return { ...f, daysLeft };
     })
-    .filter(f => f.daysLeft >= 0) 
-    .sort((a, b) => a.daysLeft - b.daysLeft); 
+    .filter(f => f.daysLeft >= 0) // LỌC: Chỉ giữ lại các lễ hội >= 0 ngày (Hôm nay hoặc tương lai)
+    .sort((a, b) => a.daysLeft - b.daysLeft); // SẮP XẾP: Ngày càng gần thì càng nổi lên trên
   }, []);
 
   return (

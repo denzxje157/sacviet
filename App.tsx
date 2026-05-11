@@ -50,7 +50,7 @@ const App: React.FC = () => {
             <Route path="/admin/orders" element={<OrderManagement />} />
             <Route path="/admin/users" element={<UserManagement />} />
             <Route path="/admin/content" element={<ContentManagement />} />
-            <Route path="/admin/seo" element={<SeoManagement />} /> {/* THÊM DÒNG NÀY */}
+            <Route path="/admin/seo" element={<SeoManagement />} /> 
             <Route path="/reset-password" element={<ResetPassword />} />
             {/* Public Routes */}
             <Route path="*" element={
