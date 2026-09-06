@@ -31,54 +31,55 @@ const ArtisansList: React.FC = () => {
   return (
     <div className="min-h-screen bg-[#F7F3E9] font-display text-text-main pb-24">
       
-      {/* 🌟 HERO BANNER */}
-      <section className="relative bg-gradient-to-b from-[#8B1A1A] to-[#631212] text-white pt-12 pb-20 md:pb-28 overflow-hidden border-b-4 border-gold">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_40%,rgba(212,175,55,0.2),transparent_70%)] pointer-events-none"></div>
-
+      {/* 🌟 HERO SECTION */}
+      <section className="relative pt-10 pb-6 overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 md:px-8 relative z-10 text-center space-y-4">
-          <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-md px-4 py-1.5 rounded-full border border-gold/40 text-gold-light text-xs font-black uppercase tracking-widest">
+          <div className="inline-flex items-center gap-2 bg-primary/10 border border-primary/20 px-4 py-1.5 rounded-full text-primary text-xs font-black uppercase tracking-widest shadow-xs">
             <span className="material-symbols-outlined text-sm">front_hand</span>
             BẢN SẮC TRONG TỪNG NÉT THỦ CÔNG
           </div>
 
-          <h1 className="text-3xl sm:text-4xl md:text-6xl font-black uppercase tracking-tight text-white leading-tight">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black uppercase tracking-tight text-text-main leading-tight">
             Những Bàn Tay Vàng <span className="text-gold italic">Di Sản</span>
           </h1>
 
-          <p className="text-sm sm:text-base md:text-lg text-white/90 max-w-2xl mx-auto font-medium leading-relaxed">
+          <p className="text-sm sm:text-base md:text-lg text-text-soft max-w-2xl mx-auto font-medium leading-relaxed">
             Nơi mỗi tác phẩm gắn liền với tên tuổi, buôn làng cội nguồn, ý nghĩa hoa văn thiêng liêng và hàng chục ngày lao động mồ hôi của nghệ nhân bản địa.
           </p>
 
           {/* UVP BANNER - THỨ SHOPEE KHÔNG CÓ */}
-          <div className="pt-4 max-w-4xl mx-auto">
-            <div className="bg-black/30 backdrop-blur-md p-4 sm:p-5 rounded-3xl border border-gold/30 grid grid-cols-1 sm:grid-cols-3 gap-4 text-left">
-              <div className="flex items-center gap-3">
-                <div className="size-10 rounded-xl bg-gold/20 text-gold flex items-center justify-center shrink-0">
+          <div className="pt-2 max-w-4xl mx-auto">
+            <div 
+              style={{ backgroundColor: '#2E473B' }} 
+              className="p-4 sm:p-5 rounded-3xl border-2 border-gold/30 shadow-xl grid grid-cols-1 sm:grid-cols-3 gap-3 text-left"
+            >
+              <div className="bg-[#FAF7F0] p-3.5 rounded-2xl flex items-center gap-3 border border-gold/20 shadow-sm">
+                <div className="size-10 rounded-xl bg-[#2E473B]/10 text-[#2E473B] flex items-center justify-center shrink-0">
                   <span className="material-symbols-outlined text-xl">person_pin</span>
                 </div>
                 <div>
-                  <h4 className="text-xs font-black uppercase text-gold">Danh Tính Minh Bạch</h4>
-                  <p className="text-[11px] text-white/80">Tên thật, buôn làng thật, bảo chứng OCOP.</p>
+                  <h4 className="text-xs font-black uppercase text-[#2E473B]">Danh Tính Minh Bạch</h4>
+                  <p className="text-[11px] text-[#5C4B4B] font-medium">Tên thật, buôn làng thật, bảo chứng OCOP.</p>
                 </div>
               </div>
 
-              <div className="flex items-center gap-3">
-                <div className="size-10 rounded-xl bg-gold/20 text-gold flex items-center justify-center shrink-0">
+              <div className="bg-[#FAF7F0] p-3.5 rounded-2xl flex items-center gap-3 border border-gold/20 shadow-sm">
+                <div className="size-10 rounded-xl bg-[#2E473B]/10 text-[#2E473B] flex items-center justify-center shrink-0">
                   <span className="material-symbols-outlined text-xl">auto_stories</span>
                 </div>
                 <div>
-                  <h4 className="text-xs font-black uppercase text-gold">Ý Nghĩa Hoa Văn</h4>
-                  <p className="text-[11px] text-white/80">Giải mã mật mã văn hóa từng nét dệt/nặn.</p>
+                  <h4 className="text-xs font-black uppercase text-[#2E473B]">Ý Nghĩa Hoa Văn</h4>
+                  <p className="text-[11px] text-[#5C4B4B] font-medium">Giải mã mật mã văn hóa từng nét dệt/nặn.</p>
                 </div>
               </div>
 
-              <div className="flex items-center gap-3">
-                <div className="size-10 rounded-xl bg-gold/20 text-gold flex items-center justify-center shrink-0">
+              <div className="bg-[#FAF7F0] p-3.5 rounded-2xl flex items-center gap-3 border border-gold/20 shadow-sm">
+                <div className="size-10 rounded-xl bg-[#2E473B]/10 text-[#2E473B] flex items-center justify-center shrink-0">
                   <span className="material-symbols-outlined text-xl">volunteer_activism</span>
                 </div>
                 <div>
-                  <h4 className="text-xs font-black uppercase text-gold">Thương Mại Công Bằng</h4>
-                  <p className="text-[11px] text-white/80">Thu nhập trực tiếp nuôi sống gia đình nghệ nhân.</p>
+                  <h4 className="text-xs font-black uppercase text-[#2E473B]">Thương Mại Công Bằng</h4>
+                  <p className="text-[11px] text-[#5C4B4B] font-medium">Thu nhập trực tiếp nuôi sống gia đình nghệ nhân.</p>
                 </div>
               </div>
             </div>
@@ -87,7 +88,7 @@ const ArtisansList: React.FC = () => {
       </section>
 
       {/* FILTER & SEARCH */}
-      <section className="max-w-7xl mx-auto px-4 md:px-8 -mt-8 relative z-20">
+      <section className="max-w-7xl mx-auto px-4 md:px-8 mt-4 relative z-20">
         <div className="bg-white rounded-2xl md:rounded-3xl p-4 md:p-6 shadow-xl border border-gold/20 flex flex-col md:flex-row gap-4 items-center justify-between">
           
           {/* Search box */}
