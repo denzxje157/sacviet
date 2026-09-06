@@ -1,10 +1,11 @@
 /// <reference types="vite/client" />
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { createPortal } from 'react-dom';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate, Link } from 'react-router-dom';
 import { useCart } from '../context/CartContext.tsx';
 import { supabase } from '../services/supabaseClient.ts'; 
 import { marketplaceData } from '../data/mockData.ts';
+import { getArtisanByEthnic, artisanData } from '../data/artisanData.ts';
 
 interface Product {
   id: string;
@@ -84,8 +85,11 @@ const ProductModal = ({ product, onClose, showToastMsg }: { product: Product, on
   const cartContext = useCart();
   const addToCart = cartContext?.addToCart;
   const toggleCart = cartContext?.toggleCart;
+  const navigate = useNavigate();
   const isOutOfStock = product.stock <= 0;
   
+  const linkedArtisan = useMemo(() => getArtisanByEthnic(product.ethnic) || artisanData[0], [product.ethnic]);
+
   useEffect(() => {
     document.body.style.overflow = 'hidden';
     return () => { document.body.style.overflow = 'unset'; };
@@ -97,6 +101,7 @@ const ProductModal = ({ product, onClose, showToastMsg }: { product: Product, on
         showToastMsg(`Đã thêm ${quantity} "${product.name}" vào giỏ hàng`);
     }
     onClose();
+    navigate('/cart');
   };
 
   const handleBuyNow = () => {
@@ -104,7 +109,7 @@ const ProductModal = ({ product, onClose, showToastMsg }: { product: Product, on
         for (let i = 0; i < quantity; i++) addToCart(product);
     }
     onClose();
-    if (toggleCart) toggleCart(); 
+    navigate('/checkout');
   };
 
   if (!product) return null;
@@ -119,28 +124,28 @@ const ProductModal = ({ product, onClose, showToastMsg }: { product: Product, on
           <div className="absolute bottom-4 left-4 text-white"><span className="bg-primary px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border border-white/30 shadow-sm inline-block mb-2">Dân tộc {product.ethnic || 'Khác'}</span></div>
         </div>
         <div className="w-full md:w-[40%] h-1/2 md:h-auto flex flex-col bg-white">
-          <div className="flex-1 overflow-y-auto custom-scrollbar p-6 md:p-8">
+          <div className="flex-1 overflow-y-auto custom-scrollbar p-6 md:p-8 space-y-4">
              
-             <h2 className="text-2xl md:text-3xl font-black text-text-main leading-tight mb-4 mt-2">{product.name || 'Sản phẩm đang cập nhật'}</h2>
-             
-             {/* HUY HIỆU NIỀM TIN (Trust Badges) */}
-             <div className="flex flex-wrap gap-2 mb-4">
-                <span className="px-3 py-1 bg-green-50 text-green-700 border border-green-200 rounded-full text-[9px] font-black uppercase tracking-widest flex items-center gap-1"><span className="material-symbols-outlined text-[12px]">eco</span> 100% Thủ công</span>
-                <span className="px-3 py-1 bg-amber-50 text-amber-700 border border-amber-200 rounded-full text-[9px] font-black uppercase tracking-widest flex items-center gap-1"><span className="material-symbols-outlined text-[12px]">verified</span> Tinh hoa bản địa</span>
+             <div>
+               <h2 className="text-2xl md:text-3xl font-black text-text-main leading-tight mb-2 mt-1">{product.name || 'Sản phẩm đang cập nhật'}</h2>
+               
+               {/* HUY HIỆU NIỀM TIN (Trust Badges) */}
+               <div className="flex flex-wrap gap-2">
+                  <span className="px-3 py-1 bg-green-50 text-green-700 border border-green-200 rounded-full text-[9px] font-black uppercase tracking-widest flex items-center gap-1"><span className="material-symbols-outlined text-[12px]">eco</span> 100% Thủ công</span>
+                  <span className="px-3 py-1 bg-amber-50 text-amber-700 border border-amber-200 rounded-full text-[9px] font-black uppercase tracking-widest flex items-center gap-1"><span className="material-symbols-outlined text-[12px]">verified</span> Tinh hoa bản địa</span>
+               </div>
              </div>
 
-             {/* UI MỚI KHỚP VỚI ẢNH UI BẠN YÊU CẦU */}
-             <div className="flex flex-wrap items-center gap-4 mb-6 pb-6 border-b border-gold/10">
-                <span className="text-3xl md:text-4xl font-black text-primary leading-none tracking-tight">{product.price || 'Liên hệ'}</span>
+             {/* UI GIÁ & SỐ LƯỢNG CÒN */}
+             <div className="flex flex-wrap items-center gap-4 py-3 border-y border-gold/10">
+                <span className="text-2xl md:text-3xl font-black text-primary leading-none tracking-tight">{product.price || 'Liên hệ'}</span>
                 
                 <div className="flex items-center gap-2 ml-auto md:ml-0">
-                  {/* Khung Đã bán */}
                   <div className="flex flex-col items-center justify-center bg-[#FDF8E9] text-[#8B5A2B] px-3 py-1.5 rounded-lg min-w-[4rem]">
                      <span className="text-[10px] font-bold uppercase tracking-wide">Đã bán:</span>
                      <span className="text-sm font-black">{product.sold || 0}</span>
                   </div>
                   
-                  {/* Khung Còn */}
                   <div className={`flex flex-col items-center justify-center px-3 py-1.5 rounded-lg min-w-[4rem] ${isOutOfStock ? 'bg-red-100 text-red-700' : 'bg-[#E8F7ED] text-[#1E7B44]'}`}>
                      <span className="text-[10px] font-bold uppercase tracking-wide">Còn:</span>
                      <span className="text-sm font-black">{isOutOfStock ? '0' : product.stock}</span>
@@ -148,11 +153,33 @@ const ProductModal = ({ product, onClose, showToastMsg }: { product: Product, on
                 </div>
              </div>
 
-             <div className="space-y-4">
-               <div className="bg-background-light p-4 rounded-xl border border-gold/10">
-                 <h4 className="font-bold text-primary uppercase text-xs mb-2 flex items-center gap-2"><span className="material-symbols-outlined text-base">auto_stories</span>Câu chuyện sản phẩm</h4>
-                 <p className="text-text-main text-sm leading-relaxed text-justify font-medium">"{product.desc || 'Chưa có mô tả chi tiết.'}"</p>
+             {/* THẺ NGHỆ NHÂN CHẾ TÁC - ĐỘC QUYỀN SẮC VIỆT */}
+             {linkedArtisan && (
+               <div 
+                 onClick={() => { onClose(); navigate(`/artisan/${linkedArtisan.id}`); }}
+                 className="bg-gradient-to-r from-primary/10 via-amber-50 to-gold/15 hover:from-primary/15 hover:to-gold/25 border-2 border-gold/40 p-3.5 rounded-2xl flex items-center justify-between cursor-pointer transition-all group shadow-sm hover:shadow-md"
+               >
+                 <div className="flex items-center gap-3 min-w-0">
+                   <img src={linkedArtisan.avatar} alt={linkedArtisan.name} className="size-11 rounded-full object-cover border-2 border-gold shrink-0 shadow-sm" />
+                   <div className="min-w-0 text-left">
+                     <div className="flex items-center gap-1">
+                       <span className="text-[9px] font-black uppercase tracking-wider text-primary bg-primary/10 px-2 py-0.5 rounded-full">Nghệ nhân chế tác</span>
+                       <span className="material-symbols-outlined text-xs text-gold">verified</span>
+                     </div>
+                     <p className="text-sm font-black text-text-main group-hover:text-primary transition-colors truncate mt-0.5">{linkedArtisan.name}</p>
+                     <p className="text-[10px] text-text-soft truncate">{linkedArtisan.village}</p>
+                   </div>
+                 </div>
+                 <div className="shrink-0 flex items-center gap-1 text-[11px] font-black uppercase text-primary tracking-wider pl-2">
+                   <span className="hidden sm:inline">Xem hồ sơ</span>
+                   <span className="material-symbols-outlined text-sm group-hover:translate-x-1 transition-transform">arrow_forward</span>
+                 </div>
                </div>
+             )}
+
+             <div className="bg-background-light p-4 rounded-xl border border-gold/10 text-left">
+               <h4 className="font-bold text-primary uppercase text-xs mb-1.5 flex items-center gap-2"><span className="material-symbols-outlined text-base">auto_stories</span>Câu chuyện sản phẩm</h4>
+               <p className="text-text-main text-xs sm:text-sm leading-relaxed text-justify font-medium">"{product.desc || 'Chưa có mô tả chi tiết.'}"</p>
              </div>
           </div>
           
@@ -284,6 +311,44 @@ const Marketplace: React.FC = () => {
             </div>
           </div>
         </section>
+
+        {/* BANNER NỔI BẬT NGHỆ NHÂN BẢN ĐỊA */}
+        <div className="mb-8 max-w-5xl mx-auto">
+          <Link
+            to="/artisans"
+            className="group block bg-gradient-to-r from-primary via-[#9B2323] to-[#681313] text-white p-4 md:p-5 rounded-2xl md:rounded-3xl border-2 border-gold/40 shadow-xl hover:shadow-2xl transition-all duration-300 relative overflow-hidden"
+          >
+            <div className="absolute right-0 top-0 bottom-0 w-1/3 bg-[radial-gradient(ellipse_at_center,rgba(212,175,55,0.25),transparent_70%)] pointer-events-none"></div>
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 relative z-10">
+              <div className="flex items-center gap-4 text-center sm:text-left">
+                <div className="size-12 rounded-2xl bg-gold/20 text-gold flex items-center justify-center shrink-0 border border-gold/40 shadow-inner">
+                  <span className="material-symbols-outlined text-2xl">front_hand</span>
+                </div>
+                <div>
+                  <div className="flex items-center gap-2 justify-center sm:justify-start">
+                    <span className="text-[10px] font-black uppercase tracking-widest text-gold bg-black/30 px-2 py-0.5 rounded-md">
+                      Thương Mại Kể Chuyện
+                    </span>
+                    <span className="text-[11px] text-gold-light font-bold">Thứ Shopee không có</span>
+                  </div>
+                  <h3 className="text-base sm:text-lg font-black text-white mt-0.5 group-hover:text-gold-light transition-colors">
+                    Khám phá Không Gian Kể Chuyện Của Các Nghệ Nhân Bản Địa ➔
+                  </h3>
+                </div>
+              </div>
+              <div className="shrink-0 flex items-center gap-2">
+                <div className="flex -space-x-3 overflow-hidden p-1">
+                  {artisanData.slice(0, 4).map((a) => (
+                    <img key={a.id} src={a.avatar} alt={a.name} className="inline-block size-8 rounded-full ring-2 ring-gold object-cover" />
+                  ))}
+                </div>
+                <span className="text-xs font-black uppercase tracking-wider bg-gold text-text-main px-4 py-2 rounded-xl group-hover:brightness-110 transition-all shadow-md">
+                  Xem ngay
+                </span>
+              </div>
+            </div>
+          </Link>
+        </div>
 
         <div className="sticky top-20 md:top-24 z-40 mb-6 md:mb-10 space-y-4 md:space-y-6">
           <div className="flex flex-col md:flex-row gap-4 max-w-5xl mx-auto">

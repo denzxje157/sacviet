@@ -13,6 +13,8 @@ import CartDrawer from './components/CartDrawer.tsx';
 import AuthModal from './components/AuthModal.tsx';
 import Blog from './pages/Blog';
 import BlogDetail from './pages/BlogDetail';
+import ArtisansList from './pages/ArtisansList.tsx';
+import ArtisanDetail from './pages/ArtisanDetail.tsx';
 
 // Admin Pages
 import AdminDashboard from './pages/admin/AdminDashboard.tsx';
@@ -63,6 +65,12 @@ const App: React.FC = () => {
                     <Routes>
                       <Route path="/" element={<Home />} />
                       <Route path="/marketplace" element={<Marketplace />} />
+                      <Route path="/cart" element={<Marketplace />} />
+                      <Route path="/checkout" element={<Marketplace />} />
+                      <Route path="/checkout/success" element={<Marketplace />} />
+                      <Route path="/artisans" element={<ArtisansList />} />
+                      <Route path="/artisan" element={<ArtisanDetail />} />
+                      <Route path="/artisan/:id" element={<ArtisanDetail />} />
                       <Route path="/library" element={<Library />} />
                       <Route path="/blog" element={<Blog />} />
                       <Route path="/blog/:slug" element={<BlogDetail />} />

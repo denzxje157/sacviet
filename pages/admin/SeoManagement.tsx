@@ -14,7 +14,7 @@ const SeoManagement: React.FC = () => {
   const [editingArticle, setEditingArticle] = useState<SeoArticle | null>(null);
   
   const [formData, setFormData] = useState<Partial<SeoArticle>>({
-    tieu_de: '', slug: '', mo_ta_ngan: '', noi_dung: '', anh_bia: '', tac_gia: 'Admin Sắc Nối'
+    tieu_de: '', slug: '', mo_ta_ngan: '', noi_dung: '', anh_bia: '', tac_gia: 'Admin Sắc Việt'
   });
 
   useEffect(() => { fetchArticles(); }, []);
@@ -61,7 +61,7 @@ const SeoManagement: React.FC = () => {
       setEditingArticle(article); setFormData(article);
     } else {
       setEditingArticle(null);
-      setFormData({ tieu_de: '', slug: '', mo_ta_ngan: '', noi_dung: '', anh_bia: '', tac_gia: 'Admin Sắc Nối' });
+      setFormData({ tieu_de: '', slug: '', mo_ta_ngan: '', noi_dung: '', anh_bia: '', tac_gia: 'Admin Sắc Việt' });
     }
     setIsModalOpen(true);
   };

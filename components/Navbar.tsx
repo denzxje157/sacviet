@@ -15,6 +15,7 @@ const Navbar: React.FC = () => {
 
   const navLinks = [
     { name: 'Trang chủ', path: '/' },
+    { name: 'Nghệ Nhân', path: '/artisans' },
     { name: 'Chợ Phiên', path: '/marketplace' },
     { name: 'Thư viện', path: '/library' },
     { name: 'Góc Nhìn', path: '/blog' },
@@ -47,20 +48,23 @@ const Navbar: React.FC = () => {
 
           {/* Desktop Nav */}
           <nav className="hidden lg:flex items-center gap-4 xl:gap-8">
-            {navLinks.map((link) => (
-              <Link
-                key={link.path}
-                to={link.path}
-                className={`text-[10px] xl:text-xs font-black uppercase tracking-widest transition-all hover:text-primary relative py-2 group whitespace-nowrap ${
-                  location.pathname === link.path ? 'text-primary' : 'text-text-soft'
-                }`}
-              >
-                {link.name}
-                <span className={`absolute bottom-0 left-0 h-0.5 bg-primary transition-all duration-300 ${
-                  location.pathname === link.path ? 'w-full' : 'w-0 group-hover:w-full'
-                }`}></span>
-              </Link>
-            ))}
+            {navLinks.map((link) => {
+              const isActive = location.pathname === link.path || (link.path === '/artisans' && location.pathname.startsWith('/artisan'));
+              return (
+                <Link
+                  key={link.path}
+                  to={link.path}
+                  className={`text-[10px] xl:text-xs font-black uppercase tracking-widest transition-all hover:text-primary relative py-2 group whitespace-nowrap ${
+                    isActive ? 'text-primary' : 'text-text-soft'
+                  }`}
+                >
+                  {link.name}
+                  <span className={`absolute bottom-0 left-0 h-0.5 bg-primary transition-all duration-300 ${
+                    isActive ? 'w-full' : 'w-0 group-hover:w-full'
+                  }`}></span>
+                </Link>
+              );
+            })}
           </nav>
 
           {/* Actions */}
