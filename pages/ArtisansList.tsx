@@ -47,38 +47,38 @@ const ArtisansList: React.FC = () => {
             Nơi mỗi tác phẩm gắn liền với tên tuổi, buôn làng cội nguồn, ý nghĩa hoa văn thiêng liêng và hàng chục ngày lao động mồ hôi của nghệ nhân bản địa.
           </p>
 
-          {/* UVP BANNER - THỨ SHOPEE KHÔNG CÓ */}
+          {/* UVP BANNER - GIÁ TRỊ CỐT LÕI */}
           <div className="pt-2 max-w-4xl mx-auto">
             <div 
-              style={{ backgroundColor: '#2E473B' }} 
-              className="p-4 sm:p-5 rounded-3xl border-2 border-gold/30 shadow-xl grid grid-cols-1 sm:grid-cols-3 gap-3 text-left"
+              style={{ backgroundColor: '#781012', backgroundImage: 'linear-gradient(135deg, #8A1517 0%, #660C0E 100%)' }} 
+              className="p-4 sm:p-5 rounded-3xl border-2 border-gold/40 shadow-xl grid grid-cols-1 sm:grid-cols-3 gap-3 text-left"
             >
-              <div className="bg-[#FAF7F0] p-3.5 rounded-2xl flex items-center gap-3 border border-gold/20 shadow-sm">
-                <div className="size-10 rounded-xl bg-[#2E473B]/10 text-[#2E473B] flex items-center justify-center shrink-0">
+              <div className="bg-[#FAF7F0] p-3.5 rounded-2xl flex items-center gap-3 border border-gold/30 shadow-sm hover:scale-[1.02] transition-transform">
+                <div className="size-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0 border border-primary/20">
                   <span className="material-symbols-outlined text-xl">person_pin</span>
                 </div>
                 <div>
-                  <h4 className="text-xs font-black uppercase text-[#2E473B]">Danh Tính Minh Bạch</h4>
+                  <h4 className="text-xs font-black uppercase text-primary tracking-wide">Danh Tính Minh Bạch</h4>
                   <p className="text-[11px] text-[#5C4B4B] font-medium">Tên thật, buôn làng thật, bảo chứng OCOP.</p>
                 </div>
               </div>
 
-              <div className="bg-[#FAF7F0] p-3.5 rounded-2xl flex items-center gap-3 border border-gold/20 shadow-sm">
-                <div className="size-10 rounded-xl bg-[#2E473B]/10 text-[#2E473B] flex items-center justify-center shrink-0">
+              <div className="bg-[#FAF7F0] p-3.5 rounded-2xl flex items-center gap-3 border border-gold/30 shadow-sm hover:scale-[1.02] transition-transform">
+                <div className="size-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0 border border-primary/20">
                   <span className="material-symbols-outlined text-xl">auto_stories</span>
                 </div>
                 <div>
-                  <h4 className="text-xs font-black uppercase text-[#2E473B]">Ý Nghĩa Hoa Văn</h4>
+                  <h4 className="text-xs font-black uppercase text-primary tracking-wide">Ý Nghĩa Hoa Văn</h4>
                   <p className="text-[11px] text-[#5C4B4B] font-medium">Giải mã mật mã văn hóa từng nét dệt/nặn.</p>
                 </div>
               </div>
 
-              <div className="bg-[#FAF7F0] p-3.5 rounded-2xl flex items-center gap-3 border border-gold/20 shadow-sm">
-                <div className="size-10 rounded-xl bg-[#2E473B]/10 text-[#2E473B] flex items-center justify-center shrink-0">
+              <div className="bg-[#FAF7F0] p-3.5 rounded-2xl flex items-center gap-3 border border-gold/30 shadow-sm hover:scale-[1.02] transition-transform">
+                <div className="size-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0 border border-primary/20">
                   <span className="material-symbols-outlined text-xl">volunteer_activism</span>
                 </div>
                 <div>
-                  <h4 className="text-xs font-black uppercase text-[#2E473B]">Thương Mại Công Bằng</h4>
+                  <h4 className="text-xs font-black uppercase text-primary tracking-wide">Thương Mại Công Bằng</h4>
                   <p className="text-[11px] text-[#5C4B4B] font-medium">Thu nhập trực tiếp nuôi sống gia đình nghệ nhân.</p>
                 </div>
               </div>

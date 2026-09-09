@@ -88,15 +88,15 @@ const ArtisanDetail: React.FC = () => {
       
       {/* Toast Notification */}
       {toastMsg && (
-        <div className="fixed top-24 left-1/2 -translate-x-1/2 z-[9999] bg-[#243527] text-white px-6 py-3.5 rounded-full shadow-2xl border border-white/20 flex items-center gap-3 animate-fade-in text-sm font-bold">
-          <span className="material-symbols-outlined text-[#8FD5A6]">verified</span>
+        <div className="fixed top-24 left-1/2 -translate-x-1/2 z-[9999] bg-[#781012] text-white px-6 py-3.5 rounded-full shadow-2xl border border-gold/40 flex items-center gap-3 animate-fade-in text-sm font-bold">
+          <span className="material-symbols-outlined text-gold">verified</span>
           <span>{toastMsg}</span>
         </div>
       )}
 
       {/* Decorative Traditional Contour Background Watermark */}
       <div className="absolute top-0 right-0 w-[500px] h-[500px] pointer-events-none opacity-[0.035] select-none text-right">
-        <svg viewBox="0 0 400 400" className="w-full h-full stroke-[#243527] fill-none stroke-[1.5]">
+        <svg viewBox="0 0 400 400" className="w-full h-full stroke-[#8B1A1A] fill-none stroke-[1.5]">
           <path d="M50,300 Q150,150 250,280 T400,220" />
           <path d="M0,350 Q120,200 280,320 T450,260" />
           <path d="M80,240 Q180,100 300,220 T420,180" />
@@ -158,8 +158,8 @@ const ArtisanDetail: React.FC = () => {
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none"></div>
               
               {/* Badge góc dưới bên trái: "📍 Nghệ nhân ưu tú" */}
-              <div className="absolute bottom-4 left-4 bg-[#243527]/95 backdrop-blur-sm text-[#E2EFE4] px-3.5 py-1.5 rounded-full border border-white/20 text-xs font-bold flex items-center gap-1.5 shadow-lg">
-                <span className="material-symbols-outlined text-sm text-[#8FD5A6]">location_on</span>
+              <div className="absolute bottom-4 left-4 bg-[#781012]/95 backdrop-blur-sm text-white px-3.5 py-1.5 rounded-full border border-gold/40 text-xs font-bold flex items-center gap-1.5 shadow-lg">
+                <span className="material-symbols-outlined text-sm text-gold">location_on</span>
                 <span>{artisan.title}</span>
               </div>
             </div>
@@ -249,7 +249,7 @@ const ArtisanDetail: React.FC = () => {
                 href={`https://www.google.com/maps/search/?api=1&query=${artisan.coords[0]},${artisan.coords[1]}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 px-4 py-2 bg-white hover:bg-gray-50 text-[#243527] rounded-xl text-xs font-bold border border-[#DDD5C7] shadow-2xs transition-colors"
+                className="inline-flex items-center gap-1.5 px-4 py-2 bg-white hover:bg-gray-50 text-primary rounded-xl text-xs font-bold border border-[#DDD5C7] shadow-2xs transition-colors"
               >
                 <span className="material-symbols-outlined text-sm text-[#9C6237]">map</span>
                 Xem vị trí xưởng trên Google Maps
@@ -268,8 +268,11 @@ const ArtisanDetail: React.FC = () => {
 
         </div>
 
-        {/* 🌟 BANNER ĐẬM SẮC VĂN HÓA (EXACT MATCH MOCKUP): "ĐÂY LÀ THỨ CÂU CHUYỆN" */}
-        <div className="bg-[#243527] rounded-[2.2rem] md:rounded-[2.8rem] p-6 sm:p-8 text-white shadow-2xl border border-[#3A4E3E] relative overflow-hidden mb-10">
+        {/* 🌟 BANNER ĐẬM SẮC VĂN HÓA: "ĐÂY LÀ THỨ CÂU CHUYỆN" */}
+        <div 
+          style={{ backgroundColor: '#781012', backgroundImage: 'linear-gradient(135deg, #8A1517 0%, #660C0E 100%)' }}
+          className="rounded-[2.2rem] md:rounded-[2.8rem] p-6 sm:p-8 text-white shadow-2xl border-2 border-gold/40 relative overflow-hidden mb-10"
+        >
           
           {/* Subtle floral watermark in background */}
           <div className="absolute right-0 top-0 translate-x-1/4 -translate-y-1/4 size-72 rounded-full bg-white/[0.02] pointer-events-none"></div>
@@ -277,21 +280,21 @@ const ArtisanDetail: React.FC = () => {
           {/* Top Bar inside banner */}
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 border-b border-white/10">
             <div className="flex items-center gap-3.5">
-              <div className="size-12 rounded-2xl bg-[#E8DDD0] text-[#7A4B24] flex items-center justify-center text-2xl shrink-0 shadow-inner">
+              <div className="size-12 rounded-2xl bg-[#FAF7F0] text-primary flex items-center justify-center text-2xl shrink-0 shadow-inner border border-gold/30">
                 🌸
               </div>
               <div>
                 <h2 className="text-xl sm:text-2xl md:text-3xl font-black text-white uppercase tracking-tight">
                   ĐÂY LÀ THỨ CÂU CHUYỆN
                 </h2>
-                <p className="text-xs sm:text-sm text-[#CFDFD3] font-medium mt-0.5">
+                <p className="text-xs sm:text-sm text-gold-light font-medium mt-0.5">
                   Không chỉ là một món hàng, mà là cả một di sản văn hóa.
                 </p>
               </div>
             </div>
 
-            <div className="bg-white/95 text-[#243527] px-4 py-2 rounded-full text-xs font-bold shadow-md border border-white/60 flex items-center gap-1.5 self-start md:self-auto">
-              <span className="material-symbols-outlined text-sm text-[#243527]">shield</span>
+            <div className="bg-white text-primary px-4 py-2 rounded-full text-xs font-bold shadow-md border border-gold/40 flex items-center gap-1.5 self-start md:self-auto">
+              <span className="material-symbols-outlined text-sm text-primary">shield</span>
               <span>Minh bạch danh tính • Thương mại di sản có trách nhiệm</span>
             </div>
           </div>
@@ -553,7 +556,7 @@ const ArtisanDetail: React.FC = () => {
               <div className="space-y-2.5 pt-2">
                 {artisan.story.map((st, i) => (
                   <div key={i} className="flex gap-3 bg-[#FAF7F0] p-3.5 rounded-xl border border-[#EADBCA]">
-                    <span className="size-5 rounded-full bg-[#243527] text-white text-[11px] font-bold flex items-center justify-center shrink-0 mt-0.5">
+                    <span className="size-5 rounded-full bg-primary text-white text-[11px] font-bold flex items-center justify-center shrink-0 mt-0.5">
                       {i + 1}
                     </span>
                     <p className="text-xs text-[#524639] leading-relaxed font-medium">
@@ -581,10 +584,13 @@ const ArtisanDetail: React.FC = () => {
                 </div>
 
                 <div className="space-y-3.5 pt-4">
-                  <div className="bg-[#243527] text-white p-4 rounded-2xl shadow-md text-left">
-                    <span className="material-symbols-outlined text-[#8FD5A6] text-xl mb-1">eco</span>
+                  <div 
+                    style={{ backgroundColor: '#781012', backgroundImage: 'linear-gradient(135deg, #8A1517 0%, #660C0E 100%)' }}
+                    className="text-white p-4 rounded-2xl shadow-md text-left border border-gold/30"
+                  >
+                    <span className="material-symbols-outlined text-gold text-xl mb-1">eco</span>
                     <h4 className="font-bold text-xs uppercase tracking-wider mb-1">Bản Sắc Bền Vững</h4>
-                    <p className="text-[11px] text-[#CFDFD3] leading-relaxed">
+                    <p className="text-[11px] text-white/90 leading-relaxed">
                       100% sợi lanh hốc đá và chàm tự nhiên không hóa chất độc hại.
                     </p>
                   </div>
@@ -667,7 +673,7 @@ const ArtisanDetail: React.FC = () => {
                     </div>
                     <button
                       onClick={() => handleBuyProduct(p)}
-                      className="px-4 py-2 bg-[#243527] hover:bg-[#1A261C] text-white rounded-xl text-xs font-bold uppercase tracking-wider active:scale-95 transition-all flex items-center gap-1.5 shadow-xs"
+                      className="px-4 py-2 bg-primary hover:brightness-110 text-white rounded-xl text-xs font-bold uppercase tracking-wider active:scale-95 transition-all flex items-center gap-1.5 shadow-xs"
                     >
                       <span className="material-symbols-outlined text-sm">shopping_bag</span>
                       Đặt mua
@@ -691,7 +697,7 @@ const ArtisanDetail: React.FC = () => {
                 to={`/artisan/${other.id}`}
                 className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-all flex items-center gap-2 border ${
                   other.id === artisan.id
-                    ? 'bg-[#243527] text-white border-[#243527] shadow-xs'
+                    ? 'bg-primary text-white border-primary shadow-xs'
                     : 'bg-[#FAF7F0] text-[#382F24] border-[#EADBCA] hover:border-[#9C6237]'
                 }`}
               >
