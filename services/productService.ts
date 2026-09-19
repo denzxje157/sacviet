@@ -11,6 +11,8 @@ export interface Product {
   image: string;
   category: string;
   created_at?: string;
+  status?: 'pending' | 'approved' | 'rejected';
+  artisanName?: string;
 }
 
 // 🎯 ĐÂY LÀ ĐỊA CHỈ KHO ẢNH SUPABASE CỦA BẠN

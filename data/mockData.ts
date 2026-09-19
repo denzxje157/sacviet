@@ -88,7 +88,7 @@ export const marketplaceData = [
   // --- 3. BRÂU ---
   { e: "BRÂU", items: [
     { n: "Gùi nhỏ (Mini/Trang trí)", p: "150.000 – 300.000 VNĐ", img: "pictures-sanpham/brau/gui-nho-mini-trang-tri.jpg", d: "Vật phẩm lưu niệm nhỏ xinh mang hồn cốt người Brâu. Dù nhỏ bé nhưng vẫn giữ nguyên kỹ thuật đan lát tinh xảo, là món quà mang hơi thở đại ngàn về phố thị." },
-    { n: "Gùi trung (Thông dụng)", p: "300.000 – 600.000 VNĐ", img: "https://upload.wikimedia.org/wikipedia/commons/c/c9/The_papoose_of_people_Ede.jpg", d: "Vật dụng gắn liền với đời sống hàng ngày, bền bỉ cùng năm tháng. Chiếc gùi theo chân người Brâu lên rẫy, xuống suối, là chứng nhân cho sự cần lao." }, // Giữ ảnh cũ do chưa có ảnh mới
+    { n: "Gùi trung (Thông dụng)", p: "300.000 – 600.000 VNĐ", img: "pictures-sanpham/brau/gui-cao-cap-an-kin-hoa-tiet.jpg", d: "Vật dụng gắn liền với đời sống hàng ngày, bền bỉ cùng năm tháng. Chiếc gùi theo chân người Brâu lên rẫy, xuống suối, là chứng nhân cho sự cần lao." },
     { n: "Gùi cao cấp (Đan kín họa tiết)", p: "1.200.000 – 1.500.000 VNĐ trở lên", img: "pictures-sanpham/brau/gui-cao-cap-an-kin-hoa-tiet.jpg", d: "Đỉnh cao của nghệ thuật đan lát Brâu. Các nan tre được nhuộm màu tự nhiên, đan cài kín kẽ tạo nên những hoa văn cổ truyền, thể hiện đẳng cấp và khiếu thẩm mỹ của người sở hữu." }
   ]},
 
@@ -106,7 +106,7 @@ export const marketplaceData = [
   // --- 6. CHƠ RO ---
   { e: "CHƠ RO", items: [
     { n: "Đàn tre Goong Cla", p: "Từ 350.000 VNĐ", img: "pictures-sanpham/cho-ro/an-tre-goong-cla.jpg", d: "Được làm từ ống tre già, tiếng đàn Goong Cla thánh thót như tiếng suối reo vui. Đây là nhạc cụ kết nối cộng đồng trong những đêm lửa trại bập bùng." },
-    { n: "Dàn Chinh (Cồng chiêng)", p: "Từ 2.500.000 VNĐ", img: "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5f/Chi%C3%AAng_%C4%91%E1%BB%93ng.jpg/330px-Chi%C3%AAng_%C4%91%E1%BB%93ng.jpg", d: "Báu vật của buôn làng. Tiếng Chinh vang lên là báo hiệu mùa lễ hội, là cầu nối giữa con người và thần linh (Yang), mang theo khát vọng về cuộc sống ấm no." } // Giữ ảnh cũ
+    { n: "Dàn Chinh (Cồng chiêng)", p: "Từ 2.500.000 VNĐ", img: "pictures-sanpham/tho/chieng-cong.jpg", d: "Báu vật của buôn làng. Tiếng Chinh vang lên là báo hiệu mùa lễ hội, là cầu nối giữa con người và thần linh (Yang), mang theo khát vọng về cuộc sống ấm no." }
   ]},
 
   // --- 7. CHU RU ---
@@ -220,7 +220,7 @@ export const marketplaceData = [
   // --- 24. KHMER ---
   { e: "KHMER", items: [
     { n: "Gùi nhỏ (Srok - Lưu niệm)", p: "150.000 – 300.000 VNĐ", img: "pictures-sanpham/khmer/gui-nho-srok-luu-niem.jpg", d: "Phiên bản nhỏ của chiếc 'Srok' đựng lúa. Món quà lưu niệm mang đậm nét văn hóa lúa nước của đồng bào Khmer Nam Bộ." },
-    { n: "Gùi trung (Phổ biến)", p: "350.000 – 600.000 VNĐ", img: "https://upload.wikimedia.org/wikipedia/commons/c/c9/The_papoose_of_people_Ede.jpg", d: "Vật dụng quen thuộc trên cánh đồng. Chiếc gùi Khmer có dáng bầu bĩnh, đan dày dặn, chứa đựng sự no ấm của mùa màng bội thu." }, // Giữ ảnh cũ
+    { n: "Gùi trung (Phổ biến)", p: "350.000 – 600.000 VNĐ", img: "pictures-sanpham/e-e/gui-an-thua-i-ray.jpeg", d: "Vật dụng quen thuộc trên cánh đồng. Chiếc gùi Khmer có dáng bầu bĩnh, đan dày dặn, chứa đựng sự no ấm của mùa màng bội thu." },
     { n: "Gùi lớn/Tinh xảo", p: "800.000 – 1.500.000 VNĐ", img: "pictures-sanpham/khmer/gui-lon-tinh-xao.gif", d: "Những chiếc gùi được đan bởi nghệ nhân lão làng, hoa văn nổi tinh tế. Đây là niềm tự hào của gia chủ, thường dùng trong các dịp lễ tết quan trọng." }
   ]},
 
@@ -265,7 +265,7 @@ export const marketplaceData = [
 
   // --- 31. LỰ ---
   { e: "LỰ", items: [
-    { n: "Túi đeo thổ cẩm", p: "200.000 – 500.000 VNĐ", img: "https://dantra.vn/uploads/san-pham/tho-cam-dan-toc/tui-tho-cam/tui-tho-cam-2.jpeg", d: "Chiếc túi nhỏ duyên dáng với họa tiết quả trám đặc trưng. Phụ kiện hoàn hảo để tôn lên vẻ đẹp mộc mạc mà tinh tế." }, // Giữ ảnh cũ
+    { n: "Túi đeo thổ cẩm", p: "200.000 – 500.000 VNĐ", img: "/artisans/tui-tho-cam.jpg", d: "Chiếc túi nhỏ duyên dáng với họa tiết quả trám đặc trưng. Phụ kiện hoàn hảo để tôn lên vẻ đẹp mộc mạc mà tinh tế." },
     { n: "Vải dệt thô", p: "200.000 – 400.000 VNĐ/mét", img: "pictures-sanpham/lu/vai-det-tho.jpg", d: "Chất liệu vải bông tự nhiên, nhuộm chàm thủ công. Vải thô mộc, thoáng mát, mang màu sắc trầm mặc của núi rừng Tây Bắc." },
     { n: "Khăn đội đầu (Pha phong)", p: "300.000 – 600.000 VNĐ", img: "pictures-sanpham/lu/khan-oi-au-pha-phong.jpg", d: "Chiếc khăn thêu hoa văn cầu kỳ, là điểm nhấn quan trọng nhất trên trang phục người phụ nữ Lự, thể hiện sự khéo léo và nết na." },
     { n: "Áo (Xưa)", p: "800.000 – 1.500.000 VNĐ", img: "pictures-sanpham/lu/ao-xua.jpg", d: "Những chiếc áo cổ truyền may theo lối xưa, đính hàng cúc bạc và thêu hoa văn tinh xảo. Một tác phẩm nghệ thuật may mặc gìn giữ hồn cốt dân tộc." },
@@ -304,7 +304,7 @@ export const marketplaceData = [
   { e: "NÙNG", items: [
     { n: "Hương sạch (Nhang)", p: "5.000 – 10.000 VNĐ/nén", img: "pictures-sanpham/nung/huong-sach-nhang.jpg", d: "Hương làm từ thảo mộc thiên nhiên, không hóa chất. Mùi thơm dịu nhẹ, thanh khiết, dâng lên tổ tiên tấm lòng thành kính nhất." },
     { n: "Sản phẩm vải chàm", p: "Từ 150.000 VNĐ", img: "pictures-sanpham/nung/san-pham-vai-cham.jpg", d: "Màu chàm thâm trầm, bền bỉ như người Nùng. Vải nhuộm thủ công nhiều lần nước chàm, có mùi thơm đặc trưng, càng mặc càng mềm mại." },
-    { n: "Chạm bạc", p: "Từ 400.000 VNĐ", img: "https://scov.gov.vn/upload/2005660/20210923/d5aef07799019eaca8e68b7388efef33img_0518.jpg", d: "Nghề chạm bạc Nùng Phản Slin tinh xảo nức tiếng. Từng nét chạm khắc hình hoa lá, chim muông trên bạc trắng tinh khôi thể hiện tài hoa bậc thầy." } // Giữ ảnh cũ
+    { n: "Chạm bạc", p: "Từ 400.000 VNĐ", img: "pictures-sanpham/dao/trang-suc-bac-cham-khac.jpg", d: "Nghề chạm bạc Nùng Phản Slin tinh xảo nức tiếng. Từng nét chạm khắc hình hoa lá, chim muông trên bạc trắng tinh khôi thể hiện tài hoa bậc thầy." }
   ]},
 
   // --- 37. Ơ ĐU ---
@@ -314,7 +314,7 @@ export const marketplaceData = [
 
   // --- 38. PÀ THẺN ---
   { e: "PÀ THẺN", items: [
-    { n: "Sản phẩm dệt thổ cẩm (Ván Chi)", p: "Từ 150.000 VNĐ trở lên", img: "https://baohagiang.vn/file/4028eaa4679b32c401679c0c74382a7e/042024/dua_sac_mau_1_20240417094932.jpg", d: "Sắc đỏ rực rỡ như lửa. Thổ cẩm Pà Thẻn nổi bật với màu đỏ chủ đạo, tượng trưng cho thần Lửa, mang lại may mắn và sức sống mãnh liệt." } // Giữ ảnh cũ
+    { n: "Sản phẩm dệt thổ cẩm (Ván Chi)", p: "Từ 150.000 VNĐ trở lên", img: "pictures-54dantoc/pa-then.jpg", d: "Sắc đỏ rực rỡ như lửa. Thổ cẩm Pà Thẻn nổi bật với màu đỏ chủ đạo, tượng trưng cho thần Lửa, mang lại may mắn và sức sống mãnh liệt." }
   ]},
 
   // --- 39. PHÙ LÁ ---
@@ -330,7 +330,7 @@ export const marketplaceData = [
   // --- 41. RƠ MĂM ---
   { e: "RƠ MĂM", items: [
     { n: "Gùi mini (Lưu niệm)", p: "150.000 – 250.000 VNĐ", img: "pictures-sanpham/ro-mam/gui-mini-luu-niem.jpg", d: "Phiên bản nhỏ nhắn, đáng yêu của chiếc gùi Rơ Măm. Món quà lưu niệm độc đáo, mang nét văn hóa của một trong những dân tộc ít người nhất Tây Nguyên." },
-    { n: "Gùi thô (Lao động)", p: "300.000 – 500.000 VNĐ", img: "https://dantra.vn/uploads/san-pham/tho-cam-dan-toc/gui-dan-toc/gui-dan-toc-6.jpg", d: "Chiếc gùi mộc mạc, bền bỉ. Được đan lát chắc chắn để chịu được sức nặng của lúa, ngô và những chuyến đi rừng dài ngày." }, // Giữ ảnh cũ
+    { n: "Gùi thô (Lao động)", p: "300.000 – 500.000 VNĐ", img: "pictures-sanpham/ba-na/gui-sinh-hoat-i-ray.jpg", d: "Chiếc gùi mộc mạc, bền bỉ. Được đan lát chắc chắn để chịu được sức nặng của lúa, ngô và những chuyến đi rừng dài ngày." },
     { n: "Gùi hoa văn (Trang trí)", p: "600.000 – 1.200.000 VNĐ", img: "pictures-sanpham/ro-mam/gui-hoa-van-trang-tri.jpg", d: "Tuyệt tác đan lát với kỹ thuật cài nan tạo hoa văn hình học. Chiếc gùi không chỉ là vật dụng mà là niềm kiêu hãnh về sự khéo léo của người Rơ Măm." }
   ]},
 

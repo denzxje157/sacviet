@@ -138,7 +138,20 @@ const AuthModal: React.FC = () => {
       }, 1500);
       
     } catch (err: any) {
-      setErrors({ form: err.message || 'Đã có lỗi xảy ra. Vui lòng thử lại.' });
+      const rawMsg = err?.message || '';
+      let friendlyMsg = 'Đã có lỗi xảy ra. Vui lòng thử lại sau.';
+      if (rawMsg.includes('Invalid login credentials')) {
+        friendlyMsg = 'Email hoặc mật khẩu không chính xác. Nếu chưa có tài khoản, vui lòng bấm "ĐĂNG KÝ NGAY" bên dưới.';
+      } else if (rawMsg.includes('Email not confirmed')) {
+        friendlyMsg = 'Email này chưa được xác thực. Vui lòng kiểm tra hộp thư đến của bạn.';
+      } else if (rawMsg.includes('User already registered')) {
+        friendlyMsg = 'Email này đã được đăng ký trước đó. Vui lòng chuyển sang tab Đăng Nhập.';
+      } else if (rawMsg.includes('Password should be at least')) {
+        friendlyMsg = 'Mật khẩu phải có ít nhất 6 ký tự.';
+      } else if (rawMsg) {
+        friendlyMsg = rawMsg;
+      }
+      setErrors({ form: friendlyMsg });
     } finally {
       setIsLoading(false);
     }
@@ -350,10 +363,30 @@ const AuthModal: React.FC = () => {
           )}
         </div>
 
+        {/* Banner dẫn sang Đăng ký Nghệ nhân */}
+        <div className="mx-6 mb-4 p-3 bg-[#FAF7F0] border border-gold/30 rounded-2xl flex items-center justify-between gap-3 shadow-sm">
+          <div className="flex items-center gap-2.5 text-left">
+            <span className="size-8 rounded-xl bg-gold/20 text-gold-dark flex items-center justify-center shrink-0 border border-gold/30">
+              <span className="material-symbols-outlined text-lg">storefront</span>
+            </span>
+            <div>
+              <div className="text-[11px] font-black text-text-main">Bạn là Nghệ nhân / Làng nghề?</div>
+              <div className="text-[10px] text-text-soft">Đăng ký mở gian hàng bán sản phẩm</div>
+            </div>
+          </div>
+          <a
+            href="#/seller-portal?register=true"
+            onClick={() => toggleAuthModal()}
+            className="px-3 py-1.5 bg-primary hover:brightness-110 text-white font-black text-[10px] uppercase rounded-xl shadow whitespace-nowrap active:scale-95 transition-transform"
+          >
+            Đăng Ký Bán Hàng &rarr;
+          </a>
+        </div>
+
         {!successMessage && mode !== 'forgot' && (
-          <div className="p-6 pt-4 bg-white border-t border-gold/10 text-center shrink-0">
+          <div className="p-6 pt-2 bg-white border-t border-gold/10 text-center shrink-0">
             <p className="text-sm text-text-soft font-medium">
-              {mode === 'login' ? 'Chưa có tài khoản?' : 'Đã có tài khoản?'}
+              {mode === 'login' ? 'Chưa có tài khoản khách mua?' : 'Đã có tài khoản?'}
               <button 
                 type="button"
                 onClick={() => setMode(mode === 'login' ? 'register' : 'login')}

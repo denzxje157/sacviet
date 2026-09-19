@@ -15,6 +15,7 @@ import Blog from './pages/Blog';
 import BlogDetail from './pages/BlogDetail';
 import ArtisansList from './pages/ArtisansList.tsx';
 import ArtisanDetail from './pages/ArtisanDetail.tsx';
+import ArtisanPortal from './pages/ArtisanPortal.tsx';
 
 // Admin Pages
 import AdminDashboard from './pages/admin/AdminDashboard.tsx';
@@ -22,7 +23,8 @@ import ProductManagement from './pages/admin/ProductManagement.tsx';
 import OrderManagement from './pages/admin/OrderManagement.tsx';
 import UserManagement from './pages/admin/UserManagement.tsx';
 import ContentManagement from './pages/admin/ContentManagement.tsx';
-import SeoManagement from './pages/admin/SeoManagement.tsx'; // THÊM DÒNG NÀY
+import SeoManagement from './pages/admin/SeoManagement.tsx';
+import ArtisanModeration from './pages/admin/ArtisanModeration.tsx';
 import ResetPassword from './pages/ResetPassword.tsx';
 
 const ScrollToTop = () => {
@@ -48,6 +50,7 @@ const App: React.FC = () => {
           <Routes>
             {/* Admin Routes */}
             <Route path="/admin/dashboard" element={<AdminDashboard />} />
+            <Route path="/admin/artisan-approvals" element={<ArtisanModeration />} />
             <Route path="/admin/products" element={<ProductManagement />} />
             <Route path="/admin/orders" element={<OrderManagement />} />
             <Route path="/admin/users" element={<UserManagement />} />
@@ -71,6 +74,7 @@ const App: React.FC = () => {
                       <Route path="/artisans" element={<ArtisansList />} />
                       <Route path="/artisan" element={<ArtisanDetail />} />
                       <Route path="/artisan/:id" element={<ArtisanDetail />} />
+                      <Route path="/seller-portal" element={<ArtisanPortal />} />
                       <Route path="/library" element={<Library />} />
                       <Route path="/blog" element={<Blog />} />
                       <Route path="/blog/:slug" element={<BlogDetail />} />

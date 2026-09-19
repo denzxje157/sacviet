@@ -179,7 +179,7 @@ export const artisanData: Artisan[] = [
     yearsOfCraft: 42,
     craftType: 'Dệt thổ cẩm cổ truyền Champa',
     avatar: '/artisans/dang-thi-truong.jpg',
-    coverImg: '/artisans/weaving-fabric.jpg',
+    coverImg: '/artisans/cham-textile.png',
     quote: 'Tiếng thoi đưa kẽo kẹt là nhịp tim của buôn làng Chăm. Tôi dệt không chỉ để mưu sinh, mà để con cháu ngàn đời sau không quên hồn cốt Champa.',
     bio: 'Sinh ra và lớn lên trong cái nôi dệt Mỹ Nghiệp hơn 800 năm tuổi, Nghệ nhân Ưu tú Đàng Thị Trương đã dành trọn hơn 4 thập kỷ giữ lửa cho từng sợi bông, luống thoi. Bà là một trong những nghệ nhân tiêu biểu bậc nhất còn lưu giữ trọn vẹn kỹ thuật dệt hoa văn nổi hai mặt tinh xảo của người Chăm.',
     story: [
@@ -258,7 +258,7 @@ export const artisanData: Artisan[] = [
         price: '420.000 VNĐ',
         priceValue: 420000,
         timeToCraft: '7 ngày dệt tay',
-        img: '/artisans/weaving-fabric.jpg',
+        img: '/pictures-sanpham/cham/san-pham-det-tho-cam-my-nghiep.png',
         category: 'Phụ kiện thời trang',
         soldCount: 115,
         desc: 'Khăn choàng mềm mịn, thấm hút mồ hôi tự nhiên, mang gam màu đỏ vàng trầm ấm của nắng gió duyên hải Nam Trung Bộ.'
@@ -276,9 +276,9 @@ export const artisanData: Artisan[] = [
       }
     ],
     gallery: [
-      'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=600&auto=format&fit=crop',
-      'https://images.unsplash.com/photo-1544717305-2782549b5136?w=600&auto=format&fit=crop',
-      'https://images.unsplash.com/photo-1584917865442-de89df76afd3?w=600&auto=format&fit=crop'
+      '/artisans/cham-textile.png',
+      '/pictures-sanpham/cham/san-pham-det-tho-cam-my-nghiep.png',
+      '/artisans/tui-tho-cam.jpg'
     ],
     contactZalo: '0987654321'
   },
@@ -294,7 +294,7 @@ export const artisanData: Artisan[] = [
     yearsOfCraft: 45,
     craftType: 'Gốm cổ nặn tay Bàu Trúc (UNESCO)',
     avatar: '/artisans/dang-thi-phan.jpg',
-    coverImg: 'https://images.unsplash.com/photo-1565193566173-7a0ee3dbe261?w=1400&auto=format&fit=crop',
+    coverImg: '/artisans/artisan-pottery.jpg',
     quote: 'Ở Bàu Trúc chúng tôi không dùng bàn xoay máy. Phụ nữ Chăm đi giật lùi quanh khối đất, gửi cả hơi ấm bàn tay và linh hồn vào từng thớ gốm.',
     bio: 'Bà Đàng Thị Phan là nghệ nhân kỳ cựu của Làng gốm Bàu Trúc — làng gốm cổ xưa bậc nhất Đông Nam Á được UNESCO ghi danh vào Danh sách Di sản văn hóa phi vật thể cần bảo vệ khẩn cấp. Suốt 45 năm qua, bà chỉ dùng đôi chân đi lùi và đôi tay trần nhào nặn đất sét sông Quao.',
     story: [
@@ -363,7 +363,7 @@ export const artisanData: Artisan[] = [
         price: '850.000 VNĐ',
         priceValue: 850000,
         timeToCraft: '10 ngày nhào nặn & nung lộ thiên',
-        img: 'https://cazllsidgvysyxbvrftq.supabase.co/storage/v1/object/public/images-sacviet/pictures-sanpham/cham/gom-ban-xoay-bau-truc.jpg',
+        img: '/artisans/cham-pottery.jpg',
         category: 'Gốm trang trí phong thủy',
         soldCount: 71,
         desc: 'Bình gốm cổ mang dáng dấp chiếc lu nước Chăm, vân ám khói đen đỏ tự nhiên, hút tài lộc và cân bằng sinh khí cho gian nhà.'
@@ -374,7 +374,7 @@ export const artisanData: Artisan[] = [
         price: '1.200.000 VNĐ',
         priceValue: 1200000,
         timeToCraft: '14 ngày chạm khắc tay',
-        img: 'https://images.unsplash.com/photo-1565193566173-7a0ee3dbe261?w=600&auto=format&fit=crop',
+        img: '/artisans/artisan-pottery.jpg',
         category: 'Tượng nghệ thuật',
         soldCount: 39,
         desc: 'Tượng điêu khắc vũ nữ Apsara mềm mại uyển chuyển, toát lên vẻ đẹp huyền bí của nền văn minh Champa cổ đại.'
@@ -385,15 +385,16 @@ export const artisanData: Artisan[] = [
         price: '480.000 VNĐ',
         priceValue: 480000,
         timeToCraft: '7 ngày hoàn thiện',
-        img: 'https://images.unsplash.com/photo-1612196808214-b8e1d6145a8c?w=600&auto=format&fit=crop',
+        img: '/artisans/cham-pottery.jpg',
         category: 'Gốm gia dụng',
         soldCount: 88,
         desc: 'Lọ hoa mộc mạc lưu giữ nét thô ráp của đất nung tự nhiên, giúp hoa tươi lâu và tạo điểm nhấn ấm áp cho không gian sống.'
       }
     ],
     gallery: [
-      'https://images.unsplash.com/photo-1565193566173-7a0ee3dbe261?w=600&auto=format&fit=crop',
-      'https://images.unsplash.com/photo-1612196808214-b8e1d6145a8c?w=600&auto=format&fit=crop'
+      '/artisans/bau-truc-artisan-0.jpg',
+      '/artisans/artisan-pottery.jpg',
+      '/artisans/cham-pottery.jpg'
     ],
     contactZalo: '0987654321'
   },
@@ -409,7 +410,7 @@ export const artisanData: Artisan[] = [
     yearsOfCraft: 50,
     craftType: 'Đan lát mây tre & Tạc tượng gỗ Tây Nguyên',
     avatar: '/artisans/y-sinh.jpg',
-    coverImg: 'https://images.unsplash.com/photo-1511497584788-87676104235f?w=1400&auto=format&fit=crop',
+    coverImg: '/artisans/y-sinh.jpg',
     quote: 'Chiếc gùi Ba Na không chỉ cõng bắp ngô trên nương rẫy. Nó cõng cả tuổi thơ những đứa trẻ ngủ say trên lưng mẹ và niềm tự hào của người đàn ông đại ngàn.',
     bio: 'Bên dòng sông Đăk Bla huyền thoại chảy ngược, Già làng Y Sinh là cây đại thụ giữ lửa của buôn làng Kon K\'tu. Đôi bàn tay chai sần của ông đã vót hàng triệu nan tre, tạo tác nên những chiếc gùi hoa văn K\'tơh tinh xảo vang danh khắp núi rừng Tây Nguyên.',
     story: [
@@ -477,7 +478,7 @@ export const artisanData: Artisan[] = [
         price: '1.600.000 VNĐ',
         priceValue: 1600000,
         timeToCraft: '18 ngày vót nan & đan kín',
-        img: 'https://cazllsidgvysyxbvrftq.supabase.co/storage/v1/object/public/images-sacviet/pictures-sanpham/ba-na/gui-hoa-van-tinh-xao-co-nap.jpg',
+        img: '/pictures-sanpham/ba-na/gui-hoa-van-tinh-xao-co-nap.jpg',
         category: 'Gùi truyền thống cao cấp',
         soldCount: 38,
         desc: 'Kiệt tác đan lát đỉnh cao của già Y Sinh, nan mây nhuộm màu tự nhiên, có nắp đậy khít chống nước, dùng trang trí hoặc đựng bảo vật gia đình.'
@@ -488,26 +489,26 @@ export const artisanData: Artisan[] = [
         price: '380.000 VNĐ',
         priceValue: 380000,
         timeToCraft: '6 ngày chế tác',
-        img: 'https://cazllsidgvysyxbvrftq.supabase.co/storage/v1/object/public/images-sacviet/pictures-sanpham/ba-na/gui-mua-bieu-dien.webp',
+        img: '/pictures-sanpham/ba-na/gui-mua-bieu-dien.webp',
         category: 'Gùi múa nghệ thuật',
         soldCount: 65,
         desc: 'Chiếc gùi nhẹ nhàng thanh thoát, quai đan êm ái, mang lại vẻ duyên dáng uyển chuyển trong từng nhịp xoang lễ hội.'
       },
       {
         id: 'bana-sp-3',
-        name: 'Mô Hình Nhà Rông Kon Tum Thủ Công Bằng Tre Nứa',
-        price: '450.000 VNĐ',
-        priceValue: 450000,
-        timeToCraft: '8 ngày ghép thủ công',
-        img: 'https://images.unsplash.com/photo-1511497584788-87676104235f?w=600&auto=format&fit=crop',
-        category: 'Mô hình văn hóa',
+        name: 'Gùi Sinh Hoạt Đi Rẫy Ba Na Đan Mây Già',
+        price: '550.000 VNĐ',
+        priceValue: 550000,
+        timeToCraft: '8 ngày đan thủ công',
+        img: '/pictures-sanpham/ba-na/gui-sinh-hoat-i-ray.jpg',
+        category: 'Mây tre đan lát',
         soldCount: 52,
-        desc: "Tái hiện nguyên bản tỉ lệ nhà Rông Kon K'tu với mái cao vút như lưỡi búa chém mây, biểu tượng kiêu hãnh của Tây Nguyên."
+        desc: "Đan từ mây tre già bền bỉ, chiếc gùi này theo chân người Ba Na lên rẫy, xuống suối, là chứng nhân cho sự cần lao."
       }
     ],
     gallery: [
-      'https://images.unsplash.com/photo-1511497584788-87676104235f?w=600&auto=format&fit=crop',
-      'https://images.unsplash.com/photo-1544717305-2782549b5136?w=600&auto=format&fit=crop'
+      '/artisans/y-sinh.jpg',
+      '/pictures-sanpham/ba-na/gui-sinh-hoat-i-ray.jpg'
     ],
     contactZalo: '0987654321'
   },
@@ -523,7 +524,7 @@ export const artisanData: Artisan[] = [
     yearsOfCraft: 32,
     craftType: 'Dệt Dèng cườm ngũ sắc Tà Ôi (Di sản Quốc gia)',
     avatar: '/artisans/mai-thi-hop.jpg',
-    coverImg: 'https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9?w=1400&auto=format&fit=crop',
+    coverImg: '/artisans/mai-thi-hop.jpg',
     quote: 'Để làm nên một tấm Dèng, người phụ nữ Tà Ôi phải luồn từng hạt cườm chì vào từng sợi chỉ. Sai một hạt là phải tháo cả ngày dệt lại từ đầu.',
     bio: 'Nghệ nhân Mai Thị Hợp là linh hồn của nghề dệt Dèng tại thung lũng A Lưới. Kỹ thuật đính cườm trực tiếp vào sợi chỉ dệt khi thoi đang chạy là bí truyền độc nhất vô nhị của người Tà Ôi, đã được Bộ Văn hóa Thể thao và Du lịch vinh danh là Di sản văn hóa phi vật thể Quốc gia.',
     story: [
@@ -591,7 +592,7 @@ export const artisanData: Artisan[] = [
         price: '2.800.000 VNĐ',
         priceValue: 2800000,
         timeToCraft: '30 ngày gài cườm thủ công',
-        img: 'https://cazllsidgvysyxbvrftq.supabase.co/storage/v1/object/public/images-sacviet/pictures-sanpham/ta-oi/vai-zeng.jpg',
+        img: '/pictures-sanpham/ta-oi/san-pham-det-tu-zeng-luu-niem-gia-dung.jpg',
         category: 'Dèng nghi lễ cao cấp',
         soldCount: 21,
         desc: 'Tuyệt phẩm Dèng đính cườm thủ công tinh xảo, thể hiện quyền quý và vị thế cao quý của chủ nhân trong các dịp lễ hội truyền thống.'
@@ -602,26 +603,27 @@ export const artisanData: Artisan[] = [
         price: '790.000 VNĐ',
         priceValue: 790000,
         timeToCraft: '12 ngày dệt tay',
-        img: 'https://images.unsplash.com/photo-1607344645866-009c320c5ab8?w=600&auto=format&fit=crop',
+        img: '/pictures-sanpham/ta-oi/san-pham-det-tu-zeng-luu-niem-gia-dung.jpg',
         category: 'Khăn choàng di sản',
         soldCount: 45,
         desc: 'Khăn Dèng mềm mại với dải cườm gài mép tinh tế, điểm nhấn quý phái cho trang phục dạ hội và công sở hiện đại.'
       },
       {
         id: 'taoi-sp-3',
-        name: 'Cà Vạt Thổ Cẩm Zèng A Lưới Điểm Cườm Độc Bản',
-        price: '290.000 VNĐ',
-        priceValue: 290000,
+        name: 'Túi Thổ Cẩm Zèng A Lưới Điểm Cườm Độc Bản',
+        price: '380.000 VNĐ',
+        priceValue: 380000,
         timeToCraft: '5 ngày hoàn thiện',
-        img: 'https://dantra.vn/uploads/san-pham/tho-cam-dan-toc/tui-tho-cam/tui-tho-cam-2.jpeg',
+        img: '/artisans/tui-tho-cam.jpg',
         category: 'Phụ kiện cao cấp',
         soldCount: 78,
-        desc: 'Món quà ngoại giao văn hóa ý nghĩa, kết hợp hài hòa giữa nét trang trọng của âu phục và linh hồn di sản Trường Sơn.'
+        desc: 'Món quà ngoại giao văn hóa ý nghĩa, kết hợp hài hòa giữa nét trang trọng và linh hồn di sản Trường Sơn.'
       }
     ],
     gallery: [
-      'https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9?w=600&auto=format&fit=crop',
-      'https://images.unsplash.com/photo-1544717305-2782549b5136?w=600&auto=format&fit=crop'
+      '/artisans/mai-thi-hop.jpg',
+      '/pictures-sanpham/ta-oi/san-pham-det-tu-zeng-luu-niem-gia-dung.jpg',
+      '/artisans/tui-tho-cam.jpg'
     ],
     contactZalo: '0987654321'
   },
@@ -637,7 +639,7 @@ export const artisanData: Artisan[] = [
     yearsOfCraft: 40,
     craftType: 'Dệt thổ cẩm mẫu hệ Ê Đê & Làm gùi',
     avatar: '/artisans/h-yam-bkrong.jpg',
-    coverImg: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=1400&auto=format&fit=crop',
+    coverImg: '/pictures-sanpham/e-e/gui-an-kin-hoa-tiet.jpg',
     quote: 'Người phụ nữ Ê Đê trong chế độ mẫu hệ thể hiện sự dịu dàng mà kiên cường qua từng đường chỉ đỏ đen. Tấm chăn k’pă dệt nên là hơi ấm che chở cả gia đình.',
     bio: "Bà H'Yam Bkrông là Giám đốc HTX Dệt thổ cẩm Tơng Bông — người phụ nữ Ê Đê kiên cường đã chèo lái hợp tác xã dệt qua bao thăng trầm, đưa tấm thổ cẩm truyền thống của buôn Tơng Jút thành những sản phẩm thời trang cao cấp phục vụ du khách trong và ngoài nước.",
     story: [
@@ -701,14 +703,14 @@ export const artisanData: Artisan[] = [
     products: [
       {
         id: 'ede-sp-1',
-        name: 'Áo Thổ Cẩm Nữ Ê Đê Thêu Hoa Văn Kỳ Đà',
-        price: '1.350.000 VNĐ',
-        priceValue: 1350000,
-        timeToCraft: '16 ngày dệt tay tỉ mỉ',
-        img: 'https://images.unsplash.com/photo-1544717305-2782549b5136?w=600&auto=format&fit=crop',
-        category: 'Trang phục nữ Ê Đê',
+        name: 'Gùi Đan Kín Họa Tiết Đại Ngàn Ê Đê',
+        price: '1.450.000 VNĐ',
+        priceValue: 1450000,
+        timeToCraft: '16 ngày đan tay tỉ mỉ',
+        img: '/pictures-sanpham/e-e/gui-an-kin-hoa-tiet.jpg',
+        category: 'Đan lát truyền thống',
         soldCount: 53,
-        desc: 'Áo chui đầu dáng ngắn truyền thống Ê Đê, hoa văn dải đỏ đen sắc nét, tôn vinh vẻ đẹp khỏe khoắn, tự tin của người phụ nữ Tây Nguyên.'
+        desc: 'Tác phẩm đan lát mây tre tinh xảo trên lưng người phụ nữ Ê Đê, hoa văn đen đỏ nổi bật trên nền tre vàng óng ả.'
       },
       {
         id: 'ede-sp-2',
@@ -716,26 +718,27 @@ export const artisanData: Artisan[] = [
         price: '380.000 VNĐ',
         priceValue: 380000,
         timeToCraft: '7 ngày hoàn thiện',
-        img: 'https://images.unsplash.com/photo-1607344645866-009c320c5ab8?w=600&auto=format&fit=crop',
+        img: '/pictures-sanpham/cham/san-pham-det-tho-cam-my-nghiep.png',
         category: 'Khăn thổ cẩm',
         soldCount: 88,
         desc: 'Khăn dệt chất liệu sợi bông thiên nhiên thoáng mát, viền tua rua thắt nút thủ công, phong cách mộc mạc thanh lịch.'
       },
       {
         id: 'ede-sp-3',
-        name: 'Túi Thổ Cẩm Du Lịch Phối Da Bò Tơng Bông',
-        price: '590.000 VNĐ',
-        priceValue: 590000,
-        timeToCraft: '9 ngày chế tác',
-        img: 'https://dantra.vn/uploads/san-pham/tho-cam-dan-toc/tui-tho-cam/tui-tho-cam-2.jpeg',
+        name: 'Túi Thổ Cẩm Du Lịch Đeo Vai Buôn Tơng Jú',
+        price: '350.000 VNĐ',
+        priceValue: 350000,
+        timeToCraft: '5 ngày chế tác',
+        img: '/artisans/tui-tho-cam.jpg',
         category: 'Túi du lịch cao cấp',
         soldCount: 64,
-        desc: 'Sự kết hợp hoàn hảo giữa thổ cẩm Ê Đê dệt tay và da bò sáp thật, quai đeo bền bỉ, phong cách dã ngoại đậm chất du mục.'
+        desc: 'Sự kết hợp hoàn hảo giữa thổ cẩm Ê Đê dệt tay và quai đeo chắc chắn, phong cách mộc mạc đậm chất Tây Nguyên.'
       }
     ],
     gallery: [
-      'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=600&auto=format&fit=crop',
-      'https://images.unsplash.com/photo-1544717305-2782549b5136?w=600&auto=format&fit=crop'
+      '/artisans/h-yam-bkrong.jpg',
+      '/pictures-sanpham/e-e/gui-an-kin-hoa-tiet.jpg',
+      '/artisans/tui-tho-cam.jpg'
     ],
     contactZalo: '0987654321'
   }

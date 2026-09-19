@@ -6,6 +6,7 @@ import { useCart } from '../context/CartContext.tsx';
 import { supabase } from '../services/supabaseClient.ts'; 
 import { marketplaceData } from '../data/mockData.ts';
 import { getArtisanByEthnic, artisanData } from '../data/artisanData.ts';
+import { artisanPortalService } from '../services/artisanPortalService.ts';
 
 interface Product {
   id: string;
@@ -228,28 +229,60 @@ const Marketplace: React.FC = () => {
     const fetchProducts = async () => {
       setIsLoading(true);
       try {
-        const { data, error } = await supabase.from('san_pham').select('*, dan_toc(ten_dan_toc)');
-        if (error) throw error;
-        if (data) {
-          const mapped = data.map(p => ({
-            id: p.id,
-            name: p.ten_san_pham,
-            ethnic: p.dan_toc?.ten_dan_toc || 'Khác',
-            stock: p.so_luong || 0,
-            price: p.gia,
-            priceValue: parseInt(p.gia?.replace(/\D/g, '') || '0'),
-            desc: p.mo_ta,
-            artisan: "Nghệ nhân bản địa",
-            exp: "Lâu năm",
-            img: p.anh_san_pham?.replace('/public/images/', '/public/images-sacviet/'),
-            sold: Math.floor(Math.random() * 50) + 10,
-            likes: Math.floor(Math.random() * 300) + 50, // Lượt thích tự động
-            category: 'Thủ công'
-          }));
-          setProducts(mapped);
+        // 1. Tải sản phẩm từ Kênh Nghệ Nhân (sản phẩm đã được Admin thẩm định và duyệt)
+        const artisanProds = await artisanPortalService.getApprovedProductsForMarketplace();
+        const mappedArtisanProds: Product[] = (artisanProds || []).map(ap => ({
+          id: ap.id,
+          name: ap.name,
+          ethnic: ap.ethnic || 'Khác',
+          stock: ap.stock ?? 10,
+          price: `${ap.price.toLocaleString('vi-VN')} đ`,
+          priceValue: ap.price,
+          desc: ap.heritageStory || 'Sản phẩm thủ công truyền thống do nghệ nhân bản địa chế tác.',
+          artisan: ap.artisanName || 'Nghệ nhân bản địa',
+          exp: ap.craftTimeDays ? `Chế tác ${ap.craftTimeDays} ngày` : 'Nghệ nhân di sản',
+          img: ap.image || 'https://placehold.co/600x600?text=Sac+Viet',
+          sold: ap.sold || 0,
+          likes: Math.floor(Math.random() * 200) + 60,
+          category: ap.category || 'Thủ công'
+        }));
+
+        // 2. Tải sản phẩm từ cơ sở dữ liệu Supabase
+        let mappedSupabase: Product[] = [];
+        try {
+          const { data, error } = await supabase.from('san_pham').select('*, dan_toc(ten_dan_toc)');
+          if (!error && data) {
+            mappedSupabase = data.map(p => ({
+              id: p.id,
+              name: p.ten_san_pham,
+              ethnic: p.dan_toc?.ten_dan_toc || 'Khác',
+              stock: p.so_luong || 0,
+              price: p.gia,
+              priceValue: parseInt(p.gia?.replace(/\D/g, '') || '0'),
+              desc: p.mo_ta,
+              artisan: "Nghệ nhân bản địa",
+              exp: "Lâu năm",
+              img: p.anh_san_pham?.replace('/public/images/', '/public/images-sacviet/'),
+              sold: Math.floor(Math.random() * 50) + 10,
+              likes: Math.floor(Math.random() * 300) + 50,
+              category: 'Thủ công'
+            }));
+          }
+        } catch (dbErr) {
+          console.warn("Lỗi tải Supabase (tiếp tục với sản phẩm nghệ nhân):", dbErr);
         }
-      } catch (err) { console.error("Lỗi tải sản phẩm:", err); }
-      setIsLoading(false);
+
+        // Kết hợp: Sản phẩm của Nghệ nhân trực tuyến xuất hiện ngay ở đầu Chợ Phiên
+        const combined = [
+          ...mappedArtisanProds,
+          ...mappedSupabase.filter(sp => !mappedArtisanProds.some(ap => ap.name.toLowerCase() === sp.name.toLowerCase()))
+        ];
+        setProducts(combined);
+      } catch (err) {
+        console.error("Lỗi tải sản phẩm:", err);
+      } finally {
+        setIsLoading(false);
+      }
     };
     fetchProducts();
   }, []);
@@ -300,8 +333,8 @@ const Marketplace: React.FC = () => {
         
         <section className="relative rounded-[2rem] md:rounded-[3.5rem] overflow-hidden mb-8 md:mb-12 h-48 md:h-80 flex items-center shadow-2xl border-4 border-white">
           <div className="absolute inset-0 bg-cover bg-center" style={{backgroundImage: "url('https://topsapa.vn/uploads/2023/04/07/nguoi-dan-o-cho-phien-bac-ha-rat-chat-phac-va-gian-di-mac-nh_cufz0_042151300.png')"}}>
-            <div className="absolute inset-0 bg-black/60 mix-blend-multiply"></div>
-            <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/20 to-transparent"></div>
+            <div className="absolute inset-0 bg-primary/70 mix-blend-multiply"></div>
+            <div className="absolute inset-0 bg-gradient-to-r from-primary/90 via-primary/40 to-transparent"></div>
           </div>
           <div className="relative z-10 px-6 md:px-16 max-w-3xl text-left">
             <h2 className="text-2xl sm:text-3xl md:text-5xl lg:text-7xl font-black text-white mb-2 md:mb-4 italic uppercase tracking-tighter drop-shadow-2xl">CHỢ <span className="text-gold">PHIÊN</span></h2>

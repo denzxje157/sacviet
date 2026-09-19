@@ -17,8 +17,8 @@ const Navbar: React.FC = () => {
     { name: 'Trang chủ', path: '/' },
     { name: 'Nghệ Nhân', path: '/artisans' },
     { name: 'Chợ Phiên', path: '/marketplace' },
+    { name: 'Kênh Nghệ Nhân', path: '/seller-portal' },
     { name: 'Thư viện', path: '/library' },
-    { name: 'Góc Nhìn', path: '/blog' },
     { name: 'Cộng đồng', path: '/community' },
   ];
 
@@ -152,6 +152,10 @@ const Navbar: React.FC = () => {
                       
                       <Link to="/orders" className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-text-main hover:bg-gold/10 rounded-xl transition-colors" onClick={() => setIsUserMenuOpen(false)}>
                         <span className="material-symbols-outlined text-base">receipt_long</span> Đơn hàng của tôi
+                      </Link>
+
+                      <Link to="/seller-portal" className="flex items-center gap-3 px-3 py-2.5 text-sm font-bold text-primary bg-primary/5 hover:bg-primary/10 rounded-xl transition-colors" onClick={() => setIsUserMenuOpen(false)}>
+                        <span className="material-symbols-outlined text-base text-primary">storefront</span> Kênh Bán Hàng Nghệ Nhân
                       </Link>
                       
                       {/* NÚT ĐỔI MẬT KHẨU MỚI THÊM VÀO ĐÂY */}

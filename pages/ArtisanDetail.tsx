@@ -573,7 +573,7 @@ const ArtisanDetail: React.FC = () => {
                   <div className="rounded-2xl overflow-hidden border border-[#EADBCA] shadow-md aspect-[4/5] bg-gray-100">
                     <img
                       src={artisan.coverImg}
-                      alt="Không gian dệt Lùng Tám"
+                      alt={`Không gian chế tác của ${artisan.name}`}
                       className="w-full h-full object-cover hover:scale-105 transition-transform duration-700"
                     />
                   </div>
@@ -591,13 +591,13 @@ const ArtisanDetail: React.FC = () => {
                     <span className="material-symbols-outlined text-gold text-xl mb-1">eco</span>
                     <h4 className="font-bold text-xs uppercase tracking-wider mb-1">Bản Sắc Bền Vững</h4>
                     <p className="text-[11px] text-white/90 leading-relaxed">
-                      100% sợi lanh hốc đá và chàm tự nhiên không hóa chất độc hại.
+                      Sản phẩm làm từ nguyên liệu địa phương thuần khiết, gìn giữ môi sinh và tri thức ngàn đời.
                     </p>
                   </div>
                   <div className="rounded-2xl overflow-hidden border border-[#EADBCA] shadow-md aspect-[4/5] bg-gray-100">
                     <img
                       src={artisan.gallery && artisan.gallery[1] ? artisan.gallery[1] : artisan.avatar}
-                      alt="Vẽ sáp ong thủ công"
+                      alt={`Tác phẩm thủ công ${artisan.craftType}`}
                       className="w-full h-full object-cover hover:scale-105 transition-transform duration-700"
                     />
                   </div>

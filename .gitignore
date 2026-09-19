@@ -1,3 +1,3 @@
 node_modules
-dist
 .env
+seed_orders.cjs

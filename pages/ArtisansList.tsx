@@ -48,40 +48,60 @@ const ArtisansList: React.FC = () => {
           </p>
 
           {/* UVP BANNER - GIÁ TRỊ CỐT LÕI */}
-          <div className="pt-2 max-w-4xl mx-auto">
-            <div 
-              style={{ backgroundColor: '#781012', backgroundImage: 'linear-gradient(135deg, #8A1517 0%, #660C0E 100%)' }} 
-              className="p-4 sm:p-5 rounded-3xl border-2 border-gold/40 shadow-xl grid grid-cols-1 sm:grid-cols-3 gap-3 text-left"
-            >
-              <div className="bg-[#FAF7F0] p-3.5 rounded-2xl flex items-center gap-3 border border-gold/30 shadow-sm hover:scale-[1.02] transition-transform">
-                <div className="size-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0 border border-primary/20">
-                  <span className="material-symbols-outlined text-xl">person_pin</span>
+          <div className="pt-2 max-w-4xl mx-auto space-y-4">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-left">
+              <div className="bg-white p-4 rounded-2xl flex items-center gap-3 border-2 border-gold/30 shadow-sm hover:shadow-md hover:border-gold transition-all">
+                <div className="size-11 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0 border border-primary/20">
+                  <span className="material-symbols-outlined text-2xl">person_pin</span>
                 </div>
                 <div>
                   <h4 className="text-xs font-black uppercase text-primary tracking-wide">Danh Tính Minh Bạch</h4>
-                  <p className="text-[11px] text-[#5C4B4B] font-medium">Tên thật, buôn làng thật, bảo chứng OCOP.</p>
+                  <p className="text-[11px] text-[#5C4B4B] font-medium leading-tight mt-0.5">Tên thật, buôn làng thật, bảo chứng OCOP.</p>
                 </div>
               </div>
 
-              <div className="bg-[#FAF7F0] p-3.5 rounded-2xl flex items-center gap-3 border border-gold/30 shadow-sm hover:scale-[1.02] transition-transform">
-                <div className="size-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0 border border-primary/20">
-                  <span className="material-symbols-outlined text-xl">auto_stories</span>
+              <div className="bg-white p-4 rounded-2xl flex items-center gap-3 border-2 border-gold/30 shadow-sm hover:shadow-md hover:border-gold transition-all">
+                <div className="size-11 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0 border border-primary/20">
+                  <span className="material-symbols-outlined text-2xl">auto_stories</span>
                 </div>
                 <div>
                   <h4 className="text-xs font-black uppercase text-primary tracking-wide">Ý Nghĩa Hoa Văn</h4>
-                  <p className="text-[11px] text-[#5C4B4B] font-medium">Giải mã mật mã văn hóa từng nét dệt/nặn.</p>
+                  <p className="text-[11px] text-[#5C4B4B] font-medium leading-tight mt-0.5">Giải mã mật mã văn hóa từng nét dệt/nặn.</p>
                 </div>
               </div>
 
-              <div className="bg-[#FAF7F0] p-3.5 rounded-2xl flex items-center gap-3 border border-gold/30 shadow-sm hover:scale-[1.02] transition-transform">
-                <div className="size-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0 border border-primary/20">
-                  <span className="material-symbols-outlined text-xl">volunteer_activism</span>
+              <div className="bg-white p-4 rounded-2xl flex items-center gap-3 border-2 border-gold/30 shadow-sm hover:shadow-md hover:border-gold transition-all">
+                <div className="size-11 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0 border border-primary/20">
+                  <span className="material-symbols-outlined text-2xl">volunteer_activism</span>
                 </div>
                 <div>
                   <h4 className="text-xs font-black uppercase text-primary tracking-wide">Thương Mại Công Bằng</h4>
-                  <p className="text-[11px] text-[#5C4B4B] font-medium">Thu nhập trực tiếp nuôi sống gia đình nghệ nhân.</p>
+                  <p className="text-[11px] text-[#5C4B4B] font-medium leading-tight mt-0.5">Thu nhập trực tiếp nuôi sống gia đình nghệ nhân.</p>
                 </div>
               </div>
+            </div>
+
+            {/* BANNER MỜI NGHỆ NHÂN / CON CHÁU MỞ GIAN HÀNG (SÁNG RỰC RỠ, ĐẬM CHẤT SẮC VIỆT) */}
+            <div 
+              style={{ backgroundColor: '#781012', backgroundImage: 'linear-gradient(135deg, #8B1A1A 0%, #660C0E 100%)' }}
+              className="flex flex-col sm:flex-row items-center justify-between p-5 md:p-6 border-2 border-gold/50 rounded-2xl gap-4 shadow-xl text-white"
+            >
+              <div className="flex items-center gap-3.5 text-left">
+                <span className="size-12 rounded-2xl bg-gold/20 text-gold flex items-center justify-center shrink-0 border border-gold/40 shadow-inner">
+                  <span className="material-symbols-outlined text-2xl">storefront</span>
+                </span>
+                <div>
+                  <div className="text-sm font-black text-gold uppercase tracking-wider">Dành Cho Nghệ Nhân & Con Cháu Làng Nghề</div>
+                  <div className="text-xs text-stone-200 mt-0.5 font-medium">Bạn muốn mở gian hàng bán sản phẩm thủ công và quản lý đơn bưu tá lấy tận nơi?</div>
+                </div>
+              </div>
+              <Link 
+                to="/seller-portal?register=true" 
+                className="px-6 py-3 bg-gradient-to-r from-[#F5D77F] via-gold to-[#B8860B] hover:brightness-110 text-[#3B0A0C] font-black text-xs uppercase tracking-wider rounded-xl shadow-lg shrink-0 active:scale-95 transition-all whitespace-nowrap flex items-center gap-1.5"
+              >
+                <span>Đăng Ký Mở Gian Hàng</span>
+                <span className="text-sm font-bold">&rarr;</span>
+              </Link>
             </div>
           </div>
         </div>
