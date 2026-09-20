@@ -38,7 +38,7 @@ const ScrollToTop = () => {
 const PageWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const location = useLocation();
   if (location.pathname.startsWith('/admin')) return <>{children}</>;
-  return <div key={location.pathname} className="animate-fade-in-page">{children}</div>;
+  return <div key={location.pathname} className="animate-fade-in-page w-full max-w-full overflow-x-hidden">{children}</div>;
 };
 
 const App: React.FC = () => {
@@ -59,11 +59,11 @@ const App: React.FC = () => {
             <Route path="/reset-password" element={<ResetPassword />} />
             {/* Public Routes */}
             <Route path="*" element={
-              <div className="flex flex-col min-h-screen">
+              <div className="flex flex-col min-h-screen w-full max-w-full overflow-x-hidden">
                 <Navbar />
                 <CartDrawer />
                 <AuthModal />
-                <main className="flex-grow relative">
+                <main className="flex-grow relative w-full max-w-full overflow-x-hidden">
                   <PageWrapper>
                     <Routes>
                       <Route path="/" element={<Home />} />

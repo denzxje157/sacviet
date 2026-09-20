@@ -10,14 +10,20 @@ export interface CartItem {
   quantity: number;
 }
 
+export type CartStep = 'cart' | 'checkout' | 'success';
+
 interface CartContextType {
   cart: CartItem[];
-  addToCart: (item: CartItem) => void;
+  addToCart: (item: CartItem, openStep?: 'cart' | 'checkout' | null) => void;
   removeFromCart: (id: string) => void;
   updateQuantity: (id: string, delta: number) => void;
   clearCart: () => void;
   isCartOpen: boolean;
   toggleCart: () => void;
+  openCart: (step?: 'cart' | 'checkout') => void;
+  closeCart: () => void;
+  cartStep: CartStep;
+  setCartStep: (step: CartStep) => void;
   totalPrice: number;
   totalItems: number;
   isAuthModalOpen: boolean;
@@ -40,21 +46,36 @@ const safeParsePrice = (priceStr: string): number => {
 export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [cart, setCart] = useState<CartItem[]>([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
+  const [cartStep, setCartStep] = useState<CartStep>('cart');
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
 
-  const addToCart = (item: CartItem) => {
+  const openCart = (step: 'cart' | 'checkout' = 'cart') => {
+    setCartStep(step);
+    setIsCartOpen(true);
+  };
+
+  const closeCart = () => {
+    setIsCartOpen(false);
+  };
+
+  const addToCart = (item: CartItem, openStep: 'cart' | 'checkout' | null = 'cart') => {
     // Đảm bảo giá tiền được bóc tách đúng trước khi vào giỏ
     const correctPriceValue = safeParsePrice(item.price);
+    const itemQty = item.quantity && item.quantity > 0 ? item.quantity : 1;
     const correctedItem = { ...item, priceValue: correctPriceValue };
 
     setCart(prev => {
       const existing = prev.find(i => i.id === correctedItem.id);
       if (existing) {
-        return prev.map(i => i.id === correctedItem.id ? { ...i, quantity: i.quantity + 1 } : i);
+        return prev.map(i => i.id === correctedItem.id ? { ...i, quantity: i.quantity + itemQty } : i);
       }
-      return [...prev, { ...correctedItem, quantity: 1 }];
+      return [...prev, { ...correctedItem, quantity: itemQty }];
     });
-    setIsCartOpen(true);
+
+    if (openStep) {
+      setCartStep(openStep);
+      setIsCartOpen(true);
+    }
   };
 
   const removeFromCart = (id: string) => {
@@ -79,7 +100,23 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
 
   return (
-    <CartContext.Provider value={{ cart, addToCart, removeFromCart, updateQuantity, clearCart, isCartOpen, toggleCart, totalPrice, totalItems, isAuthModalOpen, toggleAuthModal }}>
+    <CartContext.Provider value={{ 
+      cart, 
+      addToCart, 
+      removeFromCart, 
+      updateQuantity, 
+      clearCart, 
+      isCartOpen, 
+      toggleCart, 
+      openCart,
+      closeCart,
+      cartStep,
+      setCartStep,
+      totalPrice, 
+      totalItems, 
+      isAuthModalOpen, 
+      toggleAuthModal 
+    }}>
       {children}
     </CartContext.Provider>
   );

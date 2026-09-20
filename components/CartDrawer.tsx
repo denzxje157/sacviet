@@ -1,19 +1,31 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext.tsx';
 import { useAuth } from '../context/AuthContext.tsx';
 import { supabase } from '../services/supabaseClient.ts';
 import { orderService } from '../services/orderService';
 
 const CartDrawer: React.FC = () => {
-  const { cart, isCartOpen, toggleCart, removeFromCart, updateQuantity, totalPrice, clearCart } = useCart();
+  const navigate = useNavigate();
+  const { 
+    cart, 
+    isCartOpen, 
+    toggleCart, 
+    removeFromCart, 
+    updateQuantity, 
+    totalPrice, 
+    clearCart,
+    cartStep: step,
+    setCartStep: setStep
+  } = useCart();
   const { user, toggleAuthModal } = useAuth();
   
-  const [step, setStep] = useState<'cart' | 'checkout' | 'success'>('cart');
   const [formData, setFormData] = useState({ name: '', phone: '', email: '', address: '', note: '' });
   const [paymentMethod, setPaymentMethod] = useState<'cod' | 'qr'>('cod');
   const [orderId, setOrderId] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [orderStatus, setOrderStatus] = useState<'pending' | 'paid'>('pending');
+  const [copiedOrderId, setCopiedOrderId] = useState(false);
 
   const [savedAddresses, setSavedAddresses] = useState<any[]>([]);
   const [selectedAddressId, setSelectedAddressId] = useState<string>('new');
@@ -76,13 +88,8 @@ const CartDrawer: React.FC = () => {
 
         if (data && data.status === 'paid') {
           setOrderStatus('paid');
+          clearCart();
           clearInterval(interval);
-          
-          setTimeout(() => {
-            clearCart();
-            const zaloMsg = `Chào Sắc Việt, tôi đã thanh toán thành công đơn hàng ${orderId}.`;
-            window.location.href = `https://zalo.me/0987654321?text=${encodeURIComponent(zaloMsg)}`;
-          }, 3000);
         }
       } catch (err) {
         console.error("Lỗi kiểm tra thanh toán:", err);
@@ -93,6 +100,14 @@ const CartDrawer: React.FC = () => {
   }, [step, orderId, paymentMethod]);
 
   if (!isCartOpen) return null;
+
+  const handleCopyOrder = () => {
+    if (orderId && navigator.clipboard) {
+      navigator.clipboard.writeText(orderId);
+      setCopiedOrderId(true);
+      setTimeout(() => setCopiedOrderId(false), 2500);
+    }
+  };
 
   const handleCheckout = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -125,12 +140,16 @@ const CartDrawer: React.FC = () => {
 
     try {
       if (selectedAddressId === 'new') {
-        await supabase.from('user_addresses').insert([{
-          user_id: user.id,
-          name: formData.name,
-          phone: formData.phone,
-          address: formData.address
-        }]);
+        try {
+          await supabase.from('user_addresses').insert([{
+            user_id: user.id,
+            name: formData.name,
+            phone: formData.phone,
+            address: formData.address
+          }]);
+        } catch (addrErr) {
+          console.warn('Lỗi lưu sổ địa chỉ (tiếp tục tạo đơn):', addrErr);
+        }
       }
 
       await orderService.createOrder(orderData);
@@ -158,11 +177,7 @@ const CartDrawer: React.FC = () => {
         }
 
         setOrderStatus('paid');
-        setTimeout(() => {
-           clearCart();
-           const codMsg = `Chào Sắc Việt, tôi vừa đặt đơn hàng COD mã: ${newOrderId}`;
-           window.location.href = `https://zalo.me/0987654321?text=${encodeURIComponent(codMsg)}`;
-        }, 3000);
+        clearCart();
       }
     } catch (error) {
       console.error('Lỗi lưu đơn hàng:', error);
@@ -172,7 +187,16 @@ const CartDrawer: React.FC = () => {
 
   return (
     <div className="fixed inset-0 z-[200] flex justify-end font-display">
-      <div className="absolute inset-0 bg-text-main/60 backdrop-blur-sm animate-fade-in" onClick={toggleCart}></div>
+      <div 
+        className="absolute inset-0 bg-text-main/60 backdrop-blur-sm animate-fade-in" 
+        onClick={() => {
+          if (step === 'success') {
+            clearCart();
+            setStep('cart');
+          }
+          toggleCart();
+        }}
+      ></div>
       
       <div className="relative w-full max-w-md bg-[#F7F3E9] h-full shadow-2xl flex flex-col border-l-4 border-gold animate-slide-in-right">
         {/* Header */}
@@ -324,7 +348,7 @@ const CartDrawer: React.FC = () => {
                         <img src={`https://img.vietqr.io/image/MB-666150707-compact2.png?amount=${totalPrice}&addInfo=${orderId}&accountName=NGUYEN%20HOANG%20ANH`} alt="VietQR MB Bank" className="w-56 h-56 object-contain" />
                      </div>
                      
-                     <div className="text-[11px] text-text-soft space-y-1 bg-background-light w-full p-4 rounded-xl border border-gold/10 text-left mb-6">
+                     <div className="text-[11px] text-text-soft space-y-1 bg-background-light w-full p-4 rounded-xl border border-gold/10 text-left mb-5">
                         <p><span className="font-bold text-text-main">Ngân hàng:</span> MB Bank</p>
                         <p><span className="font-bold text-text-main">Số tài khoản:</span> 666150707</p>
                         <p><span className="font-bold text-text-main">Chủ tài khoản:</span> NGUYEN HOANG ANH</p>
@@ -332,40 +356,92 @@ const CartDrawer: React.FC = () => {
                         <p><span className="font-bold text-text-main">Nội dung:</span> <span className="font-bold text-primary">{orderId}</span></p>
                      </div>
 
-                     <div className="flex items-center gap-2 text-primary">
-                        <span className="material-symbols-outlined animate-spin">sync</span>
+                     <div className="flex items-center gap-2 text-primary mb-4">
+                        <span className="material-symbols-outlined animate-spin text-sm">sync</span>
                         <p className="text-xs font-bold animate-pulse">Hệ thống đang chờ nhận tiền...</p>
+                     </div>
+
+                     <div className="w-full space-y-2">
+                       <button
+                         onClick={() => {
+                           setOrderStatus('paid');
+                           clearCart();
+                         }}
+                         className="w-full bg-primary text-white py-2.5 rounded-xl font-black uppercase text-xs tracking-wider hover:brightness-110 transition-all active:scale-95 flex items-center justify-center gap-1.5 shadow-sm"
+                       >
+                         <span className="material-symbols-outlined text-sm">task_alt</span>
+                         Tôi đã chuyển khoản xong
+                       </button>
+                       <a 
+                         href={`https://zalo.me/0987654321?text=${encodeURIComponent(`Chào Sắc Việt, tôi vừa chuyển khoản đơn hàng ${orderId}.`)}`}
+                         target="_blank"
+                         rel="noopener noreferrer"
+                         className="w-full bg-blue-50 text-blue-700 border border-blue-200 py-2 rounded-xl font-bold text-xs hover:bg-blue-100 transition-all flex items-center justify-center gap-1.5"
+                       >
+                         <span className="material-symbols-outlined text-sm">chat</span>
+                         Gửi biên lai qua Zalo
+                       </a>
                      </div>
                    </div>
                 ) : (
-                   <div className="flex flex-col items-center animate-slide-up bg-white p-8 rounded-3xl border border-gold/20 shadow-xl w-full">
-                      <div className="size-24 bg-green-100 rounded-full flex items-center justify-center mb-6 shadow-inner relative">
+                   <div className="flex flex-col items-center animate-slide-up bg-white p-6 md:p-8 rounded-3xl border border-gold/20 shadow-xl w-full">
+                      <div className="size-20 bg-green-100 rounded-full flex items-center justify-center mb-4 shadow-inner relative">
                         <div className="absolute inset-0 bg-green-400 rounded-full animate-ping opacity-20"></div>
-                        <span className="material-symbols-outlined text-5xl text-green-600">check_circle</span>
+                        <span className="material-symbols-outlined text-4xl text-green-600">check_circle</span>
                       </div>
-                      <h3 className="text-2xl font-black text-text-main mb-3 leading-tight">Đặt Hàng <br/> Thành Công!</h3>
-                      <div className="bg-background-light px-6 py-4 rounded-2xl border border-gold/20 mb-6 shadow-sm w-full">
-                        <p className="text-[10px] text-text-soft uppercase font-black tracking-widest mb-1">Mã đơn hàng</p>
-                        <p className="text-xl font-black text-primary tracking-widest">{orderId}</p>
-                      </div>
-                      <p className="text-text-soft mb-6 text-sm">Cảm ơn bạn. Thông tin hóa đơn sẽ sớm được gửi qua Email.</p>
-                      
-                      <p className="text-xs font-bold text-primary animate-pulse flex items-center gap-2 mb-6">
-                        Đang chuyển hướng Zalo <span className="material-symbols-outlined text-sm">open_in_new</span>
-                      </p>
+                      <h3 className="text-xl md:text-2xl font-black text-text-main mb-2 leading-tight">Đặt Hàng Thành Công!</h3>
+                      <p className="text-text-soft mb-4 text-xs">Cảm ơn bạn đã ủng hộ nghệ nhân bản địa. Hóa đơn chi tiết đã được gửi tới email của bạn.</p>
 
-                      {/* NÚT THOÁT VÀ TIẾP TỤC MUA SẮM MỚI THÊM */}
-                      <button 
-                        onClick={() => {
-                          clearCart();
-                          setStep('cart');
-                          toggleCart();
-                        }}
-                        className="w-full bg-white border-2 border-primary text-primary py-3 rounded-xl font-black uppercase tracking-widest hover:bg-primary/5 transition-all active:scale-95 flex items-center justify-center gap-2"
-                      >
-                        <span className="material-symbols-outlined text-lg">shopping_bag</span>
-                        Tiếp tục mua sắm
-                      </button>
+                      <div className="bg-background-light px-4 py-3 rounded-2xl border border-gold/20 mb-5 shadow-sm w-full flex items-center justify-between">
+                        <div className="text-left">
+                          <p className="text-[10px] text-text-soft uppercase font-black tracking-widest">Mã đơn hàng</p>
+                          <p className="text-base md:text-lg font-black text-primary tracking-wider">{orderId}</p>
+                        </div>
+                        <button 
+                          onClick={handleCopyOrder} 
+                          className="px-3 py-1.5 bg-white border border-gold/30 rounded-xl text-[11px] font-bold text-text-main hover:bg-gold/10 transition-colors flex items-center gap-1 shadow-xs"
+                        >
+                          <span className="material-symbols-outlined text-sm">{copiedOrderId ? 'check' : 'content_copy'}</span>
+                          {copiedOrderId ? 'Đã chép' : 'Sao chép'}
+                        </button>
+                      </div>
+
+                      <div className="w-full space-y-2.5">
+                        <button 
+                          onClick={() => {
+                            clearCart();
+                            setStep('cart');
+                            toggleCart();
+                            navigate('/orders');
+                          }}
+                          className="w-full bg-primary text-white py-3 rounded-xl font-black uppercase text-xs tracking-widest hover:brightness-110 shadow-lg shadow-primary/20 transition-all active:scale-95 flex items-center justify-center gap-2"
+                        >
+                          <span className="material-symbols-outlined text-base">receipt_long</span>
+                          Xem đơn hàng của tôi
+                        </button>
+
+                        <a 
+                          href={`https://zalo.me/0987654321?text=${encodeURIComponent(`Chào Sắc Việt, tôi vừa đặt đơn hàng mã: ${orderId}`)}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="w-full bg-[#0068FF]/10 text-[#0068FF] border border-[#0068FF]/30 py-2.5 rounded-xl font-bold text-xs hover:bg-[#0068FF]/20 transition-all flex items-center justify-center gap-2"
+                        >
+                          <span className="material-symbols-outlined text-base">chat</span>
+                          Liên hệ Zalo hỗ trợ
+                        </a>
+
+                        <button 
+                          onClick={() => {
+                            clearCart();
+                            setStep('cart');
+                            toggleCart();
+                          }}
+                          className="w-full bg-white border border-gold/30 text-text-soft py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider hover:bg-gold/10 transition-all active:scale-95 flex items-center justify-center gap-2"
+                        >
+                          <span className="material-symbols-outlined text-base">storefront</span>
+                          Tiếp tục mua sắm
+                        </button>
+                      </div>
                    </div>
                 )}
              </div>

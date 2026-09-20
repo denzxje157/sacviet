@@ -91,7 +91,7 @@ const Library: React.FC = () => {
           <div className="max-w-md mx-auto relative group z-20">
             {/* Đã thêm z-10 và đổi màu thành Đỏ mận (#8B1A1A) */}
             <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none z-10">
-              <span className="material-symbols-outlined text-[#8B1A1A] group-hover:scale-110 transition-transform text-xl">search</span>
+              <span className="material-symbols-outlined text-[#8B1A1A] group-hover:scale-110 transition-transform text-xl leading-none">search</span>
             </div>
             <input type="text" placeholder="Tìm kiếm di sản..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="w-full bg-white backdrop-blur-sm border-2 border-gold/20 rounded-full py-3 pl-12 pr-6 text-text-main focus:outline-none focus:border-[#8B1A1A] transition-colors shadow-lg text-sm block" />
           </div>

@@ -1,6 +1,14 @@
 @import "tailwindcss";
 
 @theme {
+  --color-primary: #990000;
+  --color-gold: #C59100;
+  --color-gold-light: #F6E0A4;
+  --color-background-light: #F9F5EA;
+  --color-text-main: #420808;
+  --color-text-soft: #754B4B;
+  --color-bronze: #8B5A2B;
   --font-sans: "Montserrat", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Montserrat", ui-sans-serif, system-ui, sans-serif;
   --font-serif: "Playfair Display", ui-serif, Georgia, serif;
 }

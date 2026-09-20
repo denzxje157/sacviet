@@ -81,23 +81,29 @@ const ArtisansList: React.FC = () => {
               </div>
             </div>
 
-            {/* BANNER MỜI NGHỆ NHÂN / CON CHÁU MỞ GIAN HÀNG (SÁNG RỰC RỠ, ĐẬM CHẤT SẮC VIỆT) */}
-            <div 
-              style={{ backgroundColor: '#781012', backgroundImage: 'linear-gradient(135deg, #8B1A1A 0%, #660C0E 100%)' }}
-              className="flex flex-col sm:flex-row items-center justify-between p-5 md:p-6 border-2 border-gold/50 rounded-2xl gap-4 shadow-xl text-white"
-            >
-              <div className="flex items-center gap-3.5 text-left">
-                <span className="size-12 rounded-2xl bg-gold/20 text-gold flex items-center justify-center shrink-0 border border-gold/40 shadow-inner">
+            {/* BANNER MỜI NGHỆ NHÂN / CON CHÁU MỞ GIAN HÀNG (THIẾT KẾ BASIC, TRẮNG - ĐỎ - VÀNG) */}
+            <div className="bg-white border-2 border-gold/40 rounded-2xl p-5 md:p-6 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4">
+              <div className="flex items-center gap-4 text-left">
+                <div className="size-12 rounded-2xl bg-primary/10 text-primary border border-primary/20 flex items-center justify-center shrink-0 shadow-xs">
                   <span className="material-symbols-outlined text-2xl">storefront</span>
-                </span>
+                </div>
                 <div>
-                  <div className="text-sm font-black text-gold uppercase tracking-wider">Dành Cho Nghệ Nhân & Con Cháu Làng Nghề</div>
-                  <div className="text-xs text-stone-200 mt-0.5 font-medium">Bạn muốn mở gian hàng bán sản phẩm thủ công và quản lý đơn bưu tá lấy tận nơi?</div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs md:text-sm font-black text-primary uppercase tracking-wide">
+                      Dành Cho Nghệ Nhân & Con Cháu Làng Nghề
+                    </span>
+                    <span className="text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-300 px-2 py-0.5 rounded-md uppercase">
+                      Hợp Tác
+                    </span>
+                  </div>
+                  <div className="text-xs md:text-sm text-stone-600 mt-1 font-medium">
+                    Bạn muốn mở gian hàng bán sản phẩm thủ công và quản lý đơn bưu tá lấy tận nơi?
+                  </div>
                 </div>
               </div>
               <Link 
                 to="/seller-portal?register=true" 
-                className="px-6 py-3 bg-gradient-to-r from-[#F5D77F] via-gold to-[#B8860B] hover:brightness-110 text-[#3B0A0C] font-black text-xs uppercase tracking-wider rounded-xl shadow-lg shrink-0 active:scale-95 transition-all whitespace-nowrap flex items-center gap-1.5"
+                className="px-6 py-3 bg-primary hover:bg-[#7d0000] text-white font-black text-xs uppercase tracking-wider rounded-xl shadow-md hover:shadow-lg shrink-0 active:scale-95 transition-all whitespace-nowrap flex items-center gap-2"
               >
                 <span>Đăng Ký Mở Gian Hàng</span>
                 <span className="text-sm font-bold">&rarr;</span>
@@ -112,10 +118,12 @@ const ArtisansList: React.FC = () => {
         <div className="bg-white rounded-2xl md:rounded-3xl p-4 md:p-6 shadow-xl border border-gold/20 flex flex-col md:flex-row gap-4 items-center justify-between">
           
           {/* Search box */}
-          <div className="relative w-full md:w-96">
-            <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-gold">
-              search
-            </span>
+          <div className="relative w-full md:w-96 flex items-center">
+            <div className="absolute left-4 top-0 bottom-0 flex items-center justify-center pointer-events-none text-gold">
+              <span className="material-symbols-outlined text-xl leading-none">
+                search
+              </span>
+            </div>
             <input
               type="text"
               placeholder="Tìm theo tên nghệ nhân, dân tộc, buôn làng..."
@@ -126,7 +134,7 @@ const ArtisansList: React.FC = () => {
           </div>
 
           {/* Region Tabs */}
-          <div className="flex items-center gap-2 overflow-x-auto w-full md:w-auto pb-1 md:pb-0 no-scrollbar">
+          <div className="flex items-center gap-2 overflow-x-auto w-full md:w-auto pb-1 md:pb-0 no-scrollbar [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
             {regions.map((reg) => (
               <button
                 key={reg}

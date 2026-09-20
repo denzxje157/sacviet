@@ -39,7 +39,150 @@ const INITIAL_POSTS: Post[] = [
   { id: 'm3', author: 'Thanh Trúc', avatar: 'T', time: '5 giờ trước', timestamp: Date.now() - 18000000, location: 'Tháp Poklong Garai, Ninh Thuận', content: 'Lễ hội Katê của đồng bào Chăm rộn ràng trong tiếng trống Paranưng và tiếng kèn Saranai. Chiêm ngưỡng các thiếu nữ Chăm đội thúng nước múa quạt dưới chân tháp cổ thật sự là một kiệt tác nghệ thuật sống động.', image: '/artisans/cham-textile.png', likes: 205, commentsCount: 0, tags: ['Cham', 'NinhThuan'], localComments: [] }
 ];
 
-const FALLBACK_QUIZ = [{ id: 1, question: "Lễ hội 'Cấp Sắc' là của dân tộc nào?", options: ["H'Mông", "Dao", "Tày", "Thái"], correctAnswerStr: "Dao", explanation: "Lễ quan trọng của đàn ông Dao." }];
+const CULTURAL_QUIZ_BANK: QuizQuestion[] = [
+  {
+    id: 1,
+    question: "Lễ hội 'Cấp Sắc' là nghi lễ trưởng thành thiêng liêng của nam giới dân tộc nào?",
+    options: ["H'Mông", "Dao", "Tày", "Thái"],
+    correctAnswerStr: "Dao",
+    explanation: "Lễ Cấp Sắc là nghi lễ quan trọng nhất ghi nhận sự trưởng thành và đạo đức của người đàn ông Dao."
+  },
+  {
+    id: 2,
+    question: "Điệu múa dân gian nổi tiếng nào của đồng bào người Thái đã được UNESCO ghi danh là Di sản văn hóa phi vật thể đại diện của nhân loại?",
+    options: ["Múa Xòe", "Múa Sạp", "Múa Khèn", "Múa Quạt"],
+    correctAnswerStr: "Múa Xòe",
+    explanation: "Nghệ thuật Xòe Thái được UNESCO công nhận là Di sản văn hóa phi vật thể của nhân loại năm 2021."
+  },
+  {
+    id: 3,
+    question: "Cây đàn Tính kết hợp với làn điệu dân ca nào là linh hồn văn hóa thiêng liêng của người Tày và Nùng?",
+    options: ["Hát Then", "Hát Quan họ", "Hát Xoan", "Hát Lượn"],
+    correctAnswerStr: "Hát Then",
+    explanation: "Thực hành Then của người Tày, Nùng, Thái là Di sản văn hóa phi vật thể của nhân loại."
+  },
+  {
+    id: 4,
+    question: "Nhạc cụ truyền thống độc đáo nào gắn liền với tiếng gọi bạn tình của các chàng trai người H'Mông trên rẻo cao?",
+    options: ["Đàn môi", "Kèn lá", "Khèn Mông", "Sáo Mèo"],
+    correctAnswerStr: "Khèn Mông",
+    explanation: "Khèn là nhạc cụ linh hồn biểu đạt tâm tư, tài hoa và sự dũng mãnh của người đàn ông H'Mông."
+  },
+  {
+    id: 5,
+    question: "Lễ hội Katê là lễ hội truyền thống lớn nhất và thiêng liêng nhất trong năm của đồng bào dân tộc nào?",
+    options: ["Chăm", "Khmer", "Ba Na", "Hoa"],
+    correctAnswerStr: "Chăm",
+    explanation: "Lễ hội Katê của người Chăm diễn ra vào tháng 7 lịch Chăm để tưởng nhớ tổ tiên và các vị thần linh."
+  },
+  {
+    id: 6,
+    question: "Bộ sử thi đồ sộ 'Đẻ đất Đẻ nước' phản ánh nguồn gốc loài người và vũ trụ của dân tộc nào?",
+    options: ["Mường", "Kinh", "Tày", "Thái"],
+    correctAnswerStr: "Mường",
+    explanation: "'Đẻ đất Đẻ nước' là kiệt tác sử thi Mo Mường vĩ đại trong kho tàng văn học dân gian Việt Nam."
+  },
+  {
+    id: 7,
+    question: "Lễ hội đua ghe Ngo truyền thống náo nhiệt của đồng bào Khmer Nam Bộ diễn ra trong dịp lễ nào?",
+    options: ["Lễ Oóc Om Bóc", "Lễ Chol Chnam Thmay", "Lễ Sen Dolta", "Lễ Dâng Y"],
+    correctAnswerStr: "Lễ Oóc Om Bóc",
+    explanation: "Đua ghe Ngo là môn thể thao dân gian sôi động bậc nhất trong Lễ Cúng Trăng Oóc Om Bóc của người Khmer."
+  },
+  {
+    id: 8,
+    question: "Ngôi nhà chung cao vút, là biểu tượng quyền lực và tâm linh của buôn làng Ba Na và Gia Rai có tên là gì?",
+    options: ["Nhà Rông", "Nhà Dài", "Nhà Trình Tường", "Nhà Mồ"],
+    correctAnswerStr: "Nhà Rông",
+    explanation: "Nhà Rông là trái tim sinh hoạt cộng đồng, hội họp truyền thống của đồng bào Bắc Tây Nguyên."
+  },
+  {
+    id: 9,
+    question: "Phiên chợ tình Khau Vai huyền thoại họp mỗi năm duy nhất một lần vào ngày 27/3 Âm lịch thuộc tỉnh nào?",
+    options: ["Hà Giang", "Lào Cai", "Sơn La", "Cao Bằng"],
+    correctAnswerStr: "Hà Giang",
+    explanation: "Chợ tình Khau Vai (huyện Mèo Vạc, Hà Giang) là nơi hội ngộ của những đôi lứa có tình duyên trắc trở."
+  },
+  {
+    id: 10,
+    question: "Làng gốm Bàu Trúc - một trong những làng gốm cổ xưa nhất Đông Nam Á là nghề gia truyền của dân tộc nào?",
+    options: ["Chăm", "Kinh", "Khmer", "Mnông"],
+    correctAnswerStr: "Chăm",
+    explanation: "Gốm Bàu Trúc (Ninh Thuận) được người phụ nữ Chăm làm hoàn toàn bằng tay, 'tay quay mông xoay', không dùng bàn xoay."
+  },
+  {
+    id: 11,
+    question: "Ngôi nhà dài truyền thống của đồng bào Ê Đê phản ánh nét văn hóa đặc trưng nào?",
+    options: ["Chế độ mẫu hệ", "Chế độ phụ hệ", "Chế độ du mục", "Chế độ thị tộc"],
+    correctAnswerStr: "Chế độ mẫu hệ",
+    explanation: "Người Ê Đê theo chế độ mẫu hệ, mỗi khi người con gái trong gia đình lấy chồng, ngôi nhà dài lại được cơi nới dài thêm."
+  },
+  {
+    id: 12,
+    question: "Lễ hội Hoa Ban gắn liền với truyền thuyết tình yêu son sắt giữa nàng Ban và chàng Khum của dân tộc nào?",
+    options: ["Thái", "H'Mông", "Dao", "Mường"],
+    correctAnswerStr: "Thái",
+    explanation: "Lễ hội Hoa Ban là ngày hội mùa xuân cầu phúc, cầu mùa màng bội thu của đồng bào Thái Tây Bắc."
+  },
+  {
+    id: 13,
+    question: "Kiểu nhà 'Trình tường' làm từ đất nện dày chống chọi mùa đông băng giá là nét kiến trúc đặc trưng của dân tộc nào?",
+    options: ["Hà Nhì", "Ba Na", "Chăm", "Khmer"],
+    correctAnswerStr: "Hà Nhì",
+    explanation: "Nhà trình tường đất nện dày 40-50cm của người Hà Nhì ở Y Tý (Bát Xát, Lào Cai) ấm vào mùa đông, mát vào mùa hè."
+  },
+  {
+    id: 14,
+    question: "Không gian văn hóa Cồng chiêng Tây Nguyên được UNESCO công nhận là Kiệt tác di sản thế giới vào năm nào?",
+    options: ["2005", "2010", "2015", "2000"],
+    correctAnswerStr: "2005",
+    explanation: "Ngày 15/11/2005, Không gian văn hóa Cồng chiêng Tây Nguyên chính thức được UNESCO công nhận di sản thế giới."
+  },
+  {
+    id: 15,
+    question: "Chiếc khăn Piêu thêu hoa văn chỉ màu rực rỡ là trang phục đội đầu truyền thống không thể thiếu của phụ nữ dân tộc nào?",
+    options: ["Thái Đen", "H'Mông Hoa", "Dao Tiền", "Lô Lô"],
+    correctAnswerStr: "Thái Đen",
+    explanation: "Khăn Piêu là thước đo sự khéo léo, cần cù và tấm lòng son sắt của người thiếu nữ dân tộc Thái Đen."
+  },
+  {
+    id: 16,
+    question: "Kỹ thuật vẽ sáp ong (batik) trên vải lanh rồi nhuộm chàm cổ truyền là nghề thủ công trứ danh của dân tộc nào?",
+    options: ["H'Mông", "Kinh", "Mường", "Khmer"],
+    correctAnswerStr: "H'Mông",
+    explanation: "Phụ nữ H'Mông Hoa dùng bút vẽ bằng đồng nhúng sáp ong nóng chảy tạo nên các đồ án hoa văn hình học độc bản."
+  },
+  {
+    id: 17,
+    question: "Dân tộc nào có dân số đông nhất trong số 53 dân tộc thiểu số tại Việt Nam?",
+    options: ["Tày", "Thái", "Mường", "H'Mông"],
+    correctAnswerStr: "Tày",
+    explanation: "Dân tộc Tày có quy mô dân số lớn nhất trong các dân tộc thiểu số với gần 1,9 triệu người cư trú chủ yếu ở vùng Đông Bắc."
+  },
+  {
+    id: 18,
+    question: "Nghệ thuật Múa rối nước - di sản sân khấu dân gian độc nhất vô nhị trên mặt nước bắt nguồn từ nền văn minh của dân tộc nào?",
+    options: ["Kinh", "Tày", "Thái", "Mường"],
+    correctAnswerStr: "Kinh",
+    explanation: "Múa rối nước ra đời từ nền văn minh lúa nước sông Hồng của người Việt (Kinh) từ thời nhà Lý."
+  },
+  {
+    id: 19,
+    question: "Loại nhạc cụ tre nứa nào của đồng bào Tây Nguyên phát ra âm thanh trong trẻo nhờ sức chảy của dòng suối?",
+    options: ["Đàn nước (Chinh Kram)", "Đàn Klông-pút", "Đàn T'rưng", "Kèn bầu"],
+    correctAnswerStr: "Đàn nước (Chinh Kram)",
+    explanation: "Đàn nước được đặt bên khe suối, dòng nước chảy đẩy gõ vào các ống nứa tạo nên bản giao hưởng núi rừng."
+  },
+  {
+    id: 20,
+    question: "Lễ hội Lồng Tồng (Lễ hội Xuống đồng) đầu xuân là lễ hội mùa màng tiêu biểu của đồng bào nào?",
+    options: ["Tày - Nùng", "Chăm - Raglai", "Ê Đê - Ba Na", "Khmer - Hoa"],
+    correctAnswerStr: "Tày - Nùng",
+    explanation: "Lồng Tồng trong tiếng Tày có nghĩa là Xuống đồng, là ngày hội tạ ơn thần linh và cầu một năm mưa thuận gió hòa."
+  }
+];
+
+const FALLBACK_QUIZ = CULTURAL_QUIZ_BANK;
 
 // Dữ liệu Lễ hội tĩnh (Đã thay thế cho AI)
 const STATIC_FESTIVALS: Omit<FestivalDisplay, 'daysLeft'>[] = [
@@ -201,6 +344,12 @@ const QuizWidget = () => {
   const [score, setScore] = useState(0);
   const [selected, setSelected] = useState<string | null>(null);
   const [generating, setGenerating] = useState(false);
+
+  // Hàm chọn ngẫu nhiên các câu hỏi văn hóa không lặp lại
+  const pickRandomQuestions = (pool: QuizQuestion[], count: number = 5): QuizQuestion[] => {
+    const shuffled = [...pool].sort(() => 0.5 - Math.random());
+    return shuffled.slice(0, count).map((q, idx) => ({ ...q, id: idx + 1 }));
+  };
   
   const initQuiz = useCallback(async () => {
     setGenerating(true); setQIndex(0); setScore(0); setSelected(null);
@@ -208,17 +357,27 @@ const QuizWidget = () => {
       const cached = localStorage.getItem('sacviet_quiz');
       const cachedTime = localStorage.getItem('sacviet_quiz_time');
       if (cached && cachedTime && (Date.now() - Number(cachedTime) < 3600000)) {
-         setQuestions(JSON.parse(cached)); setGenerating(false); return;
+         const parsed = JSON.parse(cached);
+         // Nếu mảng lưu có ít nhất 3 câu thì hiển thị, nếu chỉ có 1 câu (lỗi cũ) thì bỏ qua để lấy bộ mới
+         if (Array.isArray(parsed) && parsed.length >= 3) {
+           setQuestions(parsed); 
+           setGenerating(false); 
+           return;
+         }
       }
       
-      if (localStorage.getItem('gemini_429_blocked')) {
-         throw new Error("API Limit Blocked");
+      if (localStorage.getItem('gemini_429_blocked') || !API_KEY) {
+         const selected5 = pickRandomQuestions(CULTURAL_QUIZ_BANK, 5);
+         setQuestions(selected5);
+         localStorage.setItem('sacviet_quiz', JSON.stringify(selected5));
+         localStorage.setItem('sacviet_quiz_time', Date.now().toString());
+         setGenerating(false);
+         return;
       }
 
-      if (!API_KEY) throw new Error("No API Key");
-      const prompt = `Tạo 5 câu hỏi trắc nghiệm về văn hóa 54 dân tộc Việt Nam. Trả về mảng JSON: [{"id": 1, "question": "...", "options": ["A", "B", "C", "D"], "correctAnswerStr": "A", "explanation": "..."}]`;
+      const prompt = `Tạo 5 câu hỏi trắc nghiệm hay về văn hóa 54 dân tộc Việt Nam. Trả về đúng mảng JSON gồm 5 phần tử: [{"id": 1, "question": "...", "options": ["A", "B", "C", "D"], "correctAnswerStr": "A", "explanation": "..."}]`;
       
-      const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${API_KEY}`, { 
+      const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`, { 
         method: 'POST', headers: { 'Content-Type': 'application/json' }, 
         body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }], generationConfig: { temperature: 0.9, responseMimeType: "application/json" } }) 
       });
@@ -232,13 +391,21 @@ const QuizWidget = () => {
       
       const data = await res.json();
       const qData = JSON.parse(data.candidates[0].content.parts[0].text);
-      setQuestions(qData);
-      localStorage.setItem('sacviet_quiz', JSON.stringify(qData)); localStorage.setItem('sacviet_quiz_time', Date.now().toString());
+      if (Array.isArray(qData) && qData.length >= 3) {
+        setQuestions(qData);
+        localStorage.setItem('sacviet_quiz', JSON.stringify(qData)); 
+        localStorage.setItem('sacviet_quiz_time', Date.now().toString());
+      } else {
+        throw new Error("Dữ liệu không đủ câu hỏi");
+      }
     } catch (e) { 
-      setQuestions([...FALLBACK_QUIZ]); 
-      localStorage.setItem('sacviet_quiz', JSON.stringify(FALLBACK_QUIZ)); 
+      const selected5 = pickRandomQuestions(CULTURAL_QUIZ_BANK, 5);
+      setQuestions(selected5); 
+      localStorage.setItem('sacviet_quiz', JSON.stringify(selected5)); 
       localStorage.setItem('sacviet_quiz_time', Date.now().toString());
-    } finally { setGenerating(false); }
+    } finally { 
+      setGenerating(false); 
+    }
   }, []);
 
   useEffect(() => { initQuiz(); }, [initQuiz]);
@@ -254,8 +421,8 @@ const QuizWidget = () => {
           <div className="text-center py-4 flex-1 flex flex-col justify-center animate-fade-in">
              <div className="size-20 mx-auto bg-gold/20 rounded-full flex items-center justify-center mb-3"><span className="material-symbols-outlined text-4xl text-primary">workspace_premium</span></div>
              <p className="text-sm font-bold uppercase tracking-widest mb-1 text-text-soft">Điểm của bạn</p>
-             <h2 className="text-3xl font-black text-primary mb-6">{score}</h2>
-             <button onClick={() => { localStorage.removeItem('sacviet_quiz_time'); localStorage.removeItem('gemini_429_blocked'); initQuiz(); }} className="w-full py-3 border-2 border-gold/30 rounded-full font-bold text-xs uppercase hover:bg-gold hover:text-white transition-all text-text-main active:scale-95">Thi lại</button>
+             <h2 className="text-3xl font-black text-primary mb-6">{score} / {questions.length * 20}</h2>
+             <button onClick={() => { localStorage.removeItem('sacviet_quiz'); localStorage.removeItem('sacviet_quiz_time'); localStorage.removeItem('gemini_429_blocked'); initQuiz(); }} className="w-full py-3 border-2 border-gold/30 rounded-full font-bold text-xs uppercase hover:bg-gold hover:text-white transition-all text-text-main active:scale-95">Thi lại (Bộ đề mới)</button>
           </div>
         ) : currentQ ? (
           <div className="flex-1 animate-slide-up">

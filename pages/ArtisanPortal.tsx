@@ -7,6 +7,7 @@ import {
   ArtisanOrderGroup 
 } from '../services/artisanPortalService';
 import { supabase, isSupabaseConfigured } from '../services/supabaseClient';
+import { useAuth } from '../context/AuthContext';
 
 // Nén ảnh canvas để tối ưu dung lượng và lưu mượt mà trong localStorage
 const compressImage = (file: File, maxWidth = 1200, maxHeight = 1200, quality = 0.8): Promise<string> => {
@@ -92,6 +93,19 @@ const ArtisanPortal: React.FC = () => {
     setToastMessage(msg);
     setTimeout(() => setToastMessage(null), 3000);
   };
+
+  const { user } = useAuth();
+  const isAdmin = user?.role === 'admin';
+
+  // Chế độ kiểm duyệt dành cho Quản Trị Viên (Admin)
+  const [adminViewMode, setAdminViewMode] = useState<'moderation' | 'artisan_portal'>('moderation');
+  const [adminStatusFilter, setAdminStatusFilter] = useState<'all' | 'pending' | 'approved' | 'rejected'>('pending');
+  const [adminSearchKeyword, setAdminSearchKeyword] = useState('');
+  const [adminEthnicFilter, setAdminEthnicFilter] = useState('all');
+  const [lightboxData, setLightboxData] = useState<{ url: string; title: string; desc?: string } | null>(null);
+  const [rejectingArtisan, setRejectingArtisan] = useState<ArtisanProfile | null>(null);
+  const [rejectReasonInput, setRejectReasonInput] = useState('');
+  const [isProcessingAction, setIsProcessingAction] = useState(false);
 
   const [searchPhone, setSearchPhone] = useState('');
 
@@ -302,6 +316,81 @@ const ArtisanPortal: React.FC = () => {
     showToast('Đã đăng xuất khỏi phiên làm việc.');
   };
 
+  // ============================
+  // XỬ LÝ PHÊ DUYỆT NHANH CHO ADMIN
+  // ============================
+  const handleApproveArtisan = async (artisan: ArtisanProfile) => {
+    setIsProcessingAction(true);
+    try {
+      await artisanPortalService.approveArtisan(artisan.id);
+      const updated = await artisanPortalService.getAllArtisans();
+      setAllArtisans(updated);
+      if (currentArtisan?.id === artisan.id) {
+        setCurrentArtisan(prev => prev ? { ...prev, status: 'approved', badgeLevel: 'verified_heritage' } : null);
+      }
+      showToast(`✓ Đã phê duyệt và cấp Tích Vàng Di Sản cho nghệ nhân ${artisan.name}!`);
+    } catch (e) {
+      console.error(e);
+      showToast('Có lỗi xảy ra khi phê duyệt hồ sơ.');
+    } finally {
+      setIsProcessingAction(false);
+    }
+  };
+
+  const handleOpenRejectModal = (artisan: ArtisanProfile) => {
+    setRejectingArtisan(artisan);
+    setRejectReasonInput('');
+  };
+
+  const handleConfirmReject = async () => {
+    if (!rejectingArtisan) return;
+    const reason = rejectReasonInput.trim() || 'Ảnh minh chứng hoặc thông tin chưa đáp ứng đầy đủ tiêu chí bảo chứng di sản Sắc Việt.';
+    setIsProcessingAction(true);
+    try {
+      await artisanPortalService.rejectArtisan(rejectingArtisan.id, reason);
+      const updated = await artisanPortalService.getAllArtisans();
+      setAllArtisans(updated);
+      if (currentArtisan?.id === rejectingArtisan.id) {
+        setCurrentArtisan(prev => prev ? { ...prev, status: 'rejected', rejectionReason: reason } : null);
+      }
+      showToast(`✕ Đã từ chối hồ sơ của ${rejectingArtisan.name}.`);
+      setRejectingArtisan(null);
+    } catch (e) {
+      console.error(e);
+      showToast('Có lỗi xảy ra khi từ chối hồ sơ.');
+    } finally {
+      setIsProcessingAction(false);
+    }
+  };
+
+  const handleRevokeArtisanBadge = async (artisan: ArtisanProfile) => {
+    if (!window.confirm(`Bạn có chắc muốn thu hồi Tích Vàng của nghệ nhân ${artisan.name}?`)) return;
+    setIsProcessingAction(true);
+    try {
+      await artisanPortalService.rejectArtisan(artisan.id, 'Tạm hoãn để kiểm tra và cập nhật thêm minh chứng di sản');
+      const updated = await artisanPortalService.getAllArtisans();
+      setAllArtisans(updated);
+      if (currentArtisan?.id === artisan.id) {
+        setCurrentArtisan(prev => prev ? { ...prev, status: 'rejected', rejectionReason: 'Tạm hoãn' } : null);
+      }
+      showToast(`Đã thu hồi Tích Vàng của ${artisan.name}.`);
+    } catch (e) {
+      console.error(e);
+      showToast('Có lỗi xảy ra khi cập nhật.');
+    } finally {
+      setIsProcessingAction(false);
+    }
+  };
+
+  const handleAdminEnterArtisanShop = async (artisan: ArtisanProfile) => {
+    localStorage.setItem('sacviet_active_artisan_id', artisan.id);
+    setCurrentArtisan(artisan);
+    setIsRegisterMode(false);
+    await refreshArtisanData(artisan.id);
+    setAdminViewMode('artisan_portal');
+    showToast(`🏪 Đang xem gian hàng: ${artisan.name}`);
+  };
+
   const handleRegisterSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!regName.trim() || !regPhone.trim()) {
@@ -407,8 +496,28 @@ const ArtisanPortal: React.FC = () => {
   const totalOrdersCount = orders.length;
   const totalRevenue = orders.reduce((sum, o) => sum + (o.totalAmount || 0), 0);
 
+  const pendingArtisansCount = allArtisans.filter(a => a.status === 'pending').length;
+  const approvedArtisansCount = allArtisans.filter(a => a.status === 'approved').length;
+  const rejectedArtisansCount = allArtisans.filter(a => a.status === 'rejected').length;
+  const distinctEthnics = Array.from(new Set(allArtisans.map(a => a.ethnic))).filter(Boolean);
+
+  const filteredArtisansForAdmin = allArtisans.filter(a => {
+    if (adminStatusFilter !== 'all' && a.status !== adminStatusFilter) return false;
+    if (adminEthnicFilter !== 'all' && a.ethnic !== adminEthnicFilter) return false;
+    if (adminSearchKeyword.trim()) {
+      const q = adminSearchKeyword.toLowerCase().trim();
+      const matchName = a.name.toLowerCase().includes(q);
+      const matchRep = (a.representative || '').toLowerCase().includes(q);
+      const matchVillage = a.village.toLowerCase().includes(q);
+      const matchPhone = a.phone.includes(q);
+      const matchEthnic = a.ethnic.toLowerCase().includes(q);
+      if (!matchName && !matchRep && !matchVillage && !matchPhone && !matchEthnic) return false;
+    }
+    return true;
+  });
+
   return (
-    <div className="min-h-screen bg-[#FAF7F0] font-display text-text-main pb-20">
+    <div className="min-h-screen bg-[#FAF7F0] font-display text-text-main pb-20 w-full max-w-full overflow-x-hidden">
       {/* Toast thông báo */}
       {toastMessage && (
         <div className="fixed top-24 left-1/2 -translate-x-1/2 z-[100] bg-white text-primary px-6 py-3 rounded-full shadow-2xl flex items-center gap-2 border-2 border-gold font-bold text-sm animate-fade-in">
@@ -418,8 +527,443 @@ const ArtisanPortal: React.FC = () => {
       )}
 
       <div className="max-w-7xl mx-auto px-4">
-        {/* TABS CHUYỂN ĐỔI CHÍNH */}
-        <div className="mt-6 flex flex-col sm:flex-row items-center justify-between gap-4 bg-white p-3 rounded-2xl border-2 border-gold/30 shadow-md">
+        {/* 🛡️ BANNER ĐIỀU HÀNH DÀNH CHO ADMIN (THIẾT KẾ BASIC, TRẮNG - ĐỎ - VÀNG SANG TRỌNG) */}
+        {isAdmin && (
+          <div className="mt-6 mb-6 bg-white border-2 border-gold/30 rounded-2xl md:rounded-3xl p-5 md:p-6 shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-5 relative overflow-hidden">
+            <div className="flex items-start sm:items-center gap-4">
+              <div className="size-12 md:size-14 rounded-2xl bg-primary/10 border-2 border-primary/20 flex items-center justify-center text-primary shrink-0 shadow-xs">
+                <span className="material-symbols-outlined text-2xl md:text-3xl">verified_user</span>
+              </div>
+              <div>
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="bg-primary text-white px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider shadow-xs">
+                    Quản Trị Viên (Admin)
+                  </span>
+                  <span className="text-stone-500 text-xs font-medium">
+                    • Đang đăng nhập: <strong className="text-stone-800">{user?.fullName || user?.email}</strong>
+                  </span>
+                </div>
+                <h2 className="text-lg md:text-xl lg:text-2xl font-black text-[#420808] uppercase tracking-tight mt-1">
+                  Bàn Thẩm Định & Phê Duyệt Hồ Sơ Nghệ Nhân
+                </h2>
+                <p className="text-xs md:text-sm text-stone-600 font-serif mt-0.5 max-w-2xl">
+                  Thẩm định nhanh hồ sơ đăng ký, minh chứng ảnh làm nghề thực tế và cấp Tích Vàng Di Sản trực tiếp cho nghệ nhân.
+                </p>
+              </div>
+            </div>
+
+            {/* Nút chuyển đổi chế độ của Admin - Rõ ràng, Tương phản cao */}
+            <div className="flex items-center gap-2 w-full md:w-auto bg-stone-100 p-1.5 rounded-2xl border border-stone-200 shrink-0">
+              <button
+                type="button"
+                onClick={() => setAdminViewMode('moderation')}
+                className={`flex-1 md:flex-none px-4 py-2.5 rounded-xl font-black text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-all cursor-pointer ${
+                  adminViewMode === 'moderation'
+                    ? 'bg-primary text-white shadow-md'
+                    : 'text-stone-600 hover:text-stone-900 hover:bg-stone-200/70'
+                }`}
+              >
+                <span className="material-symbols-outlined text-base">rule</span>
+                <span>Bàn Duyệt ({pendingArtisansCount} chờ)</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setAdminViewMode('artisan_portal')}
+                className={`flex-1 md:flex-none px-4 py-2.5 rounded-xl font-black text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-all cursor-pointer ${
+                  adminViewMode === 'artisan_portal'
+                    ? 'bg-primary text-white shadow-md'
+                    : 'text-stone-600 hover:text-stone-900 hover:bg-stone-200/70'
+                }`}
+              >
+                <span className="material-symbols-outlined text-base">storefront</span>
+                <span>Giao Diện Nghệ Nhân</span>
+              </button>
+            </div>
+          </div>
+        )}
+
+        {isAdmin && adminViewMode === 'moderation' ? (
+          /* ============================================================ */
+          /* 📋 GIAO DIỆN BÀN THẨM ĐỊNH & PHÊ DUYỆT HỒ SƠ CHO ADMIN        */
+          /* ============================================================ */
+          <div className="mt-6 space-y-6">
+            {/* 1. THỐNG KÊ NHANH 4 CHỈ SỐ */}
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+              <div 
+                onClick={() => setAdminStatusFilter('pending')}
+                className={`bg-white rounded-2xl p-4 border-2 transition-all cursor-pointer shadow-sm hover:shadow-md ${
+                  adminStatusFilter === 'pending' ? 'border-amber-500 ring-2 ring-amber-400/20 bg-amber-50/40' : 'border-gold/30 hover:border-gold'
+                }`}
+              >
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-black uppercase text-amber-800 tracking-wider">Chờ Thẩm Định</span>
+                  <span className="size-8 rounded-lg bg-amber-100 text-amber-800 flex items-center justify-center">
+                    <span className="material-symbols-outlined text-base animate-spin">hourglass_top</span>
+                  </span>
+                </div>
+                <div className="text-3xl font-black text-amber-900 mt-2">{pendingArtisansCount}</div>
+                <div className="text-[11px] text-amber-700/80 font-medium mt-0.5">Hồ sơ chờ xem xét & duyệt</div>
+              </div>
+
+              <div 
+                onClick={() => setAdminStatusFilter('approved')}
+                className={`bg-white rounded-2xl p-4 border-2 transition-all cursor-pointer shadow-sm hover:shadow-md ${
+                  adminStatusFilter === 'approved' ? 'border-emerald-500 ring-2 ring-emerald-400/20 bg-emerald-50/40' : 'border-gold/30 hover:border-gold'
+                }`}
+              >
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-black uppercase text-emerald-800 tracking-wider">Đã Cấp Tích Vàng</span>
+                  <span className="size-8 rounded-lg bg-emerald-100 text-emerald-800 flex items-center justify-center">
+                    <span className="material-symbols-outlined text-base">verified</span>
+                  </span>
+                </div>
+                <div className="text-3xl font-black text-emerald-900 mt-2">{approvedArtisansCount}</div>
+                <div className="text-[11px] text-emerald-700/80 font-medium mt-0.5">Đã được bảo chứng di sản</div>
+              </div>
+
+              <div 
+                onClick={() => setAdminStatusFilter('rejected')}
+                className={`bg-white rounded-2xl p-4 border-2 transition-all cursor-pointer shadow-sm hover:shadow-md ${
+                  adminStatusFilter === 'rejected' ? 'border-rose-500 ring-2 ring-rose-400/20 bg-rose-50/40' : 'border-gold/30 hover:border-gold'
+                }`}
+              >
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-black uppercase text-rose-800 tracking-wider">Đã Từ Chối</span>
+                  <span className="size-8 rounded-lg bg-rose-100 text-rose-800 flex items-center justify-center">
+                    <span className="material-symbols-outlined text-base">cancel</span>
+                  </span>
+                </div>
+                <div className="text-3xl font-black text-rose-900 mt-2">{rejectedArtisansCount}</div>
+                <div className="text-[11px] text-rose-700/80 font-medium mt-0.5">Chưa đạt tiêu chí minh chứng</div>
+              </div>
+
+              <div 
+                onClick={() => setAdminStatusFilter('all')}
+                className={`bg-white rounded-2xl p-4 border-2 transition-all cursor-pointer shadow-sm hover:shadow-md ${
+                  adminStatusFilter === 'all' ? 'border-gold ring-2 ring-gold/20 bg-gold/5' : 'border-gold/30 hover:border-gold'
+                }`}
+              >
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-black uppercase text-stone-700 tracking-wider">Tổng Hồ Sơ</span>
+                  <span className="size-8 rounded-lg bg-stone-100 text-stone-700 flex items-center justify-center">
+                    <span className="material-symbols-outlined text-base">folder_shared</span>
+                  </span>
+                </div>
+                <div className="text-3xl font-black text-text-main mt-2">{allArtisans.length}</div>
+                <div className="text-[11px] text-stone-500 font-medium mt-0.5">Toàn bộ hồ sơ trong hệ thống</div>
+              </div>
+            </div>
+
+            {/* 2. THANH LỌC & TÌM KIẾM HỒ SƠ */}
+            <div className="bg-white rounded-2xl border-2 border-gold/30 p-4 shadow-sm flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
+              <div className="flex flex-wrap items-center gap-1.5">
+                {[
+                  { key: 'pending', label: 'Chờ Thẩm Định', count: pendingArtisansCount, icon: 'hourglass_top' },
+                  { key: 'all', label: 'Tất Cả', count: allArtisans.length, icon: 'list' },
+                  { key: 'approved', label: 'Đã Cấp Tích Vàng', count: approvedArtisansCount, icon: 'verified' },
+                  { key: 'rejected', label: 'Đã Từ Chối', count: rejectedArtisansCount, icon: 'cancel' }
+                ].map(tab => (
+                  <button
+                    key={tab.key}
+                    type="button"
+                    onClick={() => setAdminStatusFilter(tab.key as any)}
+                    className={`px-3 py-1.5 rounded-xl text-xs font-black uppercase tracking-wider flex items-center gap-1.5 transition-all cursor-pointer ${
+                      adminStatusFilter === tab.key
+                        ? 'bg-primary text-white shadow-sm'
+                        : 'text-stone-600 hover:text-text-main hover:bg-gold/10'
+                    }`}
+                  >
+                    <span className="material-symbols-outlined text-sm">{tab.icon}</span>
+                    <span>{tab.label}</span>
+                    <span className={`px-1.5 py-0.2 rounded-full text-[10px] font-bold ${
+                      adminStatusFilter === tab.key ? 'bg-white/20 text-white' : 'bg-stone-100 text-stone-600'
+                    }`}>
+                      {tab.count}
+                    </span>
+                  </button>
+                ))}
+              </div>
+
+              <div className="flex items-center gap-2">
+                <select
+                  value={adminEthnicFilter}
+                  onChange={e => setAdminEthnicFilter(e.target.value)}
+                  className="p-2 bg-[#FAF7F0] border border-gold/30 rounded-xl text-xs font-bold text-text-main outline-none cursor-pointer"
+                >
+                  <option value="all">Tất cả dân tộc</option>
+                  {distinctEthnics.map(eth => (
+                    <option key={eth} value={eth}>{eth}</option>
+                  ))}
+                </select>
+
+                <div className="relative flex-1 sm:w-64 flex items-center">
+                  <div className="absolute left-2.5 top-0 bottom-0 flex items-center justify-center pointer-events-none text-stone-400">
+                    <span className="material-symbols-outlined text-base leading-none">
+                      search
+                    </span>
+                  </div>
+                  <input
+                    type="text"
+                    value={adminSearchKeyword}
+                    onChange={e => setAdminSearchKeyword(e.target.value)}
+                    placeholder="Tìm tên, SĐT, làng nghề..."
+                    className="w-full pl-8 pr-3 py-2 bg-[#FAF7F0] border border-gold/30 rounded-xl text-xs text-text-main outline-none focus:border-primary placeholder:text-stone-400"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* GHI CHÚ CHÍNH THỐNG */}
+            <div className="bg-amber-50/80 border border-amber-300/80 p-3.5 rounded-2xl flex items-start gap-2.5 text-xs text-amber-950">
+              <span className="material-symbols-outlined text-amber-700 text-lg shrink-0 mt-0.5">verified_user</span>
+              <div>
+                <strong className="font-bold">Hồ sơ người thật 100% từ nguồn chính thống:</strong> Các nghệ nhân trong danh sách chờ duyệt là nghệ nhân thật của làng nghề truyền thống Việt Nam, có tư liệu báo chí chính thống từ <em>Báo Nhân Dân</em>, <em>Thông tấn xã Việt Nam (TTXVN)</em>, <em>Cục Di sản Văn hóa</em>. Ảnh chụp minh chứng là ảnh tác nghiệp thực tế của nghệ nhân bên khung cửi, lò nung hoặc xưởng chế tác.
+              </div>
+            </div>
+
+            {/* 3. DANH SÁCH HỒ SƠ */}
+            {filteredArtisansForAdmin.length === 0 ? (
+              <div className="bg-white rounded-3xl border-2 border-stone-200 p-12 text-center text-stone-500">
+                <span className="material-symbols-outlined text-5xl text-stone-300 mb-2">find_in_page</span>
+                <div className="font-bold text-base text-text-main">Không tìm thấy hồ sơ nghệ nhân phù hợp</div>
+                <p className="text-xs text-stone-400 mt-1">Thử thay đổi bộ lọc trạng thái hoặc từ khóa tìm kiếm</p>
+              </div>
+            ) : (
+              <div className="space-y-3.5">
+                {filteredArtisansForAdmin.map(artisan => (
+                  <div
+                    key={artisan.id}
+                    className="bg-white rounded-2xl border border-gold/30 hover:border-gold/60 shadow-xs hover:shadow-md transition-all p-4 sm:p-5"
+                  >
+                    <div className="flex flex-col md:flex-row items-start gap-4 sm:gap-5">
+                      {/* 1. ẢNH MINH CHỨNG THỰC TẾ (GỌN GÀNG, BO GÓC ĐẸP) */}
+                      <div className="w-full md:w-32 lg:w-36 shrink-0 flex flex-row md:flex-col items-center md:items-start gap-3 md:gap-1.5">
+                        <div 
+                          onClick={() => setLightboxData({ 
+                            url: artisan.proofUrl, 
+                            title: `Nghệ nhân ${artisan.name} (${artisan.ethnic})`, 
+                            desc: artisan.proofDescription || artisan.bio 
+                          })}
+                          className="group relative size-24 md:w-full md:h-32 rounded-xl overflow-hidden border border-gold/40 bg-stone-100 cursor-pointer shadow-xs shrink-0"
+                        >
+                          <img
+                            src={artisan.proofUrl}
+                            alt={artisan.name}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                            onError={(e) => {
+                              (e.target as HTMLImageElement).src = '/artisans/dang-thi-truong.jpg';
+                            }}
+                          />
+                          <div className="absolute inset-0 bg-black/45 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center text-white p-1 text-center">
+                            <span className="material-symbols-outlined text-xl">zoom_in</span>
+                            <span className="text-[9px] font-bold uppercase mt-0.5">Phóng to</span>
+                          </div>
+
+                          <div className="absolute top-1.5 left-1.5">
+                            <span className="px-1.5 py-0.5 rounded bg-black/75 backdrop-blur-xs text-gold text-[9px] font-black uppercase tracking-wide border border-gold/40">
+                              {artisan.proofType === 'workshop' ? 'Xưởng' : artisan.proofType === 'certificate' ? 'Chứng nhận' : 'Bản làng'}
+                            </span>
+                          </div>
+                        </div>
+
+                        <button
+                          type="button"
+                          onClick={() => setLightboxData({ 
+                            url: artisan.proofUrl, 
+                            title: `Nghệ nhân ${artisan.name} (${artisan.ethnic})`, 
+                            desc: artisan.proofDescription || artisan.bio 
+                          })}
+                          className="text-[11px] text-primary hover:text-primary/80 font-bold flex items-center gap-0.5 hover:underline cursor-pointer"
+                        >
+                          <span className="material-symbols-outlined text-sm">zoom_in</span>
+                          <span>Xem ảnh lớn</span>
+                        </button>
+                      </div>
+
+                      {/* 2. THÔNG TIN HỒ SƠ & DI SẢN (THIẾT KẾ MẠCH LẠC, KHÔNG BỊ RỐI) */}
+                      <div className="flex-1 min-w-0 space-y-2">
+                        {/* Hàng tiêu đề: Tên, Dân tộc & Trạng thái */}
+                        <div className="flex flex-wrap items-center justify-between gap-2">
+                          <div className="flex flex-wrap items-center gap-2">
+                            <h3 className="text-lg sm:text-xl font-black text-text-main tracking-tight">
+                              {artisan.name}
+                            </h3>
+                            <span className="px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20 text-xs font-bold">
+                              Dân tộc {artisan.ethnic}
+                            </span>
+                          </div>
+
+                          {/* Huy hiệu trạng thái */}
+                          <div>
+                            {artisan.status === 'pending' ? (
+                              <span className="px-2.5 py-1 rounded-full bg-amber-50 text-amber-900 border border-amber-300 text-xs font-black uppercase tracking-wider flex items-center gap-1.5 shadow-xs">
+                                <span className="material-symbols-outlined text-xs animate-spin text-amber-700">hourglass_top</span>
+                                Chờ Thẩm Định
+                              </span>
+                            ) : artisan.status === 'approved' ? (
+                              <span className="px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-900 border border-emerald-300 text-xs font-black uppercase tracking-wider flex items-center gap-1.5 shadow-xs">
+                                <span className="material-symbols-outlined text-sm text-emerald-700">verified</span>
+                                Đã Cấp Tích Vàng
+                              </span>
+                            ) : (
+                              <span className="px-2.5 py-1 rounded-full bg-rose-50 text-rose-900 border border-rose-300 text-xs font-black uppercase tracking-wider flex items-center gap-1.5 shadow-xs">
+                                <span className="material-symbols-outlined text-sm text-rose-700">cancel</span>
+                                Đã Từ Chối
+                              </span>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Địa chỉ, SĐT, Ngày nộp */}
+                        <div className="flex flex-wrap items-center gap-y-1 gap-x-3 text-xs text-stone-600 font-medium">
+                          <span className="flex items-center gap-1">
+                            <span className="material-symbols-outlined text-sm text-primary">location_on</span>
+                            <span className="text-text-main font-semibold">{artisan.village}</span>
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <span className="material-symbols-outlined text-sm text-emerald-700">call</span>
+                            <a href={`tel:${artisan.phone}`} className="font-mono font-bold text-text-main hover:text-primary">
+                              {artisan.phone}
+                            </a>
+                          </span>
+                          <span className="text-stone-400">
+                            • Ngày nộp: {new Date(artisan.createdAt).toLocaleDateString('vi-VN')}
+                          </span>
+                        </div>
+
+                        {/* Người đại diện nộp hộ (nếu có) */}
+                        {artisan.isRepresentative && artisan.representative && (
+                          <div className="inline-flex items-center gap-1.5 text-xs text-amber-900 bg-amber-50/80 px-2.5 py-1 rounded-lg border border-amber-200">
+                            <span className="material-symbols-outlined text-sm text-amber-700">support_agent</span>
+                            <span><strong>Đại diện nộp hộ:</strong> {artisan.representative}</span>
+                          </div>
+                        )}
+
+                        {/* Câu chuyện / Tiểu sử nghề di sản */}
+                        <p className="text-xs sm:text-sm font-serif text-text-main/85 leading-relaxed bg-[#FAF7F0] p-2.5 rounded-xl border border-gold/20">
+                          {artisan.bio || 'Chưa có thông tin giới thiệu chi tiết.'}
+                        </p>
+
+                        {/* Lý do từ chối nếu có */}
+                        {artisan.status === 'rejected' && artisan.rejectionReason && (
+                          <div className="p-2 rounded-xl bg-rose-50 border border-rose-200 text-xs text-rose-900">
+                            <strong className="text-rose-700">Lý do từ chối:</strong> {artisan.rejectionReason}
+                          </div>
+                        )}
+
+                        {/* Nguồn văn hóa chính thống */}
+                        <div className="flex items-center gap-1.5 text-[11px] text-emerald-800 bg-emerald-50/80 px-2.5 py-1 rounded-lg border border-emerald-200/80">
+                          <span className="material-symbols-outlined text-sm text-emerald-700">task_alt</span>
+                          <span><strong>Nguồn đối chiếu chính thống:</strong> Báo Nhân Dân, TTXVN & Cục Di sản Văn hóa</span>
+                        </div>
+                      </div>
+
+                      {/* 3. CÁC NÚT DUYỆT NHANH (KHÔNG BAO GIỜ BỊ MẤT CHỮ TRÊN HOVER) */}
+                      <div className="w-full md:w-44 lg:w-48 shrink-0 flex flex-col gap-2 pt-2 md:pt-0 border-t md:border-t-0 border-stone-200">
+                        {artisan.status === 'pending' ? (
+                          <>
+                            {/* Nút Duyệt Cấp Tích Vàng: Màu xanh ngọc di sản, chữ trắng luôn luôn rõ ràng */}
+                            <button
+                              type="button"
+                              disabled={isProcessingAction}
+                              onClick={() => handleApproveArtisan(artisan)}
+                              style={{ backgroundColor: '#15803d', color: '#ffffff' }}
+                              className="w-full py-2.5 px-3 rounded-xl font-black text-xs uppercase tracking-wider shadow-sm hover:brightness-110 active:scale-95 transition-all flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
+                            >
+                              <span className="material-symbols-outlined text-base text-amber-300">verified</span>
+                              <span style={{ color: '#ffffff' }} className="font-bold">Duyệt Cấp Tích Vàng</span>
+                            </button>
+
+                            {/* Nút Từ Chối / Bổ Sung */}
+                            <button
+                              type="button"
+                              disabled={isProcessingAction}
+                              onClick={() => handleOpenRejectModal(artisan)}
+                              style={{ backgroundColor: '#fff1f2', color: '#be123c', borderColor: '#fecdd3' }}
+                              className="w-full py-2 px-3 border hover:bg-rose-100 rounded-xl font-bold text-xs uppercase tracking-wider transition-all active:scale-95 flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
+                            >
+                              <span className="material-symbols-outlined text-base">cancel</span>
+                              <span>Từ Chối / Bổ Sung</span>
+                            </button>
+
+                            {/* Nút Xem Thử Gian Hàng */}
+                            <button
+                              type="button"
+                              onClick={() => handleAdminEnterArtisanShop(artisan)}
+                              style={{ backgroundColor: '#f5f5f4', color: '#44403c' }}
+                              className="w-full py-1.5 px-3 hover:bg-stone-200 rounded-xl font-bold text-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                            >
+                              <span className="material-symbols-outlined text-sm">storefront</span>
+                              <span>Xem thử gian hàng</span>
+                            </button>
+                          </>
+                        ) : artisan.status === 'approved' ? (
+                          <>
+                            <div className="p-2 rounded-xl bg-emerald-50 border border-emerald-300 text-center">
+                              <span className="material-symbols-outlined text-xl text-emerald-700">verified</span>
+                              <div className="text-xs font-black text-emerald-900 mt-0.5">ĐÃ CẤP TÍCH VÀNG</div>
+                              <div className="text-[10px] text-emerald-700">Đã mở bán trên Chợ Phiên</div>
+                            </div>
+
+                            <button
+                              type="button"
+                              onClick={() => handleAdminEnterArtisanShop(artisan)}
+                              style={{ backgroundColor: '#8B1A1A', color: '#ffffff' }}
+                              className="w-full py-2 px-3 hover:brightness-110 rounded-xl font-black text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-sm"
+                            >
+                              <span className="material-symbols-outlined text-base">storefront</span>
+                              <span style={{ color: '#ffffff' }}>Quản Lý Gian Hàng</span>
+                            </button>
+
+                            <button
+                              type="button"
+                              onClick={() => handleRevokeArtisanBadge(artisan)}
+                              style={{ color: '#78716c' }}
+                              className="w-full py-1.5 px-3 hover:text-rose-700 hover:bg-rose-50 rounded-xl font-bold text-xs transition-all flex items-center justify-center gap-1 cursor-pointer"
+                            >
+                              <span className="material-symbols-outlined text-sm">undo</span>
+                              <span>Thu hồi Tích Vàng</span>
+                            </button>
+                          </>
+                        ) : (
+                          <>
+                            <button
+                              type="button"
+                              disabled={isProcessingAction}
+                              onClick={() => handleApproveArtisan(artisan)}
+                              style={{ backgroundColor: '#15803d', color: '#ffffff' }}
+                              className="w-full py-2.5 px-3 rounded-xl font-black text-xs uppercase tracking-wider shadow-sm hover:brightness-110 active:scale-95 transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                            >
+                              <span className="material-symbols-outlined text-base text-amber-300">refresh</span>
+                              <span style={{ color: '#ffffff' }}>Xem Xét Duyệt Lại</span>
+                            </button>
+
+                            <button
+                              type="button"
+                              onClick={() => handleAdminEnterArtisanShop(artisan)}
+                              style={{ backgroundColor: '#f5f5f4', color: '#44403c' }}
+                              className="w-full py-1.5 px-3 hover:bg-stone-200 rounded-xl font-bold text-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                            >
+                              <span className="material-symbols-outlined text-sm">visibility</span>
+                              <span>Xem chi tiết hồ sơ</span>
+                            </button>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        ) : (
+          /* ============================================================ */
+          /* GIAO DIỆN NGHỆ NHÂN BÌNH THƯỜNG (KÊNH BÁN HÀNG & MỞ GIAN HÀNG) */
+          /* ============================================================ */
+          <>
+            {/* TABS CHUYỂN ĐỔI CHÍNH */}
+            <div className="mt-6 flex flex-col sm:flex-row items-center justify-between gap-4 bg-white p-3 rounded-2xl border-2 border-gold/30 shadow-md">
           <div className="flex items-center gap-2 w-full sm:w-auto">
             {(!currentArtisan || isRegisterMode) ? (
               <button
@@ -1366,6 +1910,8 @@ const ArtisanPortal: React.FC = () => {
             </div>
           )}
         </div>
+          </>
+        )}
       </div>
 
       {/* MODAL THÊM SẢN PHẨM MỚI (DÙNG ẢNH THẬT TỪ DATABASE) */}
@@ -1543,6 +2089,134 @@ const ArtisanPortal: React.FC = () => {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL PHÓNG TO ẢNH MINH CHỨNG */}
+      {lightboxData && (
+        <div 
+          onClick={() => setLightboxData(null)}
+          className="fixed inset-0 z-[110] bg-black/85 backdrop-blur-sm flex items-center justify-center p-4 animate-fade-in"
+        >
+          <div 
+            onClick={e => e.stopPropagation()}
+            className="bg-white rounded-3xl max-w-3xl w-full overflow-hidden shadow-2xl border-2 border-gold flex flex-col max-h-[90vh]"
+          >
+            <div className="p-4 bg-[#781012] text-white flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className="material-symbols-outlined text-gold">verified</span>
+                <h3 className="font-bold text-sm tracking-wide text-white truncate max-w-md">
+                  {lightboxData.title}
+                </h3>
+              </div>
+              <button
+                onClick={() => setLightboxData(null)}
+                className="size-8 rounded-full bg-white/20 hover:bg-white/30 text-white flex items-center justify-center transition-colors cursor-pointer"
+              >
+                <span className="material-symbols-outlined text-lg">close</span>
+              </button>
+            </div>
+
+            <div className="flex-1 overflow-auto p-4 bg-stone-900 flex items-center justify-center">
+              <img
+                src={lightboxData.url}
+                alt={lightboxData.title}
+                className="max-h-[65vh] w-auto object-contain rounded-xl shadow-lg border border-white/20"
+              />
+            </div>
+
+            {lightboxData.desc && (
+              <div className="p-4 bg-[#FAF7F0] border-t border-gold/30 text-xs text-text-main font-serif">
+                <strong>Chi tiết minh chứng:</strong> {lightboxData.desc}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* MODAL TỪ CHỐI / YÊU CẦU BỔ SUNG */}
+      {rejectingArtisan && (
+        <div 
+          onClick={() => setRejectingArtisan(null)}
+          className="fixed inset-0 z-[110] bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 animate-fade-in"
+        >
+          <div 
+            onClick={e => e.stopPropagation()}
+            className="bg-white rounded-2xl max-w-lg w-full overflow-hidden shadow-2xl border border-stone-200 p-6 space-y-4"
+          >
+            <div className="flex items-center justify-between border-b border-stone-100 pb-3">
+              <div className="flex items-center gap-2">
+                <span className="material-symbols-outlined text-stone-600 text-xl">rule</span>
+                <h3 className="font-bold text-base text-stone-900">Yêu Cầu Bổ Sung / Từ Chối Hồ Sơ</h3>
+              </div>
+              <button
+                onClick={() => setRejectingArtisan(null)}
+                className="size-8 rounded-full bg-stone-100 hover:bg-stone-200 text-stone-500 hover:text-stone-800 flex items-center justify-center transition-colors cursor-pointer"
+              >
+                <span className="material-symbols-outlined text-base">close</span>
+              </button>
+            </div>
+
+            <div>
+              <p className="text-xs text-stone-700">
+                Hồ sơ xem xét: <strong className="text-stone-900 font-semibold">{rejectingArtisan.name}</strong> ({rejectingArtisan.ethnic} - {rejectingArtisan.village}).
+              </p>
+              <p className="text-[11px] text-stone-500 mt-1">
+                Chọn một lý do nhanh hoặc nhập nội dung cụ thể để phản hồi cho nghệ nhân:
+              </p>
+            </div>
+
+            {/* Lý do nhanh */}
+            <div className="space-y-1.5">
+              {[
+                'Ảnh minh chứng mờ, chưa thấy rõ xưởng và thao tác làm nghề thủ công.',
+                'Cần bổ sung thêm bản chụp Bằng khen Nghệ nhân hoặc Giấy chứng nhận làng nghề.',
+                'Số điện thoại không liên lạc được để đối chiếu thông tin di sản.',
+                'Cần bổ sung văn bản xác nhận từ Trưởng bản hoặc Hợp tác xã địa phương.'
+              ].map((reason, idx) => (
+                <button
+                  key={idx}
+                  type="button"
+                  onClick={() => setRejectReasonInput(reason)}
+                  className="w-full text-left text-xs p-2.5 rounded-xl border border-stone-200 hover:border-stone-400 hover:bg-stone-50 text-stone-700 transition-colors cursor-pointer"
+                >
+                  • {reason}
+                </button>
+              ))}
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold text-stone-700 uppercase tracking-wide mb-1">
+                Nội dung phản hồi gửi nghệ nhân:
+              </label>
+              <textarea
+                rows={3}
+                value={rejectReasonInput}
+                onChange={e => setRejectReasonInput(e.target.value)}
+                placeholder="Nhập lý do hoặc hướng dẫn bổ sung..."
+                className="w-full p-3 bg-stone-50 border border-stone-200 rounded-xl text-xs text-stone-800 focus:bg-white focus:border-stone-400 outline-none resize-none"
+              ></textarea>
+            </div>
+
+            <div className="flex items-center justify-end gap-2 pt-2 border-t border-stone-100">
+              <button
+                type="button"
+                onClick={() => setRejectingArtisan(null)}
+                className="px-4 py-2 text-xs font-medium text-stone-600 hover:bg-stone-100 rounded-xl cursor-pointer"
+              >
+                Hủy Bỏ
+              </button>
+              <button
+                type="button"
+                disabled={isProcessingAction}
+                onClick={handleConfirmReject}
+                className="px-4 py-2 bg-stone-900 hover:bg-black text-white font-semibold text-xs rounded-xl shadow-xs transition-colors flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+              >
+                <span className="material-symbols-outlined text-sm">send</span>
+                <span>Gửi Phản Hồi Từ Chối</span>
+              </button>
+            </div>
           </div>
         </div>
       )}

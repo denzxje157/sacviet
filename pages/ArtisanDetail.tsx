@@ -50,9 +50,8 @@ const ArtisanDetail: React.FC = () => {
       img: product.img,
       quantity: 1
     };
-    addToCart(cartItem);
-    showToast(`Đã thêm "${product.name}" vào giỏ hàng!`);
-    navigate('/cart');
+    addToCart(cartItem, 'checkout');
+    showToast(`Đã thêm "${product.name}" vào đơn đặt hàng!`);
   };
 
   const handleSendThanks = (e: React.FormEvent) => {

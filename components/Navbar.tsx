@@ -25,12 +25,12 @@ const Navbar: React.FC = () => {
   return (
     <>
       <header className="sticky top-0 z-[100] w-full border-b border-gold/20 bg-background-light/90 backdrop-blur-md shadow-sm font-display">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 md:px-6 py-3 md:py-4">
+        <div className="mx-auto flex max-w-[1400px] items-center justify-between px-3 md:px-6 lg:px-8 py-3 md:py-4">
           
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-2 md:gap-3 shrink-0">
+          <Link to="/" className="flex items-center gap-2 md:gap-3 shrink-0 -ml-1 md:-ml-2 mr-6 lg:mr-8 group">
               <div 
-                className="w-10 h-10 md:w-16 md:h-16 rounded-full border-2 border-gold shrink-0 shadow-md bg-white"
+                className="w-10 h-10 md:w-16 md:h-16 rounded-full border-2 border-gold shrink-0 shadow-md bg-white transition-transform group-hover:scale-105"
                 style={{
                   backgroundImage: "url('https://cazllsidgvysyxbvrftq.supabase.co/storage/v1/object/public/images-sacviet/logo.png?v=1')",
                   backgroundRepeat: "no-repeat",
@@ -47,9 +47,10 @@ const Navbar: React.FC = () => {
           </Link>
 
           {/* Desktop Nav */}
-          <nav className="hidden lg:flex items-center gap-4 xl:gap-8">
+          <nav className="hidden lg:flex items-center gap-3 xl:gap-7 ml-1">
             {navLinks.map((link) => {
-              const isActive = location.pathname === link.path || (link.path === '/artisans' && location.pathname.startsWith('/artisan'));
+              const isActive = location.pathname === link.path || 
+                (link.path === '/artisans' && location.pathname.startsWith('/artisan'));
               return (
                 <Link
                   key={link.path}
@@ -69,29 +70,45 @@ const Navbar: React.FC = () => {
 
           {/* Actions */}
           <div className="flex items-center gap-2 md:gap-3 shrink-0">
-            {/* NÚT ADMIN - Ép nhỏ lại trên màn hình vừa */}
-            {user?.role === 'admin' && (
-              <Link 
-                to="/admin/dashboard"
-                className="hidden md:flex items-center gap-1.5 px-3 py-1.5 md:px-4 md:py-2 bg-black text-gold rounded-full border border-gold/30 hover:bg-zinc-900 transition-all shadow-lg active:scale-95"
+            {/* NẾU LÀ ADMIN: XẾP TRÊN DƯỚI VỚI HỎI GIÀ LÀNG ĐỂ TIẾT KIỆM KHÔNG GIAN, KHÔNG ĐÈ LÊN CỘNG ĐỒNG */}
+            {user?.role === 'admin' ? (
+              <div className="hidden md:flex flex-col gap-1 justify-center shrink-0">
+                <Link 
+                  to="/admin/dashboard"
+                  className="flex items-center justify-center gap-1 px-2.5 py-1 bg-black text-gold rounded-full border border-gold/30 hover:bg-zinc-900 transition-all shadow-sm active:scale-95 text-[9px] font-black uppercase tracking-wider whitespace-nowrap"
+                  title="Bàn làm việc Quản trị viên"
+                >
+                  <ShieldCheck size={12} className="shrink-0 text-gold" />
+                  <span>Quản trị</span>
+                </Link>
+                
+                <button 
+                  onClick={() => setIsChatOpen(!isChatOpen)}
+                  className={`flex rounded-full px-2.5 py-1 text-[9px] font-black uppercase tracking-wider transition-all hover:scale-105 active:scale-95 items-center justify-center gap-1 shadow-xs border whitespace-nowrap ${
+                    isChatOpen 
+                    ? 'bg-gold text-white border-gold shadow-gold/40' 
+                    : 'bg-white text-primary border-primary/20 hover:bg-primary/5'
+                  }`}
+                  title="Trò chuyện cùng Già Làng Di Sản"
+                >
+                  <MessageSquare size={12} className="shrink-0" />
+                  <span>Hỏi Già Làng</span>
+                </button>
+              </div>
+            ) : (
+              /* Người dùng bình thường / Nghệ nhân: Nút Hỏi Già Làng dạng thanh ngang như cũ */
+              <button 
+                onClick={() => setIsChatOpen(!isChatOpen)}
+                className={`hidden md:flex rounded-full px-3.5 py-2 text-[10px] font-black uppercase tracking-widest transition-all hover:scale-105 active:scale-95 items-center gap-1.5 shadow-sm border whitespace-nowrap ${
+                  isChatOpen 
+                  ? 'bg-gold text-white border-gold shadow-gold/40' 
+                  : 'bg-white text-primary border-primary/20 hover:bg-primary/5'
+                }`}
               >
-                <ShieldCheck size={16} />
-                <span className="text-[9px] xl:text-[10px] font-black uppercase tracking-widest hidden xl:inline">Quản trị</span>
-              </Link>
+                <MessageSquare size={16} />
+                <span>Hỏi Già Làng</span>
+              </button>
             )}
-
-            {/* AI Discovery Button */}
-            <button 
-              onClick={() => setIsChatOpen(!isChatOpen)}
-              className={`hidden md:flex rounded-full px-3 py-1.5 md:px-4 md:py-2 text-[9px] xl:text-[10px] font-black uppercase tracking-widest transition-all hover:scale-105 active:scale-95 items-center gap-1.5 shadow-sm border ${
-                isChatOpen 
-                ? 'bg-gold text-white border-gold shadow-gold/40' 
-                : 'bg-white text-primary border-primary/20 hover:bg-primary/5'
-              }`}
-            >
-              <MessageSquare size={16} />
-              <span className="hidden xl:inline">Hỏi Già Làng</span>
-            </button>
 
             {/* Cart Button */}
             <button 

@@ -98,19 +98,21 @@ const ProductModal = ({ product, onClose, showToastMsg }: { product: Product, on
 
   const handleAddToCart = () => {
     if (addToCart && product) {
-        for (let i = 0; i < quantity; i++) addToCart(product);
-        showToastMsg(`Đã thêm ${quantity} "${product.name}" vào giỏ hàng`);
+      for (let i = 0; i < quantity; i++) {
+        addToCart(product, i === 0 ? 'cart' : null);
+      }
+      showToastMsg(`Đã thêm ${quantity} "${product.name}" vào giỏ hàng`);
     }
     onClose();
-    navigate('/cart');
   };
 
   const handleBuyNow = () => {
     if (addToCart && product) {
-        for (let i = 0; i < quantity; i++) addToCart(product);
+      for (let i = 0; i < quantity; i++) {
+        addToCart(product, i === 0 ? 'checkout' : null);
+      }
     }
     onClose();
-    navigate('/checkout');
   };
 
   if (!product) return null;
@@ -345,37 +347,38 @@ const Marketplace: React.FC = () => {
           </div>
         </section>
 
-        {/* BANNER NỔI BẬT NGHỆ NHÂN BẢN ĐỊA */}
+        {/* BANNER NỔI BẬT NGHỆ NHÂN BẢN ĐỊA (THIẾT KẾ BASIC, TRẮNG - ĐỎ - VÀNG) */}
         <div className="mb-8 max-w-5xl mx-auto">
           <Link
             to="/artisans"
-            className="group block bg-gradient-to-r from-primary via-[#9B2323] to-[#681313] text-white p-4 md:p-5 rounded-2xl md:rounded-3xl border-2 border-gold/40 shadow-xl hover:shadow-2xl transition-all duration-300 relative overflow-hidden"
+            className="group block bg-white border-2 border-gold/40 hover:border-primary/50 p-4 md:p-5 rounded-2xl md:rounded-3xl shadow-sm hover:shadow-md transition-all duration-300"
           >
-            <div className="absolute right-0 top-0 bottom-0 w-1/3 bg-[radial-gradient(ellipse_at_center,rgba(212,175,55,0.25),transparent_70%)] pointer-events-none"></div>
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 relative z-10">
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
               <div className="flex items-center gap-4 text-center sm:text-left">
-                <div className="size-12 rounded-2xl bg-gold/20 text-gold flex items-center justify-center shrink-0 border border-gold/40 shadow-inner">
+                <div className="size-12 rounded-2xl bg-primary/10 text-primary flex items-center justify-center shrink-0 border border-primary/20 shadow-xs">
                   <span className="material-symbols-outlined text-2xl">front_hand</span>
                 </div>
                 <div>
                   <div className="flex items-center gap-2 justify-center sm:justify-start">
-                    <span className="text-[10px] font-black uppercase tracking-widest text-gold bg-black/30 px-2 py-0.5 rounded-md">
+                    <span className="text-[10px] font-black uppercase tracking-wider text-primary bg-primary/10 border border-primary/20 px-2.5 py-0.5 rounded-md">
                       Thương Mại Kể Chuyện
                     </span>
-                    <span className="text-[11px] text-gold-light font-bold">Thứ Shopee không có</span>
+                    <span className="text-xs text-amber-800 font-bold bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-md">
+                      Thứ Shopee không có
+                    </span>
                   </div>
-                  <h3 className="text-base sm:text-lg font-black text-white mt-0.5 group-hover:text-gold-light transition-colors">
+                  <h3 className="text-base sm:text-lg font-black text-stone-900 group-hover:text-primary transition-colors mt-1">
                     Khám phá Không Gian Kể Chuyện Của Các Nghệ Nhân Bản Địa ➔
                   </h3>
                 </div>
               </div>
-              <div className="shrink-0 flex items-center gap-2">
+              <div className="shrink-0 flex items-center gap-3">
                 <div className="flex -space-x-3 overflow-hidden p-1">
                   {artisanData.slice(0, 4).map((a) => (
-                    <img key={a.id} src={a.avatar} alt={a.name} className="inline-block size-8 rounded-full ring-2 ring-gold object-cover" />
+                    <img key={a.id} src={a.avatar} alt={a.name} className="inline-block size-8 rounded-full ring-2 ring-gold object-cover shadow-xs" />
                   ))}
                 </div>
-                <span className="text-xs font-black uppercase tracking-wider bg-gold text-text-main px-4 py-2 rounded-xl group-hover:brightness-110 transition-all shadow-md">
+                <span className="text-xs font-black uppercase tracking-wider bg-primary hover:bg-[#7d0000] text-white px-5 py-2.5 rounded-xl group-hover:scale-105 transition-all shadow-sm">
                   Xem ngay
                 </span>
               </div>
@@ -385,10 +388,10 @@ const Marketplace: React.FC = () => {
 
         <div className="sticky top-20 md:top-24 z-40 mb-6 md:mb-10 space-y-4 md:space-y-6">
           <div className="flex flex-col md:flex-row gap-4 max-w-5xl mx-auto">
-            <div className="relative group flex-1">
-              <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none z-10">
-              <span className="material-symbols-outlined text-[#8B1A1A] group-hover:scale-110 transition-transform text-xl">search</span>
-            </div>
+            <div className="relative group flex-1 flex items-center">
+              <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none z-10 text-[#8B1A1A]">
+                <span className="material-symbols-outlined group-hover:scale-110 transition-transform text-xl leading-none">search</span>
+              </div>
               <input type="text" placeholder="Tìm kiếm sản phẩm..." value={searchTerm} onChange={(e) => { setSearchTerm(e.target.value); setCurrentPage(1); }} className="w-full bg-white/95 backdrop-blur border-2 border-gold/20 rounded-full py-3.5 pl-14 pr-6 text-text-main shadow-xl text-base md:text-lg font-medium focus:outline-none focus:border-gold transition-all" />
             </div>
             

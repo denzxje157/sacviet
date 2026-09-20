@@ -88,6 +88,104 @@ const AIChatWidget: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ isOp
     return context;
   }, [libraryData]);
 
+  const generateLocalFallbackResponse = (
+    query: string,
+    libData: LibraryItem[]
+  ): { text: string; actionLink?: string; actionLabel?: string } => {
+    const q = query.toLowerCase().trim();
+
+    // 1. Dân tộc cụ thể
+    const matchedEthnic = ethnicData.find(e => 
+      q.includes(e.name.toLowerCase()) || 
+      (e.otherNames && e.otherNames.toLowerCase().includes(q))
+    );
+
+    if (matchedEthnic) {
+      const matchedProducts = marketplaceData.find(m => 
+        m.e.toLowerCase() === matchedEthnic.name.toLowerCase()
+      );
+
+      let text = `Chào con! Về đồng bào **${matchedEthnic.name}**, dân tộc cư trú chủ yếu tại **${matchedEthnic.location}** với bề dày truyền thống văn hóa rực rỡ từ trang phục thổ cẩm đến các điệu múa lễ hội độc đáo.`;
+      
+      if (matchedProducts && matchedProducts.items.length > 0) {
+        const topItems = matchedProducts.items.slice(0, 3).map(it => `• **${it.n}** (${it.p})`).join('\n');
+        text += `\n\nHiện chợ phiên Sắc Việt đang lưu giữ những báu vật của đồng bào:\n${topItems}\n\nCon có thể ghé thăm gian hàng để chiêm ngưỡng và tìm hiểu thêm nhé!`;
+        return {
+          text,
+          actionLink: `/marketplace?ethnic=${encodeURIComponent(matchedEthnic.name)}`,
+          actionLabel: `Đến gian hàng ${matchedEthnic.name}`
+        };
+      }
+
+      return {
+        text: text + `\n\nCon có muốn tìm hiểu thêm tư liệu và ảnh chụp di sản của đồng bào ${matchedEthnic.name} không?`,
+        actionLink: `/library`,
+        actionLabel: `Mở Thư Viện Di Sản`
+      };
+    }
+
+    // 2. Sản phẩm / Chợ phiên / Mua sắm / Giá tiền
+    if (q.includes('mua') || q.includes('giá') || q.includes('sản phẩm') || q.includes('chợ') || q.includes('thổ cẩm') || q.includes('vải') || q.includes('khèn') || q.includes('trà') || q.includes('bạc') || q.includes('gốm')) {
+      const foundItems: { group: string; name: string; price: string }[] = [];
+      marketplaceData.forEach(group => {
+        group.items.forEach(item => {
+          if (q.includes(item.n.toLowerCase()) || item.n.toLowerCase().split(' ').some(w => w.length > 2 && q.includes(w))) {
+            foundItems.push({ group: group.e, name: item.n, price: item.p });
+          }
+        });
+      });
+
+      if (foundItems.length > 0) {
+        const listStr = foundItems.slice(0, 3).map(i => `• **${i.name}** (Dân tộc ${i.group}) — Giá: ${i.price}`).join('\n');
+        return {
+          text: `Già làng tìm thấy ngay cho con những sản phẩm thủ công tinh hoa này:\n\n${listStr}\n\nTất cả đều được các nghệ nhân bản địa dệt may và chế tác thủ công tỉ mỉ.`,
+          actionLink: `/marketplace`,
+          actionLabel: `Đến Chợ Phiên Sắc Việt`
+        };
+      }
+
+      return {
+        text: `Chợ Phiên Sắc Việt hiện quy tụ hơn 70 sản phẩm thủ công truyền thống: trang phục dệt thổ cẩm H'Mông, bạc Chăm, trà Shan tuyết Hà Giang... do chính tay các nghệ nhân chế tác. Mời con ghé thăm chợ!`,
+        actionLink: `/marketplace`,
+        actionLabel: `Khám phá Chợ Phiên`
+      };
+    }
+
+    // 3. Nghệ nhân & Bản làng
+    if (q.includes('nghệ nhân') || q.includes('thợ') || q.includes('bản làng') || q.includes('nghề')) {
+      return {
+        text: `Mỗi sản phẩm trên Sắc Việt đều gắn liền với cuộc đời của một Nghệ nhân ưu tú gìn giữ hồn cốt dân tộc. Con có thể vào xem tiểu sử, xưởng nghề và gửi lời tri ân tới các nghệ nhân:`,
+        actionLink: `/artisans`,
+        actionLabel: `Xem danh sách Nghệ nhân`
+      };
+    }
+
+    // 4. Tra cứu đơn hàng
+    if (q.includes('đơn hàng') || q.includes('tra cứu') || q.includes('vận chuyển') || q.includes('giao hàng') || q.includes('kiểm tra đơn')) {
+      return {
+        text: `Con muốn kiểm tra đơn hàng đã đặt phải không? Con có thể tra cứu trạng thái giao nhận, hóa đơn và mã đơn trực tiếp tại đây:`,
+        actionLink: `/orders`,
+        actionLabel: `Xem Đơn Hàng Của Tôi`
+      };
+    }
+
+    // 5. Thư viện / Lễ hội / Phong tục
+    if (q.includes('lễ hội') || q.includes('thư viện') || q.includes('phong tục') || q.includes('lịch sử') || q.includes('truyền thống')) {
+      return {
+        text: `Kho tàng văn hóa của 54 dân tộc anh em vô cùng phong phú và thiêng liêng. Mời con vào Thư Viện Di Sản để xem ảnh tư liệu, video và các bài viết nghiên cứu sâu sắc:`,
+        actionLink: `/library`,
+        actionLabel: `Mở Thư Viện Di Sản`
+      };
+    }
+
+    // 6. Mặc định
+    return {
+      text: `Chào con! Già làng Di Sản luôn sẵn sàng giải đáp về trang phục, lễ hội, câu chuyện 54 dân tộc, hoặc hướng dẫn con tìm những món đồ thủ công độc bản. Con muốn tìm hiểu về dân tộc hay sản phẩm nào?`,
+      actionLink: `/marketplace`,
+      actionLabel: `Khám phá Chợ Phiên`
+    };
+  };
+
   const handleSendMessage = async () => {
     if (!inputText.trim() || isLoading) return;
 
@@ -104,7 +202,7 @@ const AIChatWidget: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ isOp
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          message: inputText,
+          message: userMsg.text,
           context: systemContext,
           history: updatedMessages.map(m => ({
             role: m.role === "model" ? "assistant" : "user",
@@ -113,8 +211,13 @@ const AIChatWidget: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ isOp
         })
       });
 
+      if (!response.ok) {
+        throw new Error(`HTTP status ${response.status}`);
+      }
+
       const data = await response.json();
-      let fullText = data.reply || "Già làng chưa nghĩ ra câu trả lời.";
+      let fullText = data.reply || "";
+      if (!fullText) throw new Error("Phản hồi rỗng");
 
       let actionLink: string | undefined;
       let actionLabel: string | undefined;
@@ -138,10 +241,11 @@ const AIChatWidget: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ isOp
       ));
 
     } catch (error) {
-      console.error("Lỗi API:", error);
+      console.warn("Kích hoạt tri thức Già Làng dự phòng:", error);
+      const fallback = generateLocalFallbackResponse(userMsg.text, libraryData);
       setMessages(prev => prev.map(msg => 
         msg.id === aiMsgId 
-          ? { ...msg, text: "Mạng của già làng đang chập chờn quá. Con thử lại sau nhé." } 
+          ? { ...msg, text: fallback.text, actionLink: fallback.actionLink, actionLabel: fallback.actionLabel } 
           : msg
       ));
     } finally {
