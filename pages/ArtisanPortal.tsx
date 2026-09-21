@@ -567,64 +567,59 @@ const ArtisanPortal: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4">
         {/* 🛡️ BANNER ĐIỀU HÀNH DÀNH CHO ADMIN (THIẾT KẾ BASIC, TRẮNG - ĐỎ - VÀNG SANG TRỌNG) */}
         {isAdmin && (
-          <div className="mt-6 mb-6 bg-white border-2 border-gold/30 rounded-2xl md:rounded-3xl p-5 md:p-6 shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-5 relative overflow-hidden">
-            <div className="flex items-start sm:items-center gap-4">
-              <div className="size-12 md:size-14 rounded-2xl bg-primary/10 border-2 border-primary/20 flex items-center justify-center text-primary shrink-0 shadow-xs">
-                <span className="material-symbols-outlined text-2xl md:text-3xl">verified_user</span>
+          <div className="mt-6 mb-4 bg-white border border-stone-200/90 rounded-2xl p-4 md:p-5 shadow-xs flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="bg-primary text-white px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider">
+                  Admin
+                </span>
+                <span className="text-xs font-semibold text-stone-500">
+                  {user?.fullName || user?.email}
+                </span>
               </div>
-              <div>
-                <div className="flex flex-wrap items-center gap-2">
-                  <span className="bg-primary text-white px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider shadow-xs">
-                    Quản Trị Viên (Admin)
-                  </span>
-                  <span className="text-stone-500 text-xs font-medium">
-                    • Đang đăng nhập: <strong className="text-stone-800">{user?.fullName || user?.email}</strong>
-                  </span>
-                </div>
-                <h2 className="text-lg md:text-xl lg:text-2xl font-black text-[#420808] uppercase tracking-tight mt-1">
-                  Bàn Thẩm Định & Phê Duyệt Hồ Sơ Nghệ Nhân
-                </h2>
-                <p className="text-xs md:text-sm text-stone-600 font-serif mt-0.5 max-w-2xl">
-                  Thẩm định nhanh hồ sơ đăng ký, minh chứng ảnh làm nghề thực tế và cấp Tích Vàng Di Sản trực tiếp cho nghệ nhân.
-                </p>
-              </div>
+              <h2 className="text-base md:text-lg font-black text-text-main uppercase tracking-tight mt-1">
+                Bàn Quản Trị & Kiểm Duyệt Sàn
+              </h2>
+              <p className="text-xs text-stone-500 mt-0.5">
+                Thẩm định hồ sơ mở gian hàng nghệ nhân và phê duyệt sản phẩm lên Chợ Phiên.
+              </p>
             </div>
 
-            {/* Nút chuyển đổi chế độ của Admin - Rõ ràng, Tương phản cao */}
-            <div className="flex flex-wrap items-center gap-2 w-full md:w-auto bg-stone-100 p-1.5 rounded-2xl border border-stone-200 shrink-0">
+            {/* Segmented Controls - Tinh gọn, đồng bộ */}
+            <div className="flex flex-wrap items-center gap-1.5 p-1 bg-stone-100 rounded-xl border border-stone-200/80 shrink-0">
               <button
                 type="button"
                 onClick={() => setAdminViewMode('moderation')}
-                className={`flex-1 md:flex-none px-4 py-2.5 rounded-xl font-black text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-all cursor-pointer ${
+                className={`px-3 py-2 rounded-lg font-bold text-xs uppercase tracking-wider flex items-center gap-1.5 transition-all cursor-pointer ${
                   adminViewMode === 'moderation'
-                    ? 'bg-primary text-white shadow-md'
-                    : 'text-stone-600 hover:text-stone-900 hover:bg-stone-200/70'
+                    ? 'bg-primary text-white shadow-xs'
+                    : 'text-stone-600 hover:text-stone-900 hover:bg-stone-200/60'
                 }`}
               >
-                <span className="material-symbols-outlined text-base">rule</span>
-                <span>Duyệt Nghệ Nhân ({pendingArtisansCount} chờ)</span>
+                <span className="material-symbols-outlined text-sm">rule</span>
+                <span>Duyệt Nghệ Nhân ({pendingArtisansCount})</span>
               </button>
 
               <button
                 type="button"
                 onClick={() => setAdminViewMode('artisan_portal')}
-                className={`flex-1 md:flex-none px-4 py-2.5 rounded-xl font-black text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-all cursor-pointer ${
+                className={`px-3 py-2 rounded-lg font-bold text-xs uppercase tracking-wider flex items-center gap-1.5 transition-all cursor-pointer ${
                   adminViewMode === 'artisan_portal'
-                    ? 'bg-primary text-white shadow-md'
-                    : 'text-stone-600 hover:text-stone-900 hover:bg-stone-200/70'
+                    ? 'bg-primary text-white shadow-xs'
+                    : 'text-stone-600 hover:text-stone-900 hover:bg-stone-200/60'
                 }`}
               >
-                <span className="material-symbols-outlined text-base">storefront</span>
+                <span className="material-symbols-outlined text-sm">storefront</span>
                 <span>Giao Diện Nghệ Nhân</span>
               </button>
 
               <Link
                 to="/admin/products"
-                className="flex-1 md:flex-none px-4 py-2.5 rounded-xl font-black text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-all text-amber-900 bg-amber-100 hover:bg-amber-200 border border-amber-300 shadow-xs whitespace-nowrap active:scale-95"
-                title="Đến trang Quản lý sản phẩm toàn sàn để duyệt sản phẩm"
+                className="px-3 py-2 rounded-lg font-bold text-xs uppercase tracking-wider flex items-center gap-1.5 transition-all text-primary hover:bg-white/80 border border-primary/20 bg-white shadow-xs"
+                title="Quản lý sản phẩm toàn sàn"
               >
-                <span className="material-symbols-outlined text-base text-amber-800">inventory_2</span>
-                <span>Kho Admin Duyệt Sản Phẩm {allPendingProductsCount > 0 ? `(${allPendingProductsCount} chờ)` : ''} →</span>
+                <span className="material-symbols-outlined text-sm">inventory_2</span>
+                <span>Kho Sản Phẩm ({allPendingProductsCount}) →</span>
               </Link>
             </div>
           </div>
@@ -1009,136 +1004,69 @@ const ArtisanPortal: React.FC = () => {
           /* GIAO DIỆN NGHỆ NHÂN BÌNH THƯỜNG (KÊNH BÁN HÀNG & MỞ GIAN HÀNG) */
           /* ============================================================ */
           <>
-            {/* TABS CHUYỂN ĐỔI CHÍNH */}
-            <div className="mt-6 flex flex-col sm:flex-row items-center justify-between gap-4 bg-white p-3 rounded-2xl border-2 border-gold/30 shadow-md">
-          <div className="flex items-center gap-2 w-full sm:w-auto">
-            {(!currentArtisan || isRegisterMode) ? (
-              <button
-                className="flex-1 sm:flex-none px-5 py-3 rounded-xl font-black text-xs sm:text-sm uppercase tracking-wider flex items-center justify-center gap-2 bg-primary text-white shadow-md cursor-default"
-              >
-                <span className="material-symbols-outlined text-lg">how_to_reg</span>
-                Đăng Ký Hồ Sơ Nghệ Nhân
-              </button>
-            ) : currentArtisan?.status === 'pending' ? (
-              <button
-                className="flex-1 sm:flex-none px-5 py-3 rounded-xl font-black text-xs sm:text-sm uppercase tracking-wider flex items-center justify-center gap-2 bg-amber-600 text-white shadow-md cursor-default"
-              >
-                <span className="material-symbols-outlined text-lg animate-spin">hourglass_top</span>
-                Hồ Sơ Đang Chờ Duyệt ({currentArtisan.name})
-              </button>
-            ) : (
-              <button
-                className="flex-1 sm:flex-none px-5 py-3 rounded-xl font-black text-xs sm:text-sm uppercase tracking-wider flex items-center justify-center gap-2 bg-emerald-700 text-white shadow-md cursor-default"
-              >
-                <span className="material-symbols-outlined text-lg">storefront</span>
-                Kênh Quản Lý Gian Hàng ({currentArtisan?.name})
-              </button>
-            )}
+            {/* THANH THÔNG TIN GIAN HÀNG NGHỆ NHÂN (TINH GỌN, TRANG NHÃ) */}
+            <div className="mt-6 bg-white border border-gold/30 rounded-2xl p-5 md:p-6 shadow-xs flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+              <div>
+                <div className="flex flex-wrap items-center gap-2 mb-1.5">
+                  <span className="inline-flex items-center gap-1 bg-gold/10 border border-gold/30 text-gold-dark text-[10px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full">
+                    <span className="material-symbols-outlined text-xs">storefront</span>
+                    Kênh Nghệ Nhân Sắc Việt
+                  </span>
+                  {currentArtisan && !isRegisterMode && (
+                    currentArtisan.status === 'approved' ? (
+                      <span className="inline-flex items-center gap-1 bg-emerald-50 border border-emerald-200 text-emerald-700 text-[10px] font-bold px-2.5 py-0.5 rounded-full">
+                        <span className="material-symbols-outlined text-xs">verified</span>
+                        Bảo chứng Tích Vàng
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1 bg-amber-50 border border-amber-200 text-amber-800 text-[10px] font-bold px-2.5 py-0.5 rounded-full">
+                        <span className="material-symbols-outlined text-xs animate-spin">hourglass_empty</span>
+                        Chờ Admin Thẩm Định
+                      </span>
+                    )
+                  )}
+                </div>
 
-            {currentArtisan && !isRegisterMode && (
-              <button
-                onClick={handleLogout}
-                className="px-3.5 py-3 rounded-xl font-bold text-xs text-stone-600 hover:text-rose-700 hover:bg-rose-50 border border-stone-200 transition-colors flex items-center gap-1.5"
-                title="Đăng xuất khỏi tài khoản hiện tại"
-              >
-                <span className="material-symbols-outlined text-sm">logout</span>
-                <span className="hidden sm:inline">Đổi tài khoản</span>
-              </button>
-            )}
-          </div>
+                <h1 className="text-xl md:text-2xl font-black text-text-main uppercase tracking-tight">
+                  {(!currentArtisan || isRegisterMode)
+                    ? 'Mở Gian Hàng Nghệ Nhân' 
+                    : `Gian Hàng: ${currentArtisan.name}`
+                  }
+                </h1>
 
-          <div className="text-xs text-stone-600 font-medium flex items-center gap-1.5">
-            {(!currentArtisan || isRegisterMode) ? (
-              <span>✨ Đăng ký chỉ 1 phút dành cho Nghệ nhân hoặc Con cháu làm hộ</span>
-            ) : currentArtisan?.status === 'pending' ? (
-              <span className="text-amber-800 font-bold flex items-center gap-1">
-                <span className="material-symbols-outlined text-sm">schedule</span>
-                Hồ sơ đang được Ban Quản Trị thẩm định trong 24h
-              </span>
-            ) : (
-              <span className="text-emerald-800 font-bold flex items-center gap-1">
-                <span className="material-symbols-outlined text-sm">verified</span>
-                Gian hàng đã được bảo chứng Tích Vàng Di Sản
-              </span>
-            )}
-          </div>
-        </div>
-
-        {/* HERO BANNER KÊNH BÁN HÀNG */}
-        <div 
-          className="mt-4 rounded-3xl p-6 md:p-8 border-2 border-gold/40 shadow-xl relative overflow-hidden text-white"
-          style={{ 
-            backgroundColor: '#781012', 
-            backgroundImage: currentArtisan?.status === 'pending' && !isRegisterMode
-              ? 'linear-gradient(135deg, #7C2D12 0%, #451A03 100%)'
-              : 'linear-gradient(135deg, #8B1A1A 0%, #660C0E 100%)'
-          }}
-        >
-          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 relative z-10">
-            <div>
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-black/25 border border-gold/40 text-gold text-[11px] font-bold uppercase tracking-wider mb-2.5">
-                <span className="material-symbols-outlined text-sm text-gold">storefront</span>
-                Sắc Việt • Kênh Nghệ Nhân Di Sản
+                <p className="text-stone-500 text-xs md:text-sm mt-0.5 font-medium">
+                  {(!currentArtisan || isRegisterMode)
+                    ? 'Đăng ký nhanh chóng trong 1 phút bằng SĐT và ảnh làm nghề thực tế để nhận Tích Vàng Di Sản.'
+                    : `${currentArtisan.village || 'Làng nghề truyền thống'} • Dân tộc ${currentArtisan.ethnic || 'Bản địa'}${currentArtisan.representative ? ` • Đại diện hỗ trợ: ${currentArtisan.representative}` : ''}`
+                  }
+                </p>
               </div>
 
-              <h1 className="text-2xl md:text-3xl font-black text-white uppercase tracking-tight">
-                {(!currentArtisan || isRegisterMode)
-                  ? 'Mở Gian Hàng Cho Nghệ Nhân' 
-                  : currentArtisan?.status === 'pending'
-                    ? `Hồ Sơ Mở Gian Hàng: ${currentArtisan?.name}`
-                    : `Gian Hàng: ${currentArtisan?.name}`
-                }
-              </h1>
-
-              <p className="text-stone-200 text-xs md:text-sm mt-1.5 max-w-2xl font-serif">
-                {(!currentArtisan || isRegisterMode)
-                  ? 'Đăng ký nhanh chóng trong 1 phút bằng SĐT và ảnh làm nghề thực tế để nhận Tích Vàng Di Sản.'
-                  : currentArtisan?.status === 'pending'
-                    ? `${currentArtisan?.village || ''} • Dân tộc ${currentArtisan?.ethnic || ''} (Đang chờ thẩm định, chưa mở bán)`
-                    : `${currentArtisan?.village || ''} • Dân tộc ${currentArtisan?.ethnic || ''} ${currentArtisan?.representative ? `(Đại diện hỗ trợ: ${currentArtisan.representative})` : ''}`
-                }
-              </p>
-            </div>
-
-            {!isRegisterMode && currentArtisan ? (
-              <div className="flex flex-wrap items-center gap-2">
-                {currentArtisan.status === 'approved' ? (
-                  <>
-                    {/* CHỨNG NHẬN GỌN GÀNG */}
-                    <div className="inline-flex items-center gap-1.5 bg-black/35 border border-gold/40 px-2.5 py-1.5 rounded-lg backdrop-blur-sm shrink-0">
-                      <span className="material-symbols-outlined text-gold text-base">verified</span>
-                      <span className="text-[11px] font-bold text-amber-200 tracking-wide">Di Sản Sắc Việt</span>
-                    </div>
-
-                    {/* NÚT ĐĂNG SẢN PHẨM NHỎ GỌN */}
+              {!isRegisterMode && currentArtisan ? (
+                <div className="flex flex-wrap items-center gap-2 shrink-0">
+                  {currentArtisan.status === 'approved' && (
                     <button
+                      type="button"
                       onClick={() => setIsAddModalOpen(true)}
-                      className="px-3.5 py-1.5 bg-gradient-to-r from-amber-300 via-yellow-200 to-amber-300 hover:brightness-105 text-[#781012] border border-white font-black rounded-lg shadow-sm flex items-center justify-center gap-1.5 uppercase tracking-wide text-xs transition-all active:scale-95 whitespace-nowrap cursor-pointer shrink-0"
+                      className="px-4 py-2.5 bg-primary hover:brightness-110 text-white font-bold text-xs uppercase tracking-wider rounded-xl shadow-sm flex items-center justify-center gap-1.5 transition-all active:scale-95 cursor-pointer"
                     >
-                      <span className="material-symbols-outlined text-base font-black">add_circle</span>
+                      <span className="material-symbols-outlined text-base">add_circle</span>
                       <span>Đăng Sản Phẩm</span>
                     </button>
-                  </>
-                ) : (
-                  <div className="inline-flex items-center gap-1.5 bg-amber-500/20 border border-amber-300/60 px-2.5 py-1.5 rounded-lg backdrop-blur-sm text-amber-200 shrink-0">
-                    <span className="material-symbols-outlined text-sm animate-spin">hourglass_empty</span>
-                    <span className="text-[11px] font-bold text-white">Chờ Thẩm Định</span>
-                  </div>
-                )}
+                  )}
 
-                {/* NÚT ĐĂNG XUẤT NHỎ GỌN */}
-                <button
-                  onClick={handleLogout}
-                  className="px-3 py-1.5 bg-white/10 hover:bg-white/20 text-white/90 hover:text-white border border-white/20 font-bold rounded-lg text-xs transition-all active:scale-95 flex items-center gap-1 shrink-0"
-                  title="Thoát phiên làm việc"
-                >
-                  <span className="material-symbols-outlined text-sm">logout</span>
-                  <span>Đăng Xuất</span>
-                </button>
-              </div>
-            ) : null}
-          </div>
-        </div>
+                  <button
+                    type="button"
+                    onClick={handleLogout}
+                    className="px-3.5 py-2.5 bg-stone-100 hover:bg-stone-200 text-stone-700 font-bold text-xs uppercase tracking-wider rounded-xl border border-stone-200 transition-all flex items-center gap-1.5 cursor-pointer"
+                    title="Đổi tài khoản khác"
+                  >
+                    <span className="material-symbols-outlined text-sm">logout</span>
+                    <span>Đổi Tài Khoản</span>
+                  </button>
+                </div>
+              ) : null}
+            </div>
 
         {/* NỘI DUNG CHÍNH */}
         <div className="py-8">
