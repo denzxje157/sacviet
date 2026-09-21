@@ -94,8 +94,9 @@ const ArtisanPortal: React.FC = () => {
     setTimeout(() => setToastMessage(null), 3000);
   };
 
-  const { user } = useAuth();
+  const { user, toggleAuthModal } = useAuth();
   const isAdmin = user?.role === 'admin';
+  const [allPendingProductsCount, setAllPendingProductsCount] = useState(0);
 
   // Chế độ kiểm duyệt dành cho Quản Trị Viên (Admin)
   const [adminViewMode, setAdminViewMode] = useState<'moderation' | 'artisan_portal'>('moderation');
@@ -228,6 +229,8 @@ const ArtisanPortal: React.FC = () => {
     try {
       const artisans = await artisanPortalService.getAllArtisans();
       setAllArtisans(artisans);
+      const allProds = await artisanPortalService.getAllArtisanProducts();
+      setAllPendingProductsCount(allProds.filter(p => p.status === 'pending').length);
 
       // Check URL query parameters first
       const paramId = searchParams.get('artisanId');
@@ -479,10 +482,45 @@ const ArtisanPortal: React.FC = () => {
       if (currentArtisan) {
         await refreshArtisanData(currentArtisan.id);
       }
+      const allProds = await artisanPortalService.getAllArtisanProducts();
+      setAllPendingProductsCount(allProds.filter(p => p.status === 'pending').length);
       showToast(`Đã gỡ sản phẩm "${productName}" khỏi gian hàng`);
     } catch (e) {
       console.error(e);
       showToast('Lỗi khi gỡ sản phẩm');
+    }
+  };
+
+  const handleAdminApproveProduct = async (productId: string, productName: string) => {
+    if (!window.confirm(`Xác nhận phê duyệt sản phẩm "${productName}" để đưa lên sàn Sắc Việt ngay lập tức?`)) return;
+    try {
+      await artisanPortalService.approveProduct(productId);
+      if (currentArtisan) {
+        await refreshArtisanData(currentArtisan.id);
+      }
+      const allProds = await artisanPortalService.getAllArtisanProducts();
+      setAllPendingProductsCount(allProds.filter(p => p.status === 'pending').length);
+      showToast(`🎉 Đã phê duyệt thành công sản phẩm "${productName}" lên Chợ Phiên!`);
+    } catch (e) {
+      console.error(e);
+      showToast('Lỗi khi phê duyệt sản phẩm');
+    }
+  };
+
+  const handleAdminRejectProduct = async (productId: string, productName: string) => {
+    const reason = window.prompt(`Nhập lý do từ chối sản phẩm "${productName}":`, 'Ảnh chụp chưa đạt chuẩn hoặc thiếu thông tin chi tiết.');
+    if (!reason) return;
+    try {
+      await artisanPortalService.rejectProduct(productId, reason);
+      if (currentArtisan) {
+        await refreshArtisanData(currentArtisan.id);
+      }
+      const allProds = await artisanPortalService.getAllArtisanProducts();
+      setAllPendingProductsCount(allProds.filter(p => p.status === 'pending').length);
+      showToast(`Đã từ chối sản phẩm "${productName}"`);
+    } catch (e) {
+      console.error(e);
+      showToast('Lỗi khi từ chối sản phẩm');
     }
   };
 
@@ -553,7 +591,7 @@ const ArtisanPortal: React.FC = () => {
             </div>
 
             {/* Nút chuyển đổi chế độ của Admin - Rõ ràng, Tương phản cao */}
-            <div className="flex items-center gap-2 w-full md:w-auto bg-stone-100 p-1.5 rounded-2xl border border-stone-200 shrink-0">
+            <div className="flex flex-wrap items-center gap-2 w-full md:w-auto bg-stone-100 p-1.5 rounded-2xl border border-stone-200 shrink-0">
               <button
                 type="button"
                 onClick={() => setAdminViewMode('moderation')}
@@ -564,7 +602,7 @@ const ArtisanPortal: React.FC = () => {
                 }`}
               >
                 <span className="material-symbols-outlined text-base">rule</span>
-                <span>Bàn Duyệt ({pendingArtisansCount} chờ)</span>
+                <span>Duyệt Nghệ Nhân ({pendingArtisansCount} chờ)</span>
               </button>
 
               <button
@@ -579,6 +617,15 @@ const ArtisanPortal: React.FC = () => {
                 <span className="material-symbols-outlined text-base">storefront</span>
                 <span>Giao Diện Nghệ Nhân</span>
               </button>
+
+              <Link
+                to="/admin/products"
+                className="flex-1 md:flex-none px-4 py-2.5 rounded-xl font-black text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-all text-amber-900 bg-amber-100 hover:bg-amber-200 border border-amber-300 shadow-xs whitespace-nowrap active:scale-95"
+                title="Đến trang Quản lý sản phẩm toàn sàn để duyệt sản phẩm"
+              >
+                <span className="material-symbols-outlined text-base text-amber-800">inventory_2</span>
+                <span>Kho Admin Duyệt Sản Phẩm {allPendingProductsCount > 0 ? `(${allPendingProductsCount} chờ)` : ''} →</span>
+              </Link>
             </div>
           </div>
         )}
@@ -1811,6 +1858,50 @@ const ArtisanPortal: React.FC = () => {
               {/* TAB 2: SẢN PHẨM CHỜ ADMIN DUYỆT */}
               {activeTab === 'pending' && (
                 <div>
+                  {/* Banner hướng dẫn kiểm duyệt của Admin */}
+                  {isAdmin ? (
+                    <div className="mb-5 p-4 bg-gradient-to-r from-amber-50 to-orange-50 border-2 border-amber-300 rounded-2xl flex flex-col md:flex-row items-start md:items-center justify-between gap-3 shadow-xs">
+                      <div className="flex items-start gap-3">
+                        <span className="size-10 rounded-xl bg-amber-200 text-amber-900 flex items-center justify-center shrink-0 mt-0.5 shadow-xs">
+                          <span className="material-symbols-outlined text-2xl">admin_panel_settings</span>
+                        </span>
+                        <div>
+                          <div className="text-sm font-black text-amber-950 uppercase tracking-wide flex items-center gap-2">
+                            <span>Bạn đang xem với quyền Quản trị viên (Admin)</span>
+                            <span className="px-2 py-0.5 bg-primary text-white text-[9px] font-black rounded-full uppercase tracking-wider">Admin</span>
+                          </div>
+                          <p className="text-xs text-amber-900/90 mt-0.5 font-medium leading-relaxed">
+                            Bạn có thể bấm nút <strong>"Phê Duyệt Lên Sàn"</strong> màu xanh ngay trên từng sản phẩm dưới đây để đưa sản phẩm lên Chợ Phiên, hoặc duyệt toàn bộ tại trang Quản lý sản phẩm.
+                          </p>
+                        </div>
+                      </div>
+                      <Link 
+                        to="/admin/products"
+                        className="px-4 py-2.5 bg-primary hover:brightness-110 text-white rounded-xl font-black text-xs uppercase tracking-wider whitespace-nowrap flex items-center gap-2 transition-all shadow-md shrink-0 active:scale-95 cursor-pointer"
+                      >
+                        <span className="material-symbols-outlined text-base">inventory_2</span>
+                        Bàn Quản Lý Sản Phẩm Toàn Sàn →
+                      </Link>
+                    </div>
+                  ) : (
+                    <div className="mb-5 p-3.5 bg-amber-50/80 border border-amber-200 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs text-amber-950">
+                      <div className="flex items-center gap-2">
+                        <span className="material-symbols-outlined text-amber-600 text-lg shrink-0">hourglass_top</span>
+                        <span>Sản phẩm đang được Admin Sắc Việt thẩm định trong 24h. Chỉ tài khoản Quản trị viên (Admin) mới có quyền Phê duyệt / Từ chối sản phẩm.</span>
+                      </div>
+                      {!user && (
+                        <button
+                          type="button"
+                          onClick={toggleAuthModal}
+                          className="text-xs font-black text-primary hover:underline uppercase whitespace-nowrap flex items-center gap-1 shrink-0 cursor-pointer"
+                        >
+                          <span className="material-symbols-outlined text-sm">login</span>
+                          Đăng nhập quyền Admin →
+                        </button>
+                      )}
+                    </div>
+                  )}
+
                   {pendingProducts.length === 0 ? (
                     <div className="bg-white p-12 rounded-3xl border border-gold/25 text-center shadow-sm">
                       <span className="material-symbols-outlined text-4xl text-amber-500/40 mb-2 block">hourglass_empty</span>
@@ -1820,25 +1911,68 @@ const ArtisanPortal: React.FC = () => {
                   ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       {pendingProducts.map(product => (
-                        <div key={product.id} className="bg-white p-4 rounded-2xl border border-amber-300 shadow-sm flex gap-4 items-center">
-                          <img src={product.image} alt={product.name} className="size-20 object-cover rounded-xl border border-gold/20 shrink-0" />
-                          <div className="flex-1">
-                            <span className="inline-block bg-amber-100 text-amber-800 font-bold text-[9px] uppercase px-2 py-0.5 rounded-full mb-1">
-                              ⏳ Chờ Admin Thẩm Định
-                            </span>
-                            <h4 className="font-bold text-text-main text-sm">{product.name}</h4>
-                            <div className="text-primary font-black text-sm mt-0.5">{product.price.toLocaleString('vi-VN')} đ</div>
-                            <div className="text-text-soft text-xs mt-0.5">Số lượng đăng: <span className="font-bold text-text-main">{product.stock} chiếc</span></div>
-                            <div className="flex items-center justify-between mt-2 pt-2 border-t border-stone-100">
-                              <span className="text-[10px] text-amber-700 font-medium italic">Admin duyệt trong 24h</span>
-                              <button
-                                type="button"
-                                onClick={() => handleDeleteProduct(product.id, product.name)}
-                                className="text-[10px] font-medium text-stone-400 hover:text-red-600"
-                              >
-                                Hủy yêu cầu
-                              </button>
+                        <div key={product.id} className="bg-white p-4 sm:p-5 rounded-2xl border-2 border-amber-300 shadow-sm flex flex-col justify-between gap-3 hover:shadow-md transition-shadow">
+                          <div className="flex gap-4 items-start">
+                            <img src={product.image} alt={product.name} className="size-20 sm:size-24 object-cover rounded-xl border border-gold/20 shrink-0" />
+                            <div className="flex-1 min-w-0">
+                              <span className="inline-block bg-amber-100 text-amber-900 font-bold text-[9px] uppercase px-2.5 py-0.5 rounded-full mb-1">
+                                ⏳ Chờ Admin Thẩm Định
+                              </span>
+                              <h4 className="font-bold text-text-main text-sm sm:text-base line-clamp-1" title={product.name}>{product.name}</h4>
+                              <div className="text-primary font-black text-base mt-0.5">{product.price.toLocaleString('vi-VN')} đ</div>
+                              <div className="text-text-soft text-xs mt-0.5">Số lượng đăng: <span className="font-bold text-text-main">{product.stock} chiếc</span></div>
+                              {product.craftTimeDays && (
+                                <div className="text-text-soft text-xs">Thời gian chế tác: <span className="font-medium text-text-main">{product.craftTimeDays} ngày</span></div>
+                              )}
                             </div>
+                          </div>
+
+                          {/* THAO TÁC DUYỆT (ADMIN) HOẶC HỦY YÊU CẦU (NGHỆ NHÂN) */}
+                          <div className="pt-3 border-t border-stone-100 flex flex-wrap items-center justify-between gap-2">
+                            {isAdmin ? (
+                              <div className="flex flex-wrap items-center gap-2 w-full">
+                                <button
+                                  type="button"
+                                  onClick={() => handleAdminApproveProduct(product.id, product.name)}
+                                  className="flex-1 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white text-xs font-black uppercase tracking-wider py-2.5 px-3 rounded-xl flex items-center justify-center gap-1.5 shadow-md shadow-emerald-700/20 transition-all cursor-pointer"
+                                  title="Chấp nhận duyệt sản phẩm này lên Chợ Phiên"
+                                >
+                                  <span className="material-symbols-outlined text-base">check_circle</span>
+                                  <span>Phê Duyệt Lên Sàn</span>
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => handleAdminRejectProduct(product.id, product.name)}
+                                  className="bg-rose-50 hover:bg-rose-100 active:scale-95 text-rose-700 border border-rose-300 text-xs font-bold py-2.5 px-3 rounded-xl flex items-center justify-center gap-1 transition-all cursor-pointer"
+                                  title="Từ chối sản phẩm này"
+                                >
+                                  <span className="material-symbols-outlined text-base">cancel</span>
+                                  <span>Từ Chối</span>
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => handleDeleteProduct(product.id, product.name)}
+                                  className="text-stone-400 hover:text-red-600 p-2 rounded-lg hover:bg-stone-100 transition-colors"
+                                  title="Xóa yêu cầu"
+                                >
+                                  <span className="material-symbols-outlined text-base">delete</span>
+                                </button>
+                              </div>
+                            ) : (
+                              <>
+                                <span className="text-[11px] text-amber-700 font-medium italic flex items-center gap-1">
+                                  <span className="material-symbols-outlined text-sm">schedule</span>
+                                  Admin duyệt trong 24h
+                                </span>
+                                <button
+                                  type="button"
+                                  onClick={() => handleDeleteProduct(product.id, product.name)}
+                                  className="text-xs font-semibold text-stone-400 hover:text-red-600 px-2.5 py-1 rounded-lg hover:bg-stone-100 transition-colors"
+                                >
+                                  Hủy yêu cầu
+                                </button>
+                              </>
+                            )}
                           </div>
                         </div>
                       ))}
