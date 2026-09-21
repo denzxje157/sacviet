@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 
 const Footer: React.FC = () => {
   return (
-    <footer className="bg-text-main text-white pt-24 pb-12 px-6 lg:px-20 border-t-4 border-gold relative overflow-hidden">
+    <footer className="bg-text-main text-white pt-16 sm:pt-24 pb-24 md:pb-12 px-6 lg:px-20 border-t-4 border-gold relative overflow-hidden">
       {/* Decorative Background */}
       <div className="absolute inset-0 opacity-5 pointer-events-none bg-[url('https://www.transparenttextures.com/patterns/black-scales.png')]"></div>
       

@@ -253,16 +253,16 @@ const Home: React.FC = () => {
               <div className="absolute inset-0 bg-black/40 md:bg-black/20"></div>
             </div>
             
-            <div className="relative z-10 h-full flex flex-col justify-center items-start px-6 md:px-16 lg:px-24 max-w-4xl">
-              <span className="text-white font-bold tracking-[0.2em] uppercase mb-4 text-[10px] md:text-xs drop-shadow-md">
+            <div className="relative z-10 h-full flex flex-col justify-center items-start px-5 sm:px-12 md:px-16 lg:px-24 max-w-4xl">
+              <span className="text-white font-bold tracking-[0.2em] uppercase mb-3 sm:mb-4 text-[10px] md:text-xs drop-shadow-md">
                 Gìn giữ bản sắc Việt
               </span>
-              <h1 className="text-white text-4xl sm:text-5xl lg:text-7xl font-black leading-[1.1] tracking-tight mb-6 drop-shadow-xl">
-                Mỗi sản phẩm là<br className="hidden md:block" />một câu chuyện<br className="hidden md:block" />văn hóa
+              <h1 className="text-white text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-black leading-snug sm:leading-tight tracking-normal mb-5 sm:mb-6 drop-shadow-xl">
+                Mỗi sản phẩm là một câu chuyện văn hóa
               </h1>
               <button 
                 onClick={() => navigate('/marketplace')} 
-                className="bg-[#8B1A1A] text-white px-8 py-3.5 mt-2 rounded-full font-bold hover:bg-red-800 hover:scale-105 shadow-xl transition-all duration-300 active:scale-95 text-sm inline-flex items-center justify-center"
+                className="bg-[#8B1A1A] text-white px-6 sm:px-8 py-3 sm:py-3.5 rounded-full font-bold hover:bg-red-800 hover:scale-105 shadow-xl transition-all duration-300 active:scale-95 text-xs sm:text-sm inline-flex items-center justify-center cursor-pointer"
               >
                 Khám phá ngay
               </button>
@@ -271,11 +271,15 @@ const Home: React.FC = () => {
         </section>
 
         {/* SỨ MỆNH */}
-        <section className="relative py-16 max-w-[1800px] mx-auto px-4">
+        <section className="relative py-10 sm:py-16 max-w-[1800px] mx-auto px-4">
           <RevealSection>
-            <div className="text-center mb-16">
-               <h2 className="text-[#8B1A1A] font-bold uppercase tracking-widest text-sm mb-6">Sứ mệnh của chúng tôi</h2>
-               <h2 className="text-2xl md:text-4xl font-black text-text-main max-w-4xl mx-auto">Chúng tôi kết nối những giá trị truyền thống với hiện đại, bảo tồn bản sắc văn hóa dân tộc.</h2>
+            <div className="text-center mb-10 sm:mb-16 max-w-3xl mx-auto px-2">
+               <span className="text-[#8B1A1A] font-bold uppercase tracking-[0.2em] text-xs sm:text-sm block mb-3">
+                 Sứ mệnh của chúng tôi
+               </span>
+               <h2 className="text-lg sm:text-2xl md:text-3xl lg:text-4xl font-extrabold text-text-main leading-relaxed tracking-normal">
+                 Chúng tôi kết nối những giá trị truyền thống với hiện đại, bảo tồn bản sắc văn hóa dân tộc.
+               </h2>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                {[
@@ -293,13 +297,247 @@ const Home: React.FC = () => {
           </RevealSection>
         </section>
 
+        {/* 🌟 MÔ HÌNH NỀN TẢNG TRUNG GIAN (SLIDE PROOF SECTION) */}
+        <section id="mo-hinh-trung-gian" className="relative py-12 sm:py-20 max-w-[1600px] mx-auto px-4">
+          <RevealSection>
+            {/* Header */}
+            <div className="text-center max-w-3xl mx-auto mb-10 sm:mb-14">
+              <div className="inline-flex items-center gap-2 bg-[#8B1A1A]/10 border border-[#8B1A1A]/20 px-4 py-1.5 rounded-full text-primary text-xs font-black uppercase tracking-widest shadow-xs mb-4">
+                <span className="material-symbols-outlined text-sm text-gold">hub</span>
+                MÔ HÌNH NỀN TẢNG TRUNG GIAN (IMPACT MARKETPLACE)
+              </div>
+              <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black text-text-main tracking-tight uppercase leading-snug mb-4">
+                <span className="text-[#8B1A1A]">SẮC VIỆT:</span> CẦU NỐI SỐ HÓA <span className="whitespace-nowrap">DI SẢN</span>
+              </h2>
+              <p className="text-xs sm:text-base text-text-soft leading-relaxed font-medium">
+                Loại bỏ mọi tầng nấc thương lái trung gian ép giá — Nơi nghệ nhân bản địa tự mở gian hàng, tự chủ định giá và nhận trọn vẹn giá trị tác phẩm của mình.
+              </p>
+            </div>
+
+            {/* SƠ ĐỒ 3 TRỤ CỘT KẾT NỐI (3-PILLAR INTERMEDIARY DIAGRAM) */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 relative">
+              
+              {/* TRỤ 1: NGHỆ NHÂN BẢN ĐỊA (BÊN CUNG) */}
+              <div className="bg-white rounded-[2.2rem] border-2 border-[#8B1A1A]/20 p-6 sm:p-8 shadow-lg flex flex-col justify-between relative overflow-hidden group hover:border-[#8B1A1A] transition-all">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-[#8B1A1A]/5 rounded-bl-full pointer-events-none"></div>
+                <div>
+                  <div className="flex items-center justify-between mb-4">
+                    <span className="text-[10px] font-black uppercase tracking-wider text-white bg-[#8B1A1A] px-3 py-1 rounded-full shadow-xs">
+                      1. BÊN CUNG CẤP
+                    </span>
+                    <div className="size-12 rounded-2xl bg-amber-50 text-[#8B1A1A] flex items-center justify-center border border-gold/30">
+                      <span className="material-symbols-outlined text-2xl">handyman</span>
+                    </div>
+                  </div>
+                  <h3 className="text-xl sm:text-2xl font-black text-text-main mb-1">
+                    Nghệ Nhân Bản Địa
+                  </h3>
+                  <p className="text-xs text-text-soft font-bold mb-5">
+                    Hợp tác xã & Người giữ nghề vùng cao
+                  </p>
+
+                  <ul className="space-y-3 text-xs sm:text-sm text-text-main font-medium">
+                    <li className="flex items-start gap-2.5">
+                      <span className="material-symbols-outlined text-emerald-600 text-base shrink-0 mt-0.5">check_circle</span>
+                      <span><strong>Tự mở gian hàng số:</strong> Đăng tác phẩm dễ dàng qua Kênh Nghệ Nhân.</span>
+                    </li>
+                    <li className="flex items-start gap-2.5">
+                      <span className="material-symbols-outlined text-emerald-600 text-base shrink-0 mt-0.5">check_circle</span>
+                      <span><strong>Tự chủ định giá gốc:</strong> Không bị thương lái ép giá rẻ mạt.</span>
+                    </li>
+                    <li className="flex items-start gap-2.5">
+                      <span className="material-symbols-outlined text-emerald-600 text-base shrink-0 mt-0.5">check_circle</span>
+                      <span><strong>Cấp tem QR di sản:</strong> Xác thực danh tính nghệ nhân & buôn làng.</span>
+                    </li>
+                    <li className="flex items-start gap-2.5">
+                      <span className="material-symbols-outlined text-emerald-600 text-base shrink-0 mt-0.5">check_circle</span>
+                      <span><strong>Nhận 90% – 95% tiền bán:</strong> Doanh thu chuyển thẳng vào tài khoản.</span>
+                    </li>
+                  </ul>
+                </div>
+
+                <div className="mt-6 pt-4 border-t border-gold/15 bg-[#FAF7F0] -mx-6 -mb-6 sm:-mx-8 sm:-mb-8 p-4 text-center rounded-b-[2.2rem]">
+                  <span className="text-[11px] font-black text-[#8B1A1A] uppercase tracking-wider block">
+                    ★ ĐƯỢC TRAO QUYỀN SỐ HÓA
+                  </span>
+                </div>
+              </div>
+
+              {/* TRỤ 2: SẮC VIỆT (NỀN TẢNG TRUNG GIAN CÔNG NGHỆ) */}
+              <div 
+                style={{ backgroundColor: '#781012', backgroundImage: 'linear-gradient(145deg, #8B1A1A 0%, #580B0D 100%)' }}
+                className="rounded-[2.2rem] border-2 border-gold text-white p-6 sm:p-8 shadow-2xl flex flex-col justify-between relative overflow-hidden transform lg:-translate-y-2"
+              >
+                <div className="absolute top-0 right-0 size-36 bg-gold/15 rounded-full blur-2xl pointer-events-none"></div>
+                <div>
+                  <div className="flex items-center justify-between mb-4">
+                    <span className="text-[10px] font-black uppercase tracking-wider text-[#420808] bg-gold px-3.5 py-1 rounded-full shadow-md">
+                      2. SÀN TRUNG GIAN
+                    </span>
+                    <div className="size-12 rounded-2xl bg-white/15 text-gold flex items-center justify-center border border-gold/40 shadow-inner">
+                      <span className="material-symbols-outlined text-2xl">hub</span>
+                    </div>
+                  </div>
+                  <h3 className="text-xl sm:text-2xl font-black text-white mb-1">
+                    Sắc Việt Platform
+                  </h3>
+                  <p className="text-xs text-gold-light font-bold mb-5">
+                    Hạ tầng công nghệ & Ký quỹ minh bạch
+                  </p>
+
+                  <ul className="space-y-3 text-xs sm:text-sm text-white font-medium">
+                    <li className="flex items-start gap-2.5">
+                      <span className="material-symbols-outlined text-gold text-base shrink-0 mt-0.5">verified</span>
+                      <span><strong className="text-gold-light">Hạ tầng số hóa miễn phí:</strong> Công cụ đăng sản phẩm & quản trị đơn.</span>
+                    </li>
+                    <li className="flex items-start gap-2.5">
+                      <span className="material-symbols-outlined text-gold text-base shrink-0 mt-0.5">verified</span>
+                      <span><strong className="text-gold-light">Ký quỹ thanh toán an toàn:</strong> Giữ tiền trung gian bảo vệ người mua & nghệ nhân.</span>
+                    </li>
+                    <li className="flex items-start gap-2.5">
+                      <span className="material-symbols-outlined text-gold text-base shrink-0 mt-0.5">verified</span>
+                      <span><strong className="text-gold-light">Truy xuất nguồn gốc QR:</strong> Cung cấp căn cước văn hóa cho từng sản phẩm.</span>
+                    </li>
+                    <li className="flex items-start gap-2.5">
+                      <span className="material-symbols-outlined text-gold text-base shrink-0 mt-0.5">verified</span>
+                      <span><strong className="text-gold-light">Già Làng AI tư vấn:</strong> Trợ lý thông minh hỗ trợ khách tìm hiểu di sản 24/7.</span>
+                    </li>
+                  </ul>
+                </div>
+
+                <div 
+                  style={{ backgroundColor: 'rgba(0, 0, 0, 0.35)' }}
+                  className="mt-6 pt-4 border-t border-white/15 -mx-6 -mb-6 sm:-mx-8 sm:-mb-8 p-4 text-center rounded-b-[2.2rem]"
+                >
+                  <span className="text-[11px] font-black text-gold uppercase tracking-wider block">
+                    ✦ THƯƠNG MẠI DI SẢN CÓ TRÁCH NHIỆM
+                  </span>
+                </div>
+              </div>
+
+              {/* TRỤ 3: KHÁCH HÀNG & DU KHÁCH (BÊN CẦU) */}
+              <div className="bg-white rounded-[2.2rem] border-2 border-[#8B1A1A]/20 p-6 sm:p-8 shadow-lg flex flex-col justify-between relative overflow-hidden group hover:border-[#8B1A1A] transition-all">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/5 rounded-bl-full pointer-events-none"></div>
+                <div>
+                  <div className="flex items-center justify-between mb-4">
+                    <span className="text-[10px] font-black uppercase tracking-wider text-emerald-800 bg-emerald-100 px-3 py-1 rounded-full shadow-xs">
+                      3. BÊN TIÊU DÙNG
+                    </span>
+                    <div className="size-12 rounded-2xl bg-emerald-50 text-emerald-800 flex items-center justify-center border border-emerald-200">
+                      <span className="material-symbols-outlined text-2xl">shopping_bag</span>
+                    </div>
+                  </div>
+                  <h3 className="text-xl sm:text-2xl font-black text-text-main mb-1">
+                    Khách Hàng & Du Khách
+                  </h3>
+                  <p className="text-xs text-text-soft font-bold mb-5">
+                    Người yêu văn hóa & tiêu dùng bền vững
+                  </p>
+
+                  <ul className="space-y-3 text-xs sm:text-sm text-text-main font-medium">
+                    <li className="flex items-start gap-2.5">
+                      <span className="material-symbols-outlined text-emerald-600 text-base shrink-0 mt-0.5">check_circle</span>
+                      <span><strong>Mua đúng đồ thủ công thật:</strong> Trực tiếp từ người thợ, không lo hàng giả.</span>
+                    </li>
+                    <li className="flex items-start gap-2.5">
+                      <span className="material-symbols-outlined text-emerald-600 text-base shrink-0 mt-0.5">check_circle</span>
+                      <span><strong>Quét mã QR minh bạch:</strong> Thấy rõ mặt, tên nghệ nhân & buôn làng quê hương.</span>
+                    </li>
+                    <li className="flex items-start gap-2.5">
+                      <span className="material-symbols-outlined text-emerald-600 text-base shrink-0 mt-0.5">check_circle</span>
+                      <span><strong>Gửi lời tri ân trực tiếp:</strong> Kết nối cảm xúc với đồng bào vùng cao.</span>
+                    </li>
+                    <li className="flex items-start gap-2.5">
+                      <span className="material-symbols-outlined text-emerald-600 text-base shrink-0 mt-0.5">check_circle</span>
+                      <span><strong>Góp phần giữ nghề:</strong> Mỗi đơn hàng trực tiếp nuôi sống nghệ nhân bản địa.</span>
+                    </li>
+                  </ul>
+                </div>
+
+                <div className="mt-6 pt-4 border-t border-gold/15 bg-[#FAF7F0] -mx-6 -mb-6 sm:-mx-8 sm:-mb-8 p-4 text-center rounded-b-[2.2rem]">
+                  <span className="text-[11px] font-black text-emerald-800 uppercase tracking-wider block">
+                    ♥ KẾT NỐI TÌNH CẢM BẢN SẮC
+                  </span>
+                </div>
+              </div>
+
+            </div>
+
+            {/* DÒNG CHẢY GIÁ TRỊ 5 BƯỚC (STEP-BY-STEP VALUE FLOW) */}
+            <div className="mt-10 sm:mt-14 bg-white rounded-3xl border border-gold/30 p-6 sm:p-8 shadow-sm">
+              <h4 className="text-center text-xs sm:text-sm font-black uppercase tracking-[0.2em] text-[#8B1A1A] mb-6 sm:mb-8">
+                QUY TRÌNH 5 BƯỚC VẬN HÀNH TRUNG GIAN MINH BẠCH
+              </h4>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4 relative">
+                {[
+                  { step: '01', title: 'Nghệ Nhân Đăng Bán', desc: 'Mở gian hàng số & đăng tác phẩm tại Kênh Nghệ Nhân', icon: 'app_registration' },
+                  { step: '02', title: 'Cấp Tem QR Di Sản', desc: 'Sắc Việt thẩm định & gắn mã định danh nguồn gốc', icon: 'qr_code_2' },
+                  { step: '03', title: 'Khách Chọn Mua', desc: 'Đặt mua trên Chợ Phiên, xem câu chuyện từng món đồ', icon: 'shopping_cart_checkout' },
+                  { step: '04', title: 'Ký Quỹ & Giao Hàng', desc: 'Sắc Việt giữ tiền an toàn & điều phối vận chuyển tận làng', icon: 'local_shipping' },
+                  { step: '05', title: 'Tiền Về Tay Nghệ Nhân', desc: 'Khách nhận hàng ưng ý → 90-95% tiền gửi thẳng cho thợ', icon: 'payments' },
+                ].map((s, idx) => (
+                  <div key={idx} className="bg-[#FAF7F0] p-4 rounded-2xl border border-gold/20 flex flex-col items-center text-center relative group hover:bg-amber-50/50 transition-colors">
+                    <span className="size-7 rounded-full bg-[#8B1A1A] text-white text-xs font-black flex items-center justify-center mb-2 shadow-xs">
+                      {s.step}
+                    </span>
+                    <span className="material-symbols-outlined text-2xl text-[#8B1A1A] mb-1.5">{s.icon}</span>
+                    <h5 className="font-bold text-xs sm:text-sm text-text-main mb-1">{s.title}</h5>
+                    <p className="text-[11px] text-text-soft leading-relaxed">{s.desc}</p>
+                  </div>
+                ))}
+              </div>
+
+              {/* THỐNG KÊ MINH BẠCH DÒNG TIỀN (FINANCIAL TRANSPARENCY) */}
+              <div className="mt-8 pt-6 border-t border-gold/20 grid grid-cols-2 md:grid-cols-4 gap-3 text-center">
+                <div className="p-3 bg-white rounded-xl border border-gold/15 shadow-2xs">
+                  <span className="text-2xl sm:text-3xl font-black text-[#8B1A1A] block leading-none">90% – 95%</span>
+                  <span className="text-[10px] sm:text-xs font-bold text-text-soft mt-1 block">Chuyển thẳng cho Nghệ nhân</span>
+                </div>
+                <div className="p-3 bg-white rounded-xl border border-gold/15 shadow-2xs">
+                  <span className="text-2xl sm:text-3xl font-black text-gold block leading-none">0 VNĐ</span>
+                  <span className="text-[10px] sm:text-xs font-bold text-text-soft mt-1 block">Phí mở gian hàng số</span>
+                </div>
+                <div className="p-3 bg-white rounded-xl border border-gold/15 shadow-2xs">
+                  <span className="text-2xl sm:text-3xl font-black text-emerald-700 block leading-none">100%</span>
+                  <span className="text-[10px] sm:text-xs font-bold text-text-soft mt-1 block">Có mã QR truy xuất di sản</span>
+                </div>
+                <div className="p-3 bg-white rounded-xl border border-gold/15 shadow-2xs">
+                  <span className="text-2xl sm:text-3xl font-black text-text-main block leading-none">5% – 10%</span>
+                  <span className="text-[10px] sm:text-xs font-bold text-text-soft mt-1 block">Phí duy trì máy chủ & đào tạo</span>
+                </div>
+              </div>
+
+              {/* Nút hành động trực tiếp */}
+              <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+                <button
+                  onClick={() => navigate('/seller-portal')}
+                  className="px-6 py-3 bg-[#8B1A1A] text-white text-xs sm:text-sm font-black uppercase tracking-wider rounded-full hover:brightness-110 shadow-lg shadow-[#8B1A1A]/30 active:scale-95 transition-all flex items-center gap-2 cursor-pointer"
+                >
+                  <span className="material-symbols-outlined text-base">storefront</span>
+                  <span>Xem Thử Kênh Nghệ Nhân (Bên Bán)</span>
+                </button>
+
+                <button
+                  onClick={() => navigate('/marketplace')}
+                  className="px-6 py-3 bg-white border border-gold/40 text-primary text-xs sm:text-sm font-black uppercase tracking-wider rounded-full hover:bg-gold/10 shadow-sm active:scale-95 transition-all flex items-center gap-2 cursor-pointer"
+                >
+                  <span className="material-symbols-outlined text-base">store</span>
+                  <span>Khám Phá Chợ Phiên (Bên Mua)</span>
+                </button>
+              </div>
+
+            </div>
+          </RevealSection>
+        </section>
+
         {/* SẢN PHẨM NỔI BẬT SECTION */}
         <section className="relative py-16 max-w-[1800px] mx-auto px-4 border-t border-gold/20 bg-[#FDFBF7]">
           <RevealSection>
             <div className="flex justify-between items-end mb-10">
               <div>
-                <h2 className="text-[#8B1A1A] font-bold uppercase tracking-widest text-sm mb-2">Chợ phiên vùng cao</h2>
-                <h3 className="text-3xl md:text-4xl font-black text-[#4A2511] italic uppercase tracking-tighter">Sản phẩm nổi bật</h3>
+                <h2 className="text-[#8B1A1A] font-bold uppercase tracking-widest text-xs sm:text-sm mb-2">Chợ phiên vùng cao</h2>
+                <h3 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-[#4A2511] uppercase tracking-normal">Sản phẩm nổi bật</h3>
               </div>
               <button onClick={() => navigate('/marketplace')} className="text-sm font-bold text-text-soft hover:text-[#8B1A1A] transition-colors flex items-center gap-1 group">
                 Xem tất cả <span className="material-symbols-outlined text-lg group-hover:translate-x-1 transition-transform">arrow_forward</span>
@@ -357,7 +595,7 @@ const Home: React.FC = () => {
           <div className="max-w-[1500px] mx-auto px-4 md:px-6">
             <RevealSection>
               <div className="mb-8 text-center flex flex-col items-center">
-                <h2 className="text-4xl md:text-7xl font-black text-[#4A2511] italic uppercase tracking-tighter leading-none mb-2">
+                <h2 className="text-3xl sm:text-5xl md:text-6xl font-black text-[#4A2511] uppercase tracking-normal leading-tight mb-2">
                   BẢN ĐỒ 54 DÂN TỘC
                 </h2>
               </div>

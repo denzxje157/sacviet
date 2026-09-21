@@ -272,7 +272,7 @@ const AIChatWidget: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ isOp
   if (!isOpen) return null;
 
   return (
-    <div className="fixed bottom-24 right-6 w-[90vw] max-w-[400px] h-[550px] bg-[#F9F5EA] rounded-[2rem] shadow-2xl border-4 border-gold z-[200] flex flex-col overflow-hidden animate-slide-up origin-bottom-right">
+    <div className="fixed inset-x-3 bottom-18 sm:bottom-24 sm:inset-x-auto sm:right-6 sm:w-[400px] h-[520px] max-h-[78vh] bg-[#F9F5EA] rounded-[2rem] shadow-2xl border-3 sm:border-4 border-gold z-[200] flex flex-col overflow-hidden animate-slide-up origin-bottom-right">
       {/* Header */}
       <div className="bg-primary p-4 flex items-center justify-between shrink-0 relative overflow-hidden">
         <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/black-scales.png')]"></div>

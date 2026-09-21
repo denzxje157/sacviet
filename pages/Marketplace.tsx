@@ -5,7 +5,7 @@ import { useSearchParams, useNavigate, Link } from 'react-router-dom';
 import { useCart } from '../context/CartContext.tsx';
 import { supabase } from '../services/supabaseClient.ts'; 
 import { marketplaceData } from '../data/mockData.ts';
-import { getArtisanByEthnic, artisanData } from '../data/artisanData.ts';
+import { getArtisanByEthnic } from '../data/artisanData.ts';
 import { artisanPortalService } from '../services/artisanPortalService.ts';
 
 interface Product {
@@ -144,19 +144,32 @@ const ProductModal = ({ product, onClose, showToastMsg }: { product: Product, on
   if (!product) return null;
 
   return createPortal(
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 font-display">
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-2 sm:p-4 font-display">
       <div className="absolute inset-0 bg-black/70 backdrop-blur-sm animate-fade-in" onClick={onClose}></div>
-      <div className="bg-white w-full max-w-5xl h-[85vh] md:h-auto md:max-h-[90vh] rounded-[2rem] shadow-2xl relative z-10 animate-slide-up flex flex-col md:flex-row overflow-hidden border-4 border-gold/30">
-        <button onClick={onClose} className="absolute top-4 right-4 z-50 w-10 h-10 flex items-center justify-center bg-white/30 hover:bg-white text-text-soft hover:text-red-800 rounded-full shadow-lg backdrop-blur-sm transition-all active:scale-95 group"><span className="material-symbols-outlined text-xl group-hover:rotate-90 transition-transform">close</span></button>
-        <div className="w-full md:w-[60%] h-1/2 md:h-auto relative bg-[#F2EFE6] border-b md:border-b-0 md:border-r border-gold/10">
+      <div className="bg-white w-full max-w-5xl h-[90vh] md:h-auto md:max-h-[90vh] rounded-3xl md:rounded-[2rem] shadow-2xl relative z-10 animate-slide-up flex flex-col md:flex-row overflow-hidden border-2 sm:border-4 border-gold/30">
+        <button 
+          onClick={onClose} 
+          className="absolute top-3 right-3 z-50 size-9 sm:size-10 flex items-center justify-center bg-white/80 hover:bg-white text-text-soft hover:text-red-800 rounded-full shadow-lg backdrop-blur-sm transition-all active:scale-95 group cursor-pointer"
+        >
+          <span className="material-symbols-outlined text-lg sm:text-xl group-hover:rotate-90 transition-transform">close</span>
+        </button>
+        
+        {/* Ảnh: Chiều cao gọn hơn trên mobile để nhường diện tích cuộn cho nội dung */}
+        <div className="w-full md:w-[50%] lg:w-[55%] h-48 sm:h-64 md:h-auto relative bg-[#F2EFE6] border-b md:border-b-0 md:border-r border-gold/10 shrink-0">
           <img src={product.img || 'https://placehold.co/600x600?text=No+Image'} alt={product.name} className="w-full h-full object-cover" />
-          <div className="absolute bottom-4 left-4 text-white"><span className="bg-primary px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border border-white/30 shadow-sm inline-block mb-2">Dân tộc {product.ethnic || 'Khác'}</span></div>
+          <div className="absolute bottom-3 left-3 text-white">
+            <span className="bg-primary/95 px-3 py-1 rounded-full text-[9px] sm:text-[10px] font-black uppercase tracking-widest border border-white/30 shadow-sm inline-block">
+              Dân tộc {product.ethnic || 'Khác'}
+            </span>
+          </div>
         </div>
-        <div className="w-full md:w-[40%] h-1/2 md:h-auto flex flex-col bg-white">
-          <div className="flex-1 overflow-y-auto custom-scrollbar p-6 md:p-8 space-y-4">
+
+        {/* Nội dung chi tiết */}
+        <div className="w-full md:w-[50%] lg:w-[45%] flex-1 min-h-0 flex flex-col bg-white">
+          <div className="flex-1 overflow-y-auto custom-scrollbar p-4 sm:p-6 md:p-8 space-y-3 sm:space-y-4">
              
              <div>
-               <h2 className="text-2xl md:text-3xl font-black text-text-main leading-tight mb-2 mt-1">{product.name || 'Sản phẩm đang cập nhật'}</h2>
+               <h2 className="text-xl sm:text-2xl md:text-3xl font-black text-text-main leading-tight mb-2 mt-1">{product.name || 'Sản phẩm đang cập nhật'}</h2>
                
                {/* HUY HIỆU NIỀM TIN (Trust Badges) */}
                <div className="flex flex-wrap gap-2">
@@ -166,18 +179,18 @@ const ProductModal = ({ product, onClose, showToastMsg }: { product: Product, on
              </div>
 
              {/* UI GIÁ & SỐ LƯỢNG CÒN */}
-             <div className="flex flex-wrap items-center gap-4 py-3 border-y border-gold/10">
-                <span className="text-2xl md:text-3xl font-black text-primary leading-none tracking-tight">{product.price || 'Liên hệ'}</span>
+             <div className="flex flex-wrap items-center gap-3 sm:gap-4 py-2.5 sm:py-3 border-y border-gold/10">
+                <span className="text-xl sm:text-2xl md:text-3xl font-black text-primary leading-none tracking-tight">{product.price || 'Liên hệ'}</span>
                 
                 <div className="flex items-center gap-2 ml-auto md:ml-0">
-                  <div className="flex flex-col items-center justify-center bg-[#FDF8E9] text-[#8B5A2B] px-3 py-1.5 rounded-lg min-w-[4rem]">
-                     <span className="text-[10px] font-bold uppercase tracking-wide">Đã bán:</span>
-                     <span className="text-sm font-black">{product.sold || 0}</span>
+                  <div className="flex flex-col items-center justify-center bg-[#FDF8E9] text-[#8B5A2B] px-2.5 sm:px-3 py-1 rounded-lg min-w-[3.5rem]">
+                     <span className="text-[9px] sm:text-[10px] font-bold uppercase tracking-wide">Đã bán:</span>
+                     <span className="text-xs sm:text-sm font-black">{product.sold || 0}</span>
                   </div>
                   
-                  <div className={`flex flex-col items-center justify-center px-3 py-1.5 rounded-lg min-w-[4rem] ${isOutOfStock ? 'bg-red-100 text-red-700' : 'bg-[#E8F7ED] text-[#1E7B44]'}`}>
-                     <span className="text-[10px] font-bold uppercase tracking-wide">Còn:</span>
-                     <span className="text-sm font-black">{isOutOfStock ? '0' : product.stock}</span>
+                  <div className={`flex flex-col items-center justify-center px-2.5 sm:px-3 py-1 rounded-lg min-w-[3.5rem] ${isOutOfStock ? 'bg-red-100 text-red-700' : 'bg-[#E8F7ED] text-[#1E7B44]'}`}>
+                     <span className="text-[9px] sm:text-[10px] font-bold uppercase tracking-wide">Còn:</span>
+                     <span className="text-xs sm:text-sm font-black">{isOutOfStock ? '0' : product.stock}</span>
                   </div>
                 </div>
              </div>
@@ -195,44 +208,44 @@ const ProductModal = ({ product, onClose, showToastMsg }: { product: Product, on
                      navigate(`/artisans?search=${encodeURIComponent(product.artisan || product.ethnic)}`);
                    }
                  }}
-                 className="bg-gradient-to-r from-primary/10 via-amber-50 to-gold/15 hover:from-primary/15 hover:to-gold/25 border-2 border-gold/40 p-3.5 rounded-2xl flex items-center justify-between cursor-pointer transition-all group shadow-sm hover:shadow-md"
+                 className="bg-gradient-to-r from-primary/10 via-amber-50 to-gold/15 hover:from-primary/15 hover:to-gold/25 border-2 border-gold/40 p-3 rounded-2xl flex items-center justify-between cursor-pointer transition-all group shadow-sm hover:shadow-md"
                >
-                 <div className="flex items-center gap-3 min-w-0">
-                   <img src={linkedArtisan.avatar} alt={linkedArtisan.name} className="size-11 rounded-full object-cover border-2 border-gold shrink-0 shadow-sm" />
+                 <div className="flex items-center gap-2.5 min-w-0">
+                   <img src={linkedArtisan.avatar} alt={linkedArtisan.name} className="size-10 sm:size-11 rounded-full object-cover border-2 border-gold shrink-0 shadow-sm" />
                    <div className="min-w-0 text-left">
                      <div className="flex items-center gap-1">
-                       <span className="text-[9px] font-black uppercase tracking-wider text-primary bg-primary/10 px-2 py-0.5 rounded-full">Nghệ nhân chế tác</span>
+                       <span className="text-[8px] sm:text-[9px] font-black uppercase tracking-wider text-primary bg-primary/10 px-2 py-0.5 rounded-full">Nghệ nhân chế tác</span>
                        <span className="material-symbols-outlined text-xs text-gold">verified</span>
                      </div>
-                     <p className="text-sm font-black text-text-main group-hover:text-primary transition-colors truncate mt-0.5">{linkedArtisan.name}</p>
-                     <p className="text-[10px] text-text-soft truncate">{linkedArtisan.village}</p>
+                     <p className="text-xs sm:text-sm font-black text-text-main group-hover:text-primary transition-colors truncate mt-0.5">{linkedArtisan.name}</p>
+                     <p className="text-[9px] sm:text-[10px] text-text-soft truncate">{linkedArtisan.village}</p>
                    </div>
                  </div>
-                 <div className="shrink-0 flex items-center gap-1 text-[11px] font-black uppercase text-primary tracking-wider pl-2">
+                 <div className="shrink-0 flex items-center gap-1 text-[10px] sm:text-[11px] font-black uppercase text-primary tracking-wider pl-1">
                    <span className="hidden sm:inline">Xem hồ sơ</span>
                    <span className="material-symbols-outlined text-sm group-hover:translate-x-1 transition-transform">arrow_forward</span>
                  </div>
                </div>
              )}
 
-             <div className="bg-background-light p-4 rounded-xl border border-gold/10 text-left">
-               <h4 className="font-bold text-primary uppercase text-xs mb-1.5 flex items-center gap-2"><span className="material-symbols-outlined text-base">auto_stories</span>Câu chuyện sản phẩm</h4>
+             <div className="bg-background-light p-3.5 sm:p-4 rounded-xl border border-gold/10 text-left">
+               <h4 className="font-bold text-primary uppercase text-xs mb-1 flex items-center gap-1.5"><span className="material-symbols-outlined text-sm">auto_stories</span>Câu chuyện sản phẩm</h4>
                <p className="text-text-main text-xs sm:text-sm leading-relaxed text-justify font-medium">"{product.desc || 'Chưa có mô tả chi tiết.'}"</p>
              </div>
           </div>
           
-          <div className="p-4 bg-white border-t border-gold/10 shrink-0 shadow-[0_-5px_20px_rgba(0,0,0,0.05)]">
-             <div className="flex items-center justify-between mb-3 bg-background-light p-2 rounded-xl border border-gold/10">
+          <div className="p-3 sm:p-4 bg-white border-t border-gold/10 shrink-0 shadow-[0_-5px_20px_rgba(0,0,0,0.05)]">
+             <div className="flex items-center justify-between mb-2.5 sm:mb-3 bg-background-light p-2 rounded-xl border border-gold/10">
                 <span className="text-xs font-bold text-text-soft ml-2">Số lượng:</span>
                 <div className="flex items-center gap-3">
-                   <button onClick={() => setQuantity(Math.max(1, quantity - 1))} className="size-8 bg-white rounded-lg border border-gold/10 flex items-center justify-center hover:bg-primary hover:text-white transition-colors text-lg font-bold">-</button>
-                   <span className="w-6 text-center font-black">{quantity}</span>
-                   <button disabled={quantity >= product.stock || isOutOfStock} onClick={() => setQuantity(quantity + 1)} className="size-8 bg-white rounded-lg border border-gold/10 flex items-center justify-center hover:bg-primary hover:text-white transition-colors text-lg font-bold disabled:opacity-50 disabled:cursor-not-allowed">+</button>
+                   <button onClick={() => setQuantity(Math.max(1, quantity - 1))} className="size-8 bg-white rounded-lg border border-gold/10 flex items-center justify-center hover:bg-primary hover:text-white transition-colors text-lg font-bold cursor-pointer">-</button>
+                   <span className="w-6 text-center font-black text-xs sm:text-sm">{quantity}</span>
+                   <button disabled={quantity >= product.stock || isOutOfStock} onClick={() => setQuantity(quantity + 1)} className="size-8 bg-white rounded-lg border border-gold/10 flex items-center justify-center hover:bg-primary hover:text-white transition-colors text-lg font-bold disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer">+</button>
                 </div>
              </div>
              <div className="flex gap-2">
-                <button disabled={isOutOfStock} onClick={handleAddToCart} className="flex-1 py-3 rounded-xl border-2 border-primary text-primary font-black uppercase text-[10px] tracking-widest hover:bg-primary/5 transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"><span className="material-symbols-outlined text-lg">add_shopping_cart</span>Thêm giỏ</button>
-                <button disabled={isOutOfStock} onClick={handleBuyNow} className="flex-[1.5] py-3 rounded-xl bg-primary text-white font-black uppercase text-[10px] tracking-widest hover:brightness-110 shadow-lg transition-transform active:scale-95 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">{isOutOfStock ? 'HẾT HÀNG' : 'Mua ngay'}<span className="material-symbols-outlined text-lg">arrow_forward</span></button>
+                <button disabled={isOutOfStock} onClick={handleAddToCart} className="flex-1 py-3 rounded-xl border-2 border-primary text-primary font-black uppercase text-[10px] tracking-widest hover:bg-primary/5 transition-colors flex items-center justify-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed active:scale-95 cursor-pointer"><span className="material-symbols-outlined text-base">add_shopping_cart</span>Thêm giỏ</button>
+                <button disabled={isOutOfStock} onClick={handleBuyNow} className="flex-[1.4] py-3 rounded-xl bg-primary text-white font-black uppercase text-[10px] tracking-widest hover:brightness-110 shadow-lg transition-transform active:scale-95 flex items-center justify-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer">{isOutOfStock ? 'HẾT HÀNG' : 'Mua ngay'}<span className="material-symbols-outlined text-base">arrow_forward</span></button>
              </div>
           </div>
         </div>
@@ -414,91 +427,55 @@ const Marketplace: React.FC = () => {
           </div>
         </section>
 
-        {/* BANNER NỔI BẬT NGHỆ NHÂN BẢN ĐỊA (THIẾT KẾ BASIC, TRẮNG - ĐỎ - VÀNG) */}
-        <div className="mb-8 max-w-5xl mx-auto">
-          <Link
-            to="/artisans"
-            className="group block bg-white border-2 border-gold/40 hover:border-primary/50 p-4 md:p-5 rounded-2xl md:rounded-3xl shadow-sm hover:shadow-md transition-all duration-300"
-          >
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-              <div className="flex items-center gap-4 text-center sm:text-left">
-                <div className="size-12 rounded-2xl bg-primary/10 text-primary flex items-center justify-center shrink-0 border border-primary/20 shadow-xs">
-                  <span className="material-symbols-outlined text-2xl">front_hand</span>
-                </div>
-                <div>
-                  <div className="flex items-center gap-2 justify-center sm:justify-start">
-                    <span className="text-[10px] font-black uppercase tracking-wider text-primary bg-primary/10 border border-primary/20 px-2.5 py-0.5 rounded-md">
-                      Thương Mại Kể Chuyện
-                    </span>
-                    <span className="text-xs text-amber-800 font-bold bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-md">
-                      Thứ Shopee không có
-                    </span>
-                  </div>
-                  <h3 className="text-base sm:text-lg font-black text-stone-900 group-hover:text-primary transition-colors mt-1">
-                    Khám phá Không Gian Kể Chuyện Của Các Nghệ Nhân Bản Địa ➔
-                  </h3>
-                </div>
-              </div>
-              <div className="shrink-0 flex items-center gap-3">
-                <div className="flex -space-x-3 overflow-hidden p-1">
-                  {artisanData.slice(0, 4).map((a) => (
-                    <img key={a.id} src={a.avatar} alt={a.name} className="inline-block size-8 rounded-full ring-2 ring-gold object-cover shadow-xs" />
-                  ))}
-                </div>
-                <span className="text-xs font-black uppercase tracking-wider bg-primary hover:bg-[#7d0000] text-white px-5 py-2.5 rounded-xl group-hover:scale-105 transition-all shadow-sm">
-                  Xem ngay
-                </span>
-              </div>
-            </div>
-          </Link>
-        </div>
 
-        <div className="sticky top-20 md:top-24 z-40 mb-6 md:mb-10 space-y-4 md:space-y-6">
-          <div className="flex flex-col md:flex-row gap-4 max-w-5xl mx-auto">
+        <div className="sticky top-16 md:top-24 z-40 mb-6 md:mb-10 space-y-3 md:space-y-4">
+          <div className="flex flex-col sm:flex-row gap-2.5 sm:gap-4 max-w-5xl mx-auto">
             <div className="relative group flex-1 flex items-center">
-              <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none z-10 text-[#8B1A1A]">
-                <span className="material-symbols-outlined group-hover:scale-110 transition-transform text-xl leading-none">search</span>
+              <div className="absolute inset-y-0 left-0 pl-4 sm:pl-5 flex items-center pointer-events-none z-10 text-[#8B1A1A]">
+                <span className="material-symbols-outlined group-hover:scale-110 transition-transform text-lg sm:text-xl leading-none">search</span>
               </div>
-              <input type="text" placeholder="Tìm kiếm sản phẩm..." value={searchTerm} onChange={(e) => { setSearchTerm(e.target.value); setCurrentPage(1); }} className="w-full bg-white/95 backdrop-blur border-2 border-gold/20 rounded-full py-3.5 pl-14 pr-6 text-text-main shadow-xl text-base md:text-lg font-medium focus:outline-none focus:border-gold transition-all" />
+              <input type="text" placeholder="Tìm kiếm sản phẩm..." value={searchTerm} onChange={(e) => { setSearchTerm(e.target.value); setCurrentPage(1); }} className="w-full bg-white/95 backdrop-blur border-2 border-gold/20 rounded-full py-2.5 sm:py-3.5 pl-11 sm:pl-14 pr-4 sm:pr-6 text-text-main shadow-md sm:shadow-xl text-sm sm:text-base font-medium focus:outline-none focus:border-gold transition-all" />
             </div>
             
-            <div className="relative w-full md:w-56 shrink-0">
-              <select value={sortOrder} onChange={(e) => { setSortOrder(e.target.value); setCurrentPage(1); }} className="w-full bg-white/95 backdrop-blur border-2 border-gold/20 rounded-full py-3.5 pl-6 pr-10 text-text-main shadow-xl text-sm font-bold focus:outline-none focus:border-gold transition-all appearance-none cursor-pointer">
+            <div className="relative w-full sm:w-56 shrink-0">
+              <select value={sortOrder} onChange={(e) => { setSortOrder(e.target.value); setCurrentPage(1); }} className="w-full bg-white/95 backdrop-blur border-2 border-gold/20 rounded-full py-2.5 sm:py-3.5 pl-4 sm:pl-6 pr-8 sm:pr-10 text-text-main shadow-md sm:shadow-xl text-xs sm:text-sm font-bold focus:outline-none focus:border-gold transition-all appearance-none cursor-pointer">
                 <option value="default">Mới cập nhật</option>
                 <option value="bestseller">Bán chạy nhất</option>
                 <option value="asc">Giá: Thấp đến Cao</option>
                 <option value="desc">Giá: Cao đến Thấp</option>
               </select>
-              <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none"></div>
+              <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-gold">
+                <span className="material-symbols-outlined text-sm">expand_more</span>
+              </div>
             </div>
           </div>
 
-          <div className="bg-white/90 backdrop-blur p-2 rounded-2xl md:rounded-[2.5rem] border border-gold/20 shadow-lg flex items-center max-w-[95vw] md:max-w-[90vw] mx-auto group">
-             <button onClick={() => scrollRef.current?.scrollBy({ left: -200, behavior: 'smooth' })} className="p-2 hover:bg-gold/10 rounded-full text-gold shrink-0"><span className="material-symbols-outlined">chevron_left</span></button>
-             <div ref={scrollRef} className="flex-1 flex overflow-x-auto gap-2 px-2 py-2 scroll-smooth no-scrollbar">
+          <div className="bg-white/90 backdrop-blur p-1.5 sm:p-2 rounded-2xl md:rounded-[2.5rem] border border-gold/20 shadow-md sm:shadow-lg flex items-center max-w-[98vw] md:max-w-[90vw] mx-auto group">
+             <button onClick={() => scrollRef.current?.scrollBy({ left: -200, behavior: 'smooth' })} className="p-1.5 sm:p-2 hover:bg-gold/10 rounded-full text-gold shrink-0 cursor-pointer"><span className="material-symbols-outlined text-base sm:text-xl">chevron_left</span></button>
+             <div ref={scrollRef} className="flex-1 flex overflow-x-auto gap-1.5 sm:gap-2 px-1 sm:px-2 py-1 scroll-smooth no-scrollbar">
                 {ethnicList.map(ethnic => (
-                  <button key={ethnic} onClick={() => { setSelectedEthnic(ethnic); setCurrentPage(1); }} className={`px-4 md:px-6 py-2 md:py-2.5 rounded-full text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap border shrink-0 ${selectedEthnic === ethnic ? 'bg-primary border-primary text-white shadow-md' : 'bg-transparent border-transparent text-text-soft hover:bg-gold/10'}`}>{ethnic}</button>
+                  <button key={ethnic} onClick={() => { setSelectedEthnic(ethnic); setCurrentPage(1); }} className={`px-3 sm:px-5 py-1.5 sm:py-2 rounded-full text-[9px] sm:text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap border shrink-0 cursor-pointer ${selectedEthnic === ethnic ? 'bg-primary border-primary text-white shadow-md' : 'bg-transparent border-transparent text-text-soft hover:bg-gold/10'}`}>{ethnic}</button>
                 ))}
              </div>
-             <button onClick={() => scrollRef.current?.scrollBy({ left: 200, behavior: 'smooth' })} className="p-2 hover:bg-gold/10 rounded-full text-gold shrink-0"><span className="material-symbols-outlined">chevron_right</span></button>
+             <button onClick={() => scrollRef.current?.scrollBy({ left: 200, behavior: 'smooth' })} className="p-1.5 sm:p-2 hover:bg-gold/10 rounded-full text-gold shrink-0 cursor-pointer"><span className="material-symbols-outlined text-base sm:text-xl">chevron_right</span></button>
           </div>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 md:gap-8 min-h-[600px] content-start">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2.5 sm:gap-4 md:gap-8 min-h-[500px] content-start pb-24 md:pb-8">
           {isLoading ? (
-            <div className="col-span-full py-20 text-center text-gold font-black text-2xl animate-pulse">Đang kết nối chợ phiên...</div>
+            <div className="col-span-full py-20 text-center text-gold font-black text-xl sm:text-2xl animate-pulse">Đang kết nối chợ phiên...</div>
           ) : currentProducts.map((p) => <ProductCard key={p.id} product={p} onOpenDetail={setSelectedProduct} />)}
         </div>
 
         {totalPages > 1 && (
-          <div className="mt-8 md:mt-16 flex items-center justify-center gap-2 pb-20 lg:pb-0">
-            <button onClick={() => handlePageChange(Math.max(1, currentPage - 1))} disabled={currentPage === 1} className="size-8 md:size-10 rounded-full flex items-center justify-center border border-gold/20 bg-white text-primary disabled:opacity-30 hover:bg-primary hover:text-white transition-colors"><span className="material-symbols-outlined text-lg">chevron_left</span></button>
+          <div className="mt-8 md:mt-16 flex items-center justify-center gap-2 pb-24 md:pb-0">
+            <button onClick={() => handlePageChange(Math.max(1, currentPage - 1))} disabled={currentPage === 1} className="size-8 md:size-10 rounded-full flex items-center justify-center border border-gold/20 bg-white text-primary disabled:opacity-30 hover:bg-primary hover:text-white transition-colors cursor-pointer"><span className="material-symbols-outlined text-lg">chevron_left</span></button>
             <div className="flex gap-1 md:gap-2 mx-2 md:mx-4">
               {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
-                <button key={page} onClick={() => handlePageChange(page)} className={`size-8 md:size-10 rounded-full flex items-center justify-center text-[10px] md:text-xs font-black transition-all ${currentPage === page ? 'bg-primary text-white shadow-lg scale-110' : 'bg-white border border-gold/10 text-text-soft hover:border-gold/50'}`}>{page}</button>
+                <button key={page} onClick={() => handlePageChange(page)} className={`size-8 md:size-10 rounded-full flex items-center justify-center text-[10px] md:text-xs font-black transition-all cursor-pointer ${currentPage === page ? 'bg-primary text-white shadow-lg scale-110' : 'bg-white border border-gold/10 text-text-soft hover:border-gold/50'}`}>{page}</button>
               ))}
             </div>
-            <button onClick={() => handlePageChange(Math.min(totalPages, currentPage + 1))} disabled={currentPage === totalPages} className="size-8 md:size-10 rounded-full flex items-center justify-center border border-gold/20 bg-white text-primary disabled:opacity-30 hover:bg-primary hover:text-white transition-colors"><span className="material-symbols-outlined text-lg">chevron_right</span></button>
+            <button onClick={() => handlePageChange(Math.min(totalPages, currentPage + 1))} disabled={currentPage === totalPages} className="size-8 md:size-10 rounded-full flex items-center justify-center border border-gold/20 bg-white text-primary disabled:opacity-30 hover:bg-primary hover:text-white transition-colors cursor-pointer"><span className="material-symbols-outlined text-lg">chevron_right</span></button>
           </div>
         )}
       </div>

@@ -94,7 +94,7 @@ const ArtisanPortal: React.FC = () => {
     setTimeout(() => setToastMessage(null), 3000);
   };
 
-  const { user, login: authLogin, register: authRegister, logout: authLogout, toggleAuthModal, updateUser } = useAuth();
+  const { user, login: authLogin, loginAsArtisan, register: authRegister, logout: authLogout, toggleAuthModal, updateUser } = useAuth();
   const isAdmin = user?.role === 'admin';
   const [allPendingProductsCount, setAllPendingProductsCount] = useState(0);
 
@@ -272,6 +272,9 @@ const ArtisanPortal: React.FC = () => {
           setCurrentArtisan(foundParam);
           setIsRegisterMode(false);
           await refreshArtisanData(foundParam.id);
+          if (!user) {
+            await loginAsArtisan(foundParam);
+          }
           setIsLoading(false);
           return;
         }
@@ -309,6 +312,8 @@ const ArtisanPortal: React.FC = () => {
           setCurrentArtisan(found);
           setIsRegisterMode(false);
           await refreshArtisanData(found.id);
+          // Tự động đăng nhập vào AuthContext để góc phải Navbar hiển thị hồ sơ Nghệ Nhân
+          await loginAsArtisan(found);
           setIsLoading(false);
           return;
         }
@@ -346,6 +351,7 @@ const ArtisanPortal: React.FC = () => {
     setIsRegisterMode(false);
     setSearchParams({});
     await refreshArtisanData(artisan.id);
+    await loginAsArtisan(artisan);
   };
 
   const handleLookupByPhone = async () => {
@@ -360,6 +366,7 @@ const ArtisanPortal: React.FC = () => {
       setIsRegisterMode(false);
       setSearchParams({});
       await refreshArtisanData(found.id);
+      await loginAsArtisan(found);
       showToast(`🎉 Chào mừng ${found.name}!`);
     } else {
       showToast('Không tìm thấy hồ sơ với SĐT này. Vui lòng kiểm tra lại hoặc đăng ký mới!');
@@ -414,23 +421,11 @@ const ArtisanPortal: React.FC = () => {
       const all = await artisanPortalService.getAllArtisans();
       const match = all.find(a => a.name.toLowerCase().includes(artisanName.toLowerCase()));
       if (match) {
-        const mockUser: any = {
-          id: `user-${match.id}`,
-          fullName: match.name,
-          email: `${match.id.replace('artisan-', '')}@sacviet.vn`,
-          phone: match.phone,
-          role: 'artisan',
-          village: match.village,
-          ethnic: match.ethnic,
-          bio: match.bio,
-          artisanId: match.id
-        };
-        localStorage.setItem('mock_token', JSON.stringify(mockUser));
-        localStorage.setItem('sacviet_active_artisan_id', match.id);
+        await loginAsArtisan(match);
         setCurrentArtisan(match);
         setIsRegisterMode(false);
         await refreshArtisanData(match.id);
-        window.location.reload();
+        showToast(`🎉 Chào mừng nghệ nhân ${match.name}!`);
       }
     } catch (e) {
       console.error(e);
@@ -496,6 +491,7 @@ const ArtisanPortal: React.FC = () => {
 
   const handleLogout = async () => {
     localStorage.removeItem('sacviet_active_artisan_id');
+    localStorage.removeItem('mock_token');
     setCurrentArtisan(null);
     setIsRegisterMode(true);
     setAuthTab('login');
@@ -577,6 +573,9 @@ const ArtisanPortal: React.FC = () => {
     setSearchParams({});
     await refreshArtisanData(artisan.id);
     setAdminViewMode('artisan_portal');
+    if (!user || user.role !== 'admin') {
+      await loginAsArtisan(artisan);
+    }
     showToast(`🏪 Đang xem gian hàng: ${artisan.name}`);
   };
 
@@ -623,6 +622,8 @@ const ArtisanPortal: React.FC = () => {
           village: regVillage,
           ethnic: regEthnic
         });
+      } else {
+        await loginAsArtisan(newArtisan);
       }
 
       showToast('🎉 Gửi hồ sơ thành công! Đang chờ Ban Quản Trị thẩm định.');
@@ -1243,11 +1244,23 @@ const ArtisanPortal: React.FC = () => {
               </div>
 
               {!isRegisterMode && currentArtisan ? (
-                <div className="flex flex-wrap items-center gap-2 shrink-0">
+                <div className="grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-2 w-full lg:w-auto mt-3 lg:mt-0">
+                  {/* Nút Đăng Sản Phẩm (Dành cho nghệ nhân đã có Tích Vàng) - Chiếm trọn 2 cột trên mobile */}
+                  {currentArtisan.status === 'approved' && (
+                    <button
+                      type="button"
+                      onClick={() => setIsAddModalOpen(true)}
+                      className="col-span-2 sm:col-auto px-4 py-2.5 sm:py-2 bg-primary hover:brightness-110 text-white font-black text-xs uppercase tracking-wider rounded-xl shadow-sm flex items-center justify-center gap-2 transition-all active:scale-95 cursor-pointer order-first"
+                    >
+                      <span className="material-symbols-outlined text-lg sm:text-base">add_circle</span>
+                      <span>+ Đăng Sản Phẩm</span>
+                    </button>
+                  )}
+
                   {/* Nút Khám Phá & Mua Sắm Chợ Phiên (Quyền Khách Hàng) */}
                   <Link
                     to="/marketplace"
-                    className="px-3.5 py-2 bg-stone-100 hover:bg-stone-200 text-stone-800 font-bold text-xs rounded-xl border border-stone-200 transition-all flex items-center gap-1.5 shadow-2xs"
+                    className="px-3 py-2 bg-stone-100 hover:bg-stone-200 text-stone-800 font-bold text-xs rounded-xl border border-stone-200 transition-all flex items-center justify-center gap-1.5 shadow-2xs"
                     title="Khám phá và mua sắm sản phẩm thủ công từ các nghệ nhân khác"
                   >
                     <span className="material-symbols-outlined text-base text-primary">storefront</span>
@@ -1257,41 +1270,29 @@ const ArtisanPortal: React.FC = () => {
                   {/* Nút Đơn Hàng Đã Mua (Quyền Khách Hàng) */}
                   <Link
                     to="/orders"
-                    className="px-3.5 py-2 bg-stone-100 hover:bg-stone-200 text-stone-800 font-bold text-xs rounded-xl border border-stone-200 transition-all flex items-center gap-1.5 shadow-2xs"
+                    className="px-3 py-2 bg-stone-100 hover:bg-stone-200 text-stone-800 font-bold text-xs rounded-xl border border-stone-200 transition-all flex items-center justify-center gap-1.5 shadow-2xs"
                     title="Xem danh sách đơn hàng bạn đã mua trên Sắc Việt"
                   >
                     <span className="material-symbols-outlined text-base text-amber-700">receipt_long</span>
-                    <span>Đơn Mua Của Tôi</span>
+                    <span>Đơn Mua</span>
                   </Link>
 
                   {/* Nút Chỉnh Sửa Hồ Sơ Nghệ Nhân & Số Tài Khoản Ngân Hàng */}
                   <button
                     type="button"
                     onClick={handleOpenEditProfile}
-                    className="px-3.5 py-2 bg-amber-50 hover:bg-amber-100 text-amber-900 font-bold text-xs rounded-xl border border-amber-300 transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs"
+                    className="px-3 py-2 bg-amber-50 hover:bg-amber-100 text-amber-900 font-bold text-xs rounded-xl border border-amber-300 transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs"
                     title="Chỉnh sửa thông tin cá nhân, tiểu sử, số tài khoản ngân hàng nhận tiền"
                   >
                     <span className="material-symbols-outlined text-base text-amber-700">manage_accounts</span>
-                    <span>Hồ Sơ & Ngân Hàng</span>
+                    <span>Hồ Sơ & Bank</span>
                   </button>
-
-                  {/* Nút Đăng Sản Phẩm (Dành cho nghệ nhân đã có Tích Vàng) */}
-                  {currentArtisan.status === 'approved' && (
-                    <button
-                      type="button"
-                      onClick={() => setIsAddModalOpen(true)}
-                      className="px-4 py-2 bg-primary hover:brightness-110 text-white font-bold text-xs uppercase tracking-wider rounded-xl shadow-sm flex items-center justify-center gap-1.5 transition-all active:scale-95 cursor-pointer"
-                    >
-                      <span className="material-symbols-outlined text-base">add_circle</span>
-                      <span>Đăng Sản Phẩm</span>
-                    </button>
-                  )}
 
                   {/* Nút Đăng Xuất */}
                   <button
                     type="button"
                     onClick={handleLogout}
-                    className="px-3 py-2 bg-stone-100 hover:bg-rose-50 hover:text-rose-700 hover:border-rose-200 text-stone-600 font-bold text-xs rounded-xl border border-stone-200 transition-all flex items-center gap-1 cursor-pointer"
+                    className="px-3 py-2 bg-stone-100 hover:bg-rose-50 hover:text-rose-700 hover:border-rose-200 text-stone-600 font-bold text-xs rounded-xl border border-stone-200 transition-all flex items-center justify-center gap-1 cursor-pointer"
                     title="Đăng xuất khỏi tài khoản"
                   >
                     <span className="material-symbols-outlined text-base">logout</span>
@@ -2060,94 +2061,98 @@ const ArtisanPortal: React.FC = () => {
             <div className="space-y-6 animate-fade-in">
 
               {/* 3 THẺ THỐNG KÊ (THIẾT KẾ SÁNG, TRANG NHÃ) */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 md:gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 md:gap-6">
                 {/* Thẻ 1: Tồn kho */}
-                <div className="bg-white p-5 md:p-6 rounded-2xl border border-gold/30 shadow-sm flex items-center justify-between hover:shadow-md transition-shadow">
+                <div className="bg-white p-4 sm:p-5 md:p-6 rounded-2xl border border-gold/30 shadow-sm flex items-center justify-between hover:shadow-md transition-shadow">
                   <div>
                     <div className="text-[11px] font-black text-text-soft uppercase tracking-wider">📦 Hàng Tồn Kho Sẵn Có</div>
-                    <div className="text-3xl md:text-4xl font-black text-primary mt-1.5">
-                      {totalStockCount} <span className="text-sm font-normal text-text-soft">sản phẩm</span>
+                    <div className="text-2xl sm:text-3xl md:text-4xl font-black text-primary mt-1">
+                      {totalStockCount} <span className="text-xs sm:text-sm font-normal text-text-soft">sản phẩm</span>
                     </div>
-                    <div className="text-[11px] text-text-soft mt-1">Đang sẵn sàng đóng gói giao ngay</div>
+                    <div className="text-[10px] sm:text-[11px] text-text-soft mt-0.5">Đang sẵn sàng đóng gói giao ngay</div>
                   </div>
-                  <div className="size-13 rounded-2xl bg-primary/10 text-primary flex items-center justify-center p-3">
-                    <span className="material-symbols-outlined text-3xl">inventory_2</span>
+                  <div className="size-11 sm:size-13 rounded-2xl bg-primary/10 text-primary flex items-center justify-center p-2.5 sm:p-3 shrink-0">
+                    <span className="material-symbols-outlined text-2xl sm:text-3xl">inventory_2</span>
                   </div>
                 </div>
 
                 {/* Thẻ 2: Đơn hàng */}
-                <div className="bg-white p-5 md:p-6 rounded-2xl border border-gold/30 shadow-sm flex items-center justify-between hover:shadow-md transition-shadow">
+                <div className="bg-white p-4 sm:p-5 md:p-6 rounded-2xl border border-gold/30 shadow-sm flex items-center justify-between hover:shadow-md transition-shadow">
                   <div>
                     <div className="text-[11px] font-black text-text-soft uppercase tracking-wider">🛒 Đơn Hàng Cần Giao</div>
-                    <div className="text-3xl md:text-4xl font-black text-gold-dark mt-1.5">
-                      {totalOrdersCount} <span className="text-sm font-normal text-text-soft">đơn</span>
+                    <div className="text-2xl sm:text-3xl md:text-4xl font-black text-gold-dark mt-1">
+                      {totalOrdersCount} <span className="text-xs sm:text-sm font-normal text-text-soft">đơn</span>
                     </div>
-                    <div className="text-[11px] text-text-soft mt-1">Bưu tá Bưu điện sẵn sàng đến nhận</div>
+                    <div className="text-[10px] sm:text-[11px] text-text-soft mt-0.5">Bưu tá Bưu điện sẵn sàng đến nhận</div>
                   </div>
-                  <div className="size-13 rounded-2xl bg-gold/10 text-gold-dark flex items-center justify-center p-3">
-                    <span className="material-symbols-outlined text-3xl">local_shipping</span>
+                  <div className="size-11 sm:size-13 rounded-2xl bg-gold/10 text-gold-dark flex items-center justify-center p-2.5 sm:p-3 shrink-0">
+                    <span className="material-symbols-outlined text-2xl sm:text-3xl">local_shipping</span>
                   </div>
                 </div>
 
                 {/* Thẻ 3: Doanh thu */}
-                <div className="bg-white p-5 md:p-6 rounded-2xl border border-gold/30 shadow-sm flex items-center justify-between hover:shadow-md transition-shadow">
+                <div className="bg-white p-4 sm:p-5 md:p-6 rounded-2xl border border-gold/30 shadow-sm flex items-center justify-between hover:shadow-md transition-shadow">
                   <div>
                     <div className="text-[11px] font-black text-text-soft uppercase tracking-wider">💰 Doanh Thu Tạm Tính</div>
-                    <div className="text-2xl md:text-3xl font-black text-green-700 mt-1.5">
-                      {totalRevenue.toLocaleString('vi-VN')} <span className="text-sm font-normal">đ</span>
+                    <div className="text-xl sm:text-2xl md:text-3xl font-black text-green-700 mt-1">
+                      {totalRevenue.toLocaleString('vi-VN')} <span className="text-xs sm:text-sm font-normal">đ</span>
                     </div>
-                    <div className="text-[11px] text-text-soft mt-1">Sẽ chuyển vào tài khoản ngân hàng</div>
+                    <div className="text-[10px] sm:text-[11px] text-text-soft mt-0.5">Sẽ chuyển vào tài khoản ngân hàng</div>
                   </div>
-                  <div className="size-13 rounded-2xl bg-green-50 text-green-700 flex items-center justify-center p-3">
-                    <span className="material-symbols-outlined text-3xl">payments</span>
+                  <div className="size-11 sm:size-13 rounded-2xl bg-green-50 text-green-700 flex items-center justify-center p-2.5 sm:p-3 shrink-0">
+                    <span className="material-symbols-outlined text-2xl sm:text-3xl">payments</span>
                   </div>
                 </div>
               </div>
 
               {/* THANH TAB ĐIỀU HƯỚNG */}
-              <div className="flex flex-wrap items-center justify-between gap-3 border-b border-gold/25 pb-3">
-                <div className="flex flex-wrap gap-2">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-gold/25 pb-3">
+                <div className="flex items-center gap-2 overflow-x-auto pb-1 -mb-1 no-scrollbar w-full sm:w-auto">
                   <button
+                    type="button"
                     onClick={() => setActiveTab('selling')}
-                    className={`px-3 py-1.5 rounded-lg font-bold text-xs uppercase tracking-wider transition-all flex items-center gap-1.5 ${
+                    className={`px-3 py-2 sm:py-1.5 rounded-lg font-bold text-xs uppercase tracking-wider transition-all flex items-center gap-1.5 shrink-0 whitespace-nowrap cursor-pointer ${
                       activeTab === 'selling'
                         ? 'bg-primary text-white shadow-sm border border-gold/30'
                         : 'bg-white text-stone-700 hover:bg-gold/10 border border-gold/20'
                     }`}
                   >
                     <span className="material-symbols-outlined text-sm">check_circle</span>
-                    Sản Phẩm Đang Bán ({approvedProducts.length})
+                    <span>Đang Bán ({approvedProducts.length})</span>
                   </button>
 
                   <button
+                    type="button"
                     onClick={() => setActiveTab('pending')}
-                    className={`px-3 py-1.5 rounded-lg font-bold text-xs uppercase tracking-wider transition-all flex items-center gap-1.5 ${
+                    className={`px-3 py-2 sm:py-1.5 rounded-lg font-bold text-xs uppercase tracking-wider transition-all flex items-center gap-1.5 shrink-0 whitespace-nowrap cursor-pointer ${
                       activeTab === 'pending'
                         ? 'bg-amber-600 text-white shadow-sm'
                         : 'bg-white text-stone-700 hover:bg-gold/10 border border-gold/20'
                     }`}
                   >
                     <span className="material-symbols-outlined text-sm">hourglass_empty</span>
-                    Chờ Admin Duyệt ({pendingProducts.length})
+                    <span>Chờ Duyệt ({pendingProducts.length})</span>
                   </button>
 
                   <button
+                    type="button"
                     onClick={() => setActiveTab('orders')}
-                    className={`px-3 py-1.5 rounded-lg font-bold text-xs uppercase tracking-wider transition-all flex items-center gap-1.5 ${
+                    className={`px-3 py-2 sm:py-1.5 rounded-lg font-bold text-xs uppercase tracking-wider transition-all flex items-center gap-1.5 shrink-0 whitespace-nowrap cursor-pointer ${
                       activeTab === 'orders'
                         ? 'bg-stone-800 text-white shadow-sm'
                         : 'bg-white text-stone-700 hover:bg-gold/10 border border-gold/20'
                     }`}
                   >
                     <span className="material-symbols-outlined text-sm">receipt_long</span>
-                    Đơn Hàng Của Tôi ({orders.length})
+                    <span>Đơn Hàng ({orders.length})</span>
                   </button>
                 </div>
 
                 {currentArtisan?.status === 'approved' && (
                   <button
+                    type="button"
                     onClick={() => setIsAddModalOpen(true)}
-                    className="px-3 py-1.5 bg-primary text-white text-xs font-bold rounded-lg hover:brightness-110 shadow-sm flex items-center gap-1 uppercase tracking-wider"
+                    className="hidden sm:flex px-3.5 py-1.5 bg-primary text-white text-xs font-bold rounded-lg hover:brightness-110 shadow-sm items-center gap-1 uppercase tracking-wider cursor-pointer"
                   >
                     <span className="material-symbols-outlined text-base">add</span>
                     Thêm Sản Phẩm
@@ -2600,17 +2605,17 @@ const ArtisanPortal: React.FC = () => {
                 ></textarea>
               </div>
 
-              <div className="flex items-center justify-end gap-2 pt-2 border-t border-gold/10">
+              <div className="flex items-center justify-end gap-2 pt-3 border-t border-gold/10 sticky bottom-0 bg-white pb-1">
                 <button
                   type="button"
                   onClick={() => setIsAddModalOpen(false)}
-                  className="px-4 py-2 border border-gold/20 rounded-xl text-xs font-bold text-text-soft hover:bg-gold/10 uppercase"
+                  className="flex-1 sm:flex-none px-4 py-2.5 border border-gold/20 rounded-xl text-xs font-bold text-text-soft hover:bg-gold/10 uppercase text-center"
                 >
                   Đóng
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 bg-primary text-white font-black text-xs rounded-xl shadow-md hover:brightness-110 uppercase tracking-wider flex items-center gap-1"
+                  className="flex-1 sm:flex-none px-5 py-2.5 bg-primary text-white font-black text-xs rounded-xl shadow-md hover:brightness-110 uppercase tracking-wider flex items-center justify-center gap-1.5 active:scale-95"
                 >
                   <span className="material-symbols-outlined text-sm">cloud_upload</span>
                   Gửi Duyệt Sản Phẩm
@@ -2887,18 +2892,18 @@ const ArtisanPortal: React.FC = () => {
               </div>
 
               {/* Nút hành động */}
-              <div className="flex items-center justify-end gap-2 pt-2 border-t border-stone-100">
+              <div className="flex items-center justify-end gap-2 pt-3 border-t border-stone-100 sticky bottom-0 bg-white pb-1">
                 <button
                   type="button"
                   onClick={() => setIsEditProfileOpen(false)}
-                  className="px-4 py-2.5 text-xs font-bold text-stone-600 hover:bg-stone-100 rounded-xl cursor-pointer"
+                  className="flex-1 sm:flex-none px-4 py-2.5 text-xs font-bold text-stone-600 hover:bg-stone-100 rounded-xl cursor-pointer text-center"
                 >
                   Hủy Bỏ
                 </button>
                 <button
                   type="submit"
                   disabled={isSavingProfile}
-                  className="px-5 py-2.5 bg-primary hover:brightness-110 text-white font-bold text-xs uppercase tracking-wider rounded-xl shadow-sm transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+                  className="flex-1 sm:flex-none px-5 py-2.5 bg-primary hover:brightness-110 text-white font-bold text-xs uppercase tracking-wider rounded-xl shadow-sm transition-all flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50 active:scale-95"
                 >
                   {isSavingProfile ? (
                     <>

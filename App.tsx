@@ -63,7 +63,7 @@ const App: React.FC = () => {
                 <Navbar />
                 <CartDrawer />
                 <AuthModal />
-                <main className="flex-grow relative w-full max-w-full overflow-x-hidden">
+                <main className="flex-grow relative w-full max-w-full overflow-x-hidden pb-12 md:pb-0">
                   <PageWrapper>
                     <Routes>
                       <Route path="/" element={<Home />} />

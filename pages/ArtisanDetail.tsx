@@ -178,23 +178,23 @@ const ArtisanDetail: React.FC = () => {
 
       <div className="max-w-7xl mx-auto px-4 md:px-8 pt-4 pb-20 relative z-10">
 
-        {/* 🌟 TOP BREADCRUMB & PILL ACTIONS (Matching Mockup) */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 py-3 mb-6 border-b border-[#EAE3D5]">
-          <div className="flex items-center gap-2 text-xs md:text-sm text-[#7C7267] font-medium">
-            <Link to="/" className="hover:text-[#9C6237] transition-colors">Trang chủ</Link>
+        {/* 🌟 TOP BREADCRUMB & ACTIONS */}
+        <div className="flex items-center justify-between gap-2 py-2 mb-4 sm:mb-6 border-b border-[#EAE3D5]">
+          <div className="flex items-center gap-1.5 text-xs text-[#7C7267] font-medium truncate">
+            <Link to="/" className="hover:text-[#9C6237] transition-colors shrink-0">Trang chủ</Link>
             <span className="text-[#C4B8A6]">&gt;</span>
-            <Link to="/artisans" className="hover:text-[#9C6237] transition-colors">Nghệ nhân bản địa</Link>
+            <Link to="/artisans" className="hover:text-[#9C6237] transition-colors shrink-0">Nghệ nhân</Link>
             <span className="text-[#C4B8A6]">&gt;</span>
-            <span className="text-[#2F271D] font-bold">{artisan.name}</span>
+            <span className="text-[#2F271D] font-bold truncate max-w-[120px] sm:max-w-none">{artisan.name}</span>
           </div>
 
-          <div className="flex items-center gap-2.5 self-end sm:self-auto">
+          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
             <button
               onClick={() => {
                 setIsLiked(!isLiked);
                 showToast(isLiked ? 'Đã bỏ yêu thích' : `Đã lưu Nghệ nhân ${artisan.name} vào danh sách yêu thích!`);
               }}
-              className={`px-4 py-1.5 rounded-full border text-xs font-bold flex items-center gap-1.5 transition-all active:scale-95 shadow-2xs ${
+              className={`px-3 sm:px-4 py-1.5 rounded-full border text-xs font-bold flex items-center gap-1.5 transition-all active:scale-95 shadow-2xs cursor-pointer ${
                 isLiked
                   ? 'bg-[#FFF0ED] border-[#F2BDB3] text-[#A63228]'
                   : 'bg-white hover:bg-[#F5EFE4] border-[#E0D8CA] text-[#4A3E31]'
@@ -203,493 +203,213 @@ const ArtisanDetail: React.FC = () => {
               <span className={`material-symbols-outlined text-sm ${isLiked ? 'fill-current text-[#A63228]' : 'text-[#7C7267]'}`}>
                 favorite
               </span>
-              <span>{isLiked ? 'Đã thích' : 'Yêu thích'}</span>
+              <span className="hidden sm:inline">{isLiked ? 'Đã thích' : 'Yêu thích'}</span>
             </button>
 
             <button
               onClick={handleShare}
-              className="px-4 py-1.5 rounded-full bg-white hover:bg-[#F5EFE4] border border-[#E0D8CA] text-[#4A3E31] text-xs font-bold flex items-center gap-1.5 transition-all active:scale-95 shadow-2xs"
+              className="px-3 sm:px-4 py-1.5 rounded-full bg-white hover:bg-[#F5EFE4] border border-[#E0D8CA] text-[#4A3E31] text-xs font-bold flex items-center gap-1.5 transition-all active:scale-95 shadow-2xs cursor-pointer"
             >
               <span className="material-symbols-outlined text-sm text-[#7C7267]">share</span>
-              <span>Chia sẻ</span>
+              <span className="hidden sm:inline">Chia sẻ</span>
             </button>
           </div>
         </div>
 
-        {/* 🌟 HERO SECTION: NGHỆ NHÂN PROFILE (EXACT MATCH MOCKUP) */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center mb-10">
-          
-          {/* CỘT TRÁI: KHUNG ẢNH NGHỆ NHÂN BO GÓC TRÒN VỚI BADGE XANH LÁ RỪNG */}
-          <div className="lg:col-span-4 flex justify-center lg:justify-start">
-            <div className="relative w-64 sm:w-76 md:w-84 aspect-square rounded-[2.2rem] overflow-hidden shadow-2xl border-4 border-white bg-zinc-900 group">
-              <img
-                src={artisan.avatar}
-                alt={artisan.name}
-                className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-700"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none"></div>
-              
-              {/* Badge góc dưới bên trái: "📍 Nghệ nhân ưu tú" */}
-              <div className="absolute bottom-4 left-4 bg-[#781012]/95 backdrop-blur-sm text-white px-3.5 py-1.5 rounded-full border border-gold/40 text-xs font-bold flex items-center gap-1.5 shadow-lg">
-                <span className="material-symbols-outlined text-sm text-gold">location_on</span>
-                <span>{artisan.title}</span>
-              </div>
-            </div>
-          </div>
-
-          {/* CỘT PHẢI: THÔNG TIN CHI TIẾT & BẢNG PILL METRICS */}
-          <div className="lg:col-span-8 space-y-4">
+        {/* 🌟 HERO SECTION: NGHỆ NHÂN PROFILE GỌN GÀNG & CÂN ĐỐI TRÊN MOBILE */}
+        <div className="bg-white rounded-2xl md:rounded-[2.5rem] p-4 sm:p-6 md:p-8 shadow-sm border border-[#E8E2D5] mb-6 md:mb-10">
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-4 md:gap-8 items-center">
             
-            {/* Tag Danh hiệu nhỏ */}
-            <span className="text-xs sm:text-sm font-black uppercase tracking-[0.2em] text-[#9C6237] block">
-              {artisan.title}
-            </span>
+            {/* CỘT ẢNH NGHỆ NHÂN */}
+            <div className="md:col-span-4 flex md:block items-center gap-3.5">
+              <div className="relative size-24 sm:size-32 md:w-full md:aspect-square rounded-2xl md:rounded-[2rem] overflow-hidden shadow-md md:shadow-lg border-2 md:border-4 border-white bg-zinc-900 shrink-0 group">
+                <img
+                  src={artisan.avatar}
+                  alt={artisan.name}
+                  className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-700"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none"></div>
+                
+                {/* Badge desktop */}
+                <div className="hidden md:flex absolute bottom-3 left-3 bg-[#781012]/95 backdrop-blur-sm text-white px-3 py-1 rounded-full border border-gold/40 text-xs font-bold items-center gap-1.5 shadow-md">
+                  <span className="material-symbols-outlined text-sm text-gold">location_on</span>
+                  <span>{artisan.title}</span>
+                </div>
+              </div>
 
-            {/* Tên Nghệ Nhân To, Rõ Nét */}
-            <h1 className="text-4xl sm:text-5xl md:text-6xl font-black tracking-tight text-[#1F2923] leading-none">
-              {artisan.name}
-            </h1>
+              {/* Thông tin hiển thị cạnh avatar trên Mobile */}
+              <div className="md:hidden flex-1 min-w-0">
+                <span className="text-[10px] font-black uppercase tracking-wider text-[#9C6237] block truncate">
+                  {artisan.title}
+                </span>
+                <h1 className="text-xl font-black text-[#1F2923] leading-tight truncate">
+                  {artisan.name}
+                </h1>
+                <p className="text-xs font-medium italic text-[#2D3E32] mt-0.5 line-clamp-2">
+                  “{artisan.craftType}”
+                </p>
+                <div className="flex items-center gap-2 mt-2">
+                  <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-800 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full">
+                    <span className="material-symbols-outlined text-xs">verified</span>
+                    Bản địa xác thực
+                  </span>
+                </div>
+              </div>
+            </div>
 
-            {/* Nghề truyền thống */}
-            <p className="text-lg sm:text-xl font-medium italic text-[#2D3E32]">
-              “{artisan.craftType}”
-            </p>
-
-            {/* BẢNG PILL DẢI NGANG 4 Ô: Dân tộc | Quê quán | Buôn làng | Thời gian làm nghề */}
-            <div className="bg-[#EFE9DC]/80 backdrop-blur-sm border border-[#DDD5C7] rounded-2xl p-2.5 sm:p-3 grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-0 md:divide-x divide-[#DDD5C7]/80 shadow-xs">
+            {/* CỘT PHẢI: CHI TIẾT + 4 Ô CHỈ SỐ */}
+            <div className="md:col-span-8 space-y-3 sm:space-y-4">
               
-              {/* Ô 1: Dân tộc */}
-              <div className="flex items-center gap-3 px-3 py-1.5">
-                <div className="size-9 rounded-full bg-[#E5D7C5] flex items-center justify-center text-[#6B4B29] shrink-0">
-                  <span className="material-symbols-outlined text-lg">groups</span>
-                </div>
-                <div>
-                  <span className="text-[11px] text-[#7A6E5F] block font-medium">Dân tộc</span>
-                  <strong className="text-xs sm:text-sm text-[#231E18] font-bold">{artisan.ethnic}</strong>
-                </div>
-              </div>
-
-              {/* Ô 2: Quê quán */}
-              <div className="flex items-center gap-3 px-3 py-1.5">
-                <div className="size-9 rounded-full bg-[#E5D7C5] flex items-center justify-center text-[#6B4B29] shrink-0">
-                  <span className="material-symbols-outlined text-lg">location_on</span>
-                </div>
-                <div>
-                  <span className="text-[11px] text-[#7A6E5F] block font-medium">Quê quán</span>
-                  <strong className="text-xs sm:text-sm text-[#231E18] font-bold">{artisan.province}</strong>
-                </div>
-              </div>
-
-              {/* Ô 3: Buôn làng */}
-              <div className="flex items-center gap-3 px-3 py-1.5">
-                <div className="size-9 rounded-full bg-[#E5D7C5] flex items-center justify-center text-[#6B4B29] shrink-0">
-                  <span className="material-symbols-outlined text-lg">home</span>
-                </div>
-                <div>
-                  <span className="text-[11px] text-[#7A6E5F] block font-medium">Buôn làng</span>
-                  <strong className="text-xs sm:text-sm text-[#231E18] font-bold truncate max-w-[140px] block">{artisan.village}</strong>
-                </div>
-              </div>
-
-              {/* Ô 4: Thời gian làm nghề */}
-              <div className="flex items-center gap-3 px-3 py-1.5">
-                <div className="size-9 rounded-full bg-[#E5D7C5] flex items-center justify-center text-[#6B4B29] shrink-0">
-                  <span className="material-symbols-outlined text-lg">history</span>
-                </div>
-                <div>
-                  <span className="text-[11px] text-[#7A6E5F] block font-medium">Thời gian làm nghề</span>
-                  <strong className="text-xs sm:text-sm text-[#231E18] font-bold">Gần {artisan.yearsOfCraft} năm</strong>
-                </div>
-              </div>
-
-            </div>
-
-            {/* Trích dẫn nghệ nhân với dấu ngoặc kép màu đồng nổi bật */}
-            <div className="pt-2 flex items-start gap-3">
-              <span className="text-4xl sm:text-5xl text-[#9C6237] leading-none font-serif select-none shrink-0 mt-1">“</span>
-              <div>
-                <blockquote className="text-sm sm:text-base italic text-[#382F24] leading-relaxed font-serif">
-                  “{artisan.quote}”
-                </blockquote>
-                <p className="text-xs font-bold text-[#635342] mt-1.5">— {artisan.name}</p>
-              </div>
-            </div>
-
-            {/* Quick Actions (Bản đồ & Tri ân) */}
-            <div className="flex flex-wrap items-center gap-3 pt-2">
-              <a
-                href={artisan.coords && artisan.coords.length >= 2 ? `https://www.google.com/maps/search/?api=1&query=${artisan.coords[0]},${artisan.coords[1]}` : `https://www.google.com/maps`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 px-4 py-2 bg-white hover:bg-gray-50 text-primary rounded-xl text-xs font-bold border border-[#DDD5C7] shadow-2xs transition-colors"
-              >
-                <span className="material-symbols-outlined text-sm text-[#9C6237]">map</span>
-                Xem vị trí xưởng trên Google Maps
-              </a>
-
-              <button
-                onClick={() => setIsThankModalOpen(true)}
-                className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#9C6237] hover:bg-[#85512A] text-white rounded-xl text-xs font-bold shadow-sm transition-colors active:scale-95"
-              >
-                <span className="material-symbols-outlined text-sm">volunteer_activism</span>
-                Gửi lời tri ân nghệ nhân
-              </button>
-            </div>
-
-          </div>
-
-        </div>
-
-        {/* 🌟 BANNER ĐẬM SẮC VĂN HÓA: "ĐÂY LÀ THỨ CÂU CHUYỆN" */}
-        <div 
-          style={{ backgroundColor: '#781012', backgroundImage: 'linear-gradient(135deg, #8A1517 0%, #660C0E 100%)' }}
-          className="rounded-[2.2rem] md:rounded-[2.8rem] p-6 sm:p-8 text-white shadow-2xl border-2 border-gold/40 relative overflow-hidden mb-10"
-        >
-          
-          {/* Subtle floral watermark in background */}
-          <div className="absolute right-0 top-0 translate-x-1/4 -translate-y-1/4 size-72 rounded-full bg-white/[0.02] pointer-events-none"></div>
-
-          {/* Top Bar inside banner */}
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 border-b border-white/10">
-            <div className="flex items-center gap-3.5">
-              <div className="size-12 rounded-2xl bg-[#FAF7F0] text-primary flex items-center justify-center text-2xl shrink-0 shadow-inner border border-gold/30">
-                🌸
-              </div>
-              <div>
-                <h2 className="text-xl sm:text-2xl md:text-3xl font-black text-white uppercase tracking-tight">
-                  ĐÂY LÀ THỨ CÂU CHUYỆN
-                </h2>
-                <p className="text-xs sm:text-sm text-gold-light font-medium mt-0.5">
-                  Không chỉ là một món hàng, mà là cả một di sản văn hóa.
+              {/* Tiêu đề hiển thị trên Desktop */}
+              <div className="hidden md:block space-y-1">
+                <span className="text-xs sm:text-sm font-black uppercase tracking-[0.2em] text-[#9C6237] block">
+                  {artisan.title}
+                </span>
+                <h1 className="text-3xl lg:text-5xl font-black tracking-tight text-[#1F2923] leading-tight">
+                  {artisan.name}
+                </h1>
+                <p className="text-base lg:text-lg font-medium italic text-[#2D3E32]">
+                  “{artisan.craftType}”
                 </p>
               </div>
-            </div>
 
-            <div className="bg-white text-primary px-4 py-2 rounded-full text-xs font-bold shadow-md border border-gold/40 flex items-center gap-1.5 self-start md:self-auto">
-              <span className="material-symbols-outlined text-sm text-primary">shield</span>
-              <span>Minh bạch danh tính • Thương mại di sản có trách nhiệm</span>
-            </div>
-          </div>
-
-          {/* 5 Thẻ Trắng Tinh Tế (Matching 5 Cards in Mockup) */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3.5 mt-6">
-            
-            {/* Thẻ 1: Tên nghệ nhân */}
-            <div className="bg-white rounded-2xl p-4 text-[#222823] shadow-sm flex flex-col justify-between">
-              <div className="flex items-center gap-2 mb-2">
-                <div className="size-7 rounded-full bg-[#F5EFE4] flex items-center justify-center text-[#9C6237]">
-                  <span className="material-symbols-outlined text-sm">person</span>
+              {/* BẢNG 4 Ô THÔNG TIN: Dân tộc | Quê quán | Buôn làng | Thời gian làm nghề */}
+              <div className="bg-[#FAF7F0] border border-[#EADBCA] rounded-xl sm:rounded-2xl p-2 sm:p-3 grid grid-cols-2 sm:grid-cols-4 gap-1.5 sm:gap-2">
+                {/* Ô 1: Dân tộc */}
+                <div className="flex items-center gap-2 p-1.5 sm:p-2 bg-white/70 rounded-lg">
+                  <div className="size-7 sm:size-8 rounded-full bg-[#E5D7C5] flex items-center justify-center text-[#6B4B29] shrink-0">
+                    <span className="material-symbols-outlined text-base">groups</span>
+                  </div>
+                  <div className="min-w-0">
+                    <span className="text-[10px] text-[#7A6E5F] block font-medium leading-tight">Dân tộc</span>
+                    <strong className="text-xs sm:text-sm text-[#231E18] font-bold truncate block">{artisan.ethnic}</strong>
+                  </div>
                 </div>
-                <span className="text-[10px] font-black uppercase tracking-wider text-[#9C6237]">
-                  TÊN NGHỆ NHÂN
-                </span>
-              </div>
-              <div>
-                <p className="text-sm font-bold text-[#1F2923]">{artisan.name}</p>
-                <p className="text-[11px] text-[#6B7280] font-medium mt-0.5">{artisan.title} - {artisan.yearsOfCraft} năm nghề</p>
-              </div>
-            </div>
 
-            {/* Thẻ 2: Buôn làng xuất xứ */}
-            <div className="bg-white rounded-2xl p-4 text-[#222823] shadow-sm flex flex-col justify-between">
-              <div className="flex items-center gap-2 mb-2">
-                <div className="size-7 rounded-full bg-[#F5EFE4] flex items-center justify-center text-[#9C6237]">
-                  <span className="material-symbols-outlined text-sm">holiday_village</span>
+                {/* Ô 2: Quê quán */}
+                <div className="flex items-center gap-2 p-1.5 sm:p-2 bg-white/70 rounded-lg">
+                  <div className="size-7 sm:size-8 rounded-full bg-[#E5D7C5] flex items-center justify-center text-[#6B4B29] shrink-0">
+                    <span className="material-symbols-outlined text-base">location_on</span>
+                  </div>
+                  <div className="min-w-0">
+                    <span className="text-[10px] text-[#7A6E5F] block font-medium leading-tight">Quê quán</span>
+                    <strong className="text-xs sm:text-sm text-[#231E18] font-bold truncate block">{artisan.province}</strong>
+                  </div>
                 </div>
-                <span className="text-[10px] font-black uppercase tracking-wider text-[#9C6237]">
-                  BUÔN LÀNG XUẤT XỨ
-                </span>
-              </div>
-              <div>
-                <p className="text-sm font-bold text-[#1F2923] truncate">{artisan.village}</p>
-                <p className="text-[11px] text-[#6B7280] font-medium mt-0.5">{artisan.province}</p>
-              </div>
-            </div>
 
-            {/* Thẻ 3: Nghề truyền thống */}
-            <div className="bg-white rounded-2xl p-4 text-[#222823] shadow-sm flex flex-col justify-between">
-              <div className="flex items-center gap-2 mb-2">
-                <div className="size-7 rounded-full bg-[#F5EFE4] flex items-center justify-center text-[#9C6237]">
-                  <span className="material-symbols-outlined text-sm">brush</span>
+                {/* Ô 3: Buôn làng */}
+                <div className="flex items-center gap-2 p-1.5 sm:p-2 bg-white/70 rounded-lg">
+                  <div className="size-7 sm:size-8 rounded-full bg-[#E5D7C5] flex items-center justify-center text-[#6B4B29] shrink-0">
+                    <span className="material-symbols-outlined text-base">home</span>
+                  </div>
+                  <div className="min-w-0">
+                    <span className="text-[10px] text-[#7A6E5F] block font-medium leading-tight">Buôn làng</span>
+                    <strong className="text-xs sm:text-sm text-[#231E18] font-bold truncate block">{artisan.village}</strong>
+                  </div>
                 </div>
-                <span className="text-[10px] font-black uppercase tracking-wider text-[#9C6237]">
-                  NGHỀ TRUYỀN THỐNG
-                </span>
-              </div>
-              <div>
-                <p className="text-sm font-bold text-[#1F2923] truncate">Dệt lanh – Vẽ sáp ong</p>
-                <p className="text-[11px] text-[#6B7280] font-medium mt-0.5">Nhuộm chàm tự nhiên</p>
-              </div>
-            </div>
 
-            {/* Thẻ 4: Đặc điểm hoa văn */}
-            <div className="bg-white rounded-2xl p-4 text-[#222823] shadow-sm flex flex-col justify-between">
-              <div className="flex items-center gap-2 mb-2">
-                <div className="size-7 rounded-full bg-[#F5EFE4] flex items-center justify-center text-[#9C6237]">
-                  <span className="material-symbols-outlined text-sm">interests</span>
+                {/* Ô 4: Thời gian làm nghề */}
+                <div className="flex items-center gap-2 p-1.5 sm:p-2 bg-white/70 rounded-lg">
+                  <div className="size-7 sm:size-8 rounded-full bg-[#E5D7C5] flex items-center justify-center text-[#6B4B29] shrink-0">
+                    <span className="material-symbols-outlined text-base">history</span>
+                  </div>
+                  <div className="min-w-0">
+                    <span className="text-[10px] text-[#7A6E5F] block font-medium leading-tight">Tuổi nghề</span>
+                    <strong className="text-xs sm:text-sm text-[#231E18] font-bold truncate block">Gần {artisan.yearsOfCraft} năm</strong>
+                  </div>
                 </div>
-                <span className="text-[10px] font-black uppercase tracking-wider text-[#9C6237]">
-                  ĐẶC ĐIỂM HOA VĂN
-                </span>
               </div>
-              <div>
-                <p className="text-sm font-bold text-[#1F2923] truncate">Hoa văn H'Mông độc bản</p>
-                <p className="text-[11px] text-[#6B7280] font-medium mt-0.5">Mang ý nghĩa tâm linh sâu sắc</p>
-              </div>
-            </div>
 
-            {/* Thẻ 5: Thời gian hoàn thành */}
-            <div className="bg-white rounded-2xl p-4 text-[#222823] shadow-sm flex flex-col justify-between">
-              <div className="flex items-center gap-2 mb-2">
-                <div className="size-7 rounded-full bg-[#F5EFE4] flex items-center justify-center text-[#9C6237]">
-                  <span className="material-symbols-outlined text-sm">hourglass_top</span>
-                </div>
-                <span className="text-[10px] font-black uppercase tracking-wider text-[#9C6237]">
-                  THỜI GIAN HOÀN THÀNH
-                </span>
+              {/* Trích dẫn nghệ nhân */}
+              <div className="p-3 sm:p-3.5 bg-[#FAF7F0]/80 rounded-xl border-l-3 border-[#9C6237] shadow-2xs">
+                <blockquote className="text-xs sm:text-sm italic text-[#382F24] leading-relaxed font-serif">
+                  “{artisan.quote}”
+                </blockquote>
+                <p className="text-[11px] font-bold text-[#635342] mt-1">— Nghệ nhân {artisan.name}</p>
               </div>
-              <div>
-                <p className="text-sm font-black text-[#9C6237]">{artisan.metrics?.[0]?.value || '15 – 30 ngày'}</p>
-                <p className="text-[11px] text-[#6B7280] font-medium mt-0.5">41 công đoạn thủ công</p>
+
+              {/* Quick Actions (Bản đồ & Tri ân) */}
+              <div className="flex flex-wrap items-center gap-2 pt-1">
+                <a
+                  href={artisan.coords && artisan.coords.length >= 2 ? `https://www.google.com/maps/search/?api=1&query=${artisan.coords[0]},${artisan.coords[1]}` : `https://www.google.com/maps`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#FAF7F0] hover:bg-gray-100 text-primary rounded-xl text-xs font-bold border border-[#DDD5C7] shadow-2xs transition-colors"
+                >
+                  <span className="material-symbols-outlined text-sm text-[#9C6237]">map</span>
+                  Xem vị trí xưởng
+                </a>
+
+                <button
+                  onClick={() => setIsThankModalOpen(true)}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#9C6237] hover:bg-[#85512A] text-white rounded-xl text-xs font-bold shadow-xs transition-colors active:scale-95 cursor-pointer"
+                >
+                  <span className="material-symbols-outlined text-sm">volunteer_activism</span>
+                  Gửi lời tri ân
+                </button>
               </div>
+
             </div>
 
           </div>
-
         </div>
 
-        {/* 🌟 KHỐI CHỈ SỐ ĐÔI BÀN TAY THỦ CÔNG (MATCHING MOCKUP) */}
-        <div className="bg-white rounded-[2.2rem] p-6 sm:p-8 shadow-sm border border-[#E8E2D5] mb-12">
-          
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-6 border-b border-[#EAE3D5] gap-4 mb-6">
-            <div className="flex items-center gap-3">
-              <span className="material-symbols-outlined text-[#9C6237] text-3xl">spa</span>
+        {/* 🌟 KHỐI CHỈ SỐ ĐÔI BÀN TAY THỦ CÔNG */}
+        <div className="bg-white rounded-2xl md:rounded-[2.2rem] p-4 sm:p-6 shadow-sm border border-[#E8E2D5] mb-8">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 sm:pb-4 border-b border-[#EAE3D5] gap-2 mb-4">
+            <div className="flex items-center gap-2.5">
+              <span className="material-symbols-outlined text-[#9C6237] text-2xl">spa</span>
               <div>
                 <span className="text-[10px] font-extrabold uppercase tracking-widest text-[#9C6237] block">
-                  BẢO TỒN GIÁ TRỊ THẬT • HỖ TRỢ CỘNG ĐỒNG BẢN ĐỊA
+                  BẢO TỒN GIÁ TRỊ THẬT • 100% THỦ CÔNG
                 </span>
-                <h2 className="text-2xl sm:text-3xl font-black text-[#1F2923] tracking-tight uppercase">
-                  CHỈ SỐ ĐÔI BÀN TAY THỦ CÔNG
+                <h2 className="text-lg sm:text-2xl font-black text-[#1F2923] tracking-tight uppercase">
+                  CHỈ SỐ ĐÔI BÀN TAY NGHỆ NHÂN
                 </h2>
               </div>
             </div>
 
-            <div className="bg-[#FFF6F4] text-[#A63228] border border-[#FCDAD5] px-4 py-2 rounded-full text-xs font-bold flex items-center gap-2 self-start sm:self-auto">
-              <span className="material-symbols-outlined text-sm text-[#A63228]">verified_user</span>
-              <span>100% Không sản xuất công nghiệp hàng loạt</span>
+            <div className="bg-[#FFF6F4] text-[#A63228] border border-[#FCDAD5] px-3 py-1 rounded-full text-[11px] font-bold flex items-center gap-1.5 self-start sm:self-auto">
+              <span className="material-symbols-outlined text-xs text-[#A63228]">verified_user</span>
+              <span>Không sản xuất công nghiệp hàng loạt</span>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4">
             {(artisan.metrics || []).map((m, idx) => (
               <div
                 key={idx}
-                className="bg-[#FAF7F0] p-5 rounded-2xl border border-[#EADBCA] hover:border-[#9C6237]/50 transition-all flex flex-col justify-between"
+                className="bg-[#FAF7F0] p-3 sm:p-4 rounded-xl sm:rounded-2xl border border-[#EADBCA] hover:border-[#9C6237]/50 transition-all flex flex-col justify-between"
               >
-                <div className="flex items-center justify-between mb-3">
-                  <span className="text-[11px] font-black uppercase tracking-wider text-[#7C7267]">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-[10px] sm:text-[11px] font-black uppercase tracking-wider text-[#7C7267]">
                     {m.label}
                   </span>
-                  <div className="size-8 rounded-lg bg-[#EAE0D2] text-[#9C6237] flex items-center justify-center">
-                    <span className="material-symbols-outlined text-lg">{m.icon}</span>
+                  <div className="size-6 sm:size-7 rounded-lg bg-[#EAE0D2] text-[#9C6237] flex items-center justify-center">
+                    <span className="material-symbols-outlined text-sm sm:text-base">{m.icon}</span>
                   </div>
                 </div>
                 <div>
-                  <p className="text-xl sm:text-2xl font-black text-[#9C6237] leading-tight">
+                  <p className="text-lg sm:text-2xl font-black text-[#9C6237] leading-tight">
                     {m.value}
                   </p>
-                  <p className="text-xs text-[#524639] mt-1 font-medium leading-snug">
+                  <p className="text-[11px] sm:text-xs text-[#524639] mt-0.5 font-medium leading-snug">
                     {m.sub}
                   </p>
                 </div>
               </div>
             ))}
           </div>
-
-        </div>
-
-        {/* 🌟 KHỐI GIẢI MÃ MẬT MÃ HOA VĂN THIÊNG (MOTIFS DECODER) */}
-        {artisan.motifs && artisan.motifs.length > 0 && (
-          <div className="mb-14">
-            <div className="text-center max-w-2xl mx-auto mb-8 space-y-2">
-              <span className="text-[11px] font-extrabold uppercase tracking-[0.2em] text-[#9C6237] bg-[#EFE9DC] px-3.5 py-1 rounded-full border border-[#DDD5C7] inline-block">
-                MẬT MÃ BẢN SẮC
-              </span>
-              <h2 className="text-2xl sm:text-3xl font-black text-[#1F2923] tracking-tight uppercase">
-                Giải Mã Từng Đường Nét Hoa Văn Thiêng
-              </h2>
-              <p className="text-xs sm:text-sm text-[#635342] leading-relaxed">
-                Mỗi họa tiết là một triết lý nhân sinh, lời chúc phúc cho vụ mùa no ấm và sự che chở tâm linh của tổ tiên người Mông.
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-              
-              {/* Cột Trái: Danh sách tab hoa văn */}
-              <div className="lg:col-span-5 space-y-3">
-                {(artisan.motifs || []).map((motif, index) => {
-                  const isSelected = selectedMotif?.name === motif.name;
-                  return (
-                    <div
-                      key={index}
-                      onClick={() => setSelectedMotif(motif)}
-                      className={`p-4 rounded-2xl border-2 cursor-pointer transition-all flex items-start gap-4 ${
-                        isSelected
-                          ? 'bg-white border-[#9C6237] shadow-lg scale-[1.01]'
-                          : 'bg-white/70 border-[#E5DDD0] hover:border-[#9C6237]/50 hover:bg-white'
-                      }`}
-                    >
-                      <div className={`size-12 rounded-xl flex items-center justify-center text-2xl shrink-0 border ${
-                        isSelected ? 'bg-[#9C6237] text-white border-[#9C6237]' : 'bg-[#FAF7F0] text-[#9C6237] border-[#EADBCA]'
-                      }`}>
-                        {motif.symbol}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center justify-between gap-2">
-                          <h3 className="font-bold text-sm text-[#1F2923]">
-                            {motif.name}
-                          </h3>
-                          {motif.originalName && (
-                            <span className="text-[10px] bg-[#EFE9DC] text-[#7A4B24] font-black uppercase px-2 py-0.5 rounded-md">
-                              {motif.originalName}
-                            </span>
-                          )}
-                        </div>
-                        <p className="text-xs text-[#9C6237] font-semibold mt-0.5 line-clamp-1">
-                          {motif.meaning}
-                        </p>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-
-              {/* Cột Phải: Bảng Chi Tiết Hoa Văn */}
-              <div className="lg:col-span-7">
-                {selectedMotif && (
-                  <div className="bg-white p-6 sm:p-8 rounded-3xl border border-[#E8E2D5] shadow-lg relative overflow-hidden animate-fade-in">
-                    <div className="absolute top-0 right-0 p-6 text-7xl opacity-10 select-none pointer-events-none">
-                      {selectedMotif.symbol}
-                    </div>
-                    
-                    <div className="flex items-center gap-3 mb-4">
-                      <span className="text-3xl">{selectedMotif.symbol}</span>
-                      <div>
-                        <span className="text-[10px] font-black uppercase tracking-wider text-[#9C6237] bg-[#EFE9DC] px-2.5 py-0.5 rounded-full border border-[#DDD5C7]">
-                          Tên bản địa: {selectedMotif.originalName || 'Cổ truyền'}
-                        </span>
-                        <h3 className="text-xl sm:text-2xl font-black text-[#1F2923] mt-1">
-                          {selectedMotif.name}
-                        </h3>
-                      </div>
-                    </div>
-
-                    <div className="h-0.5 w-14 bg-[#9C6237] mb-5"></div>
-
-                    <div className="bg-[#FAF7F0] p-4 rounded-2xl border border-[#EADBCA] mb-5">
-                      <p className="text-[10px] font-black uppercase text-[#9C6237] tracking-widest mb-1">
-                        Ý NGHĨA BIỂU TRƯNG:
-                      </p>
-                      <p className="text-base font-bold text-[#1F2923]">
-                        "{selectedMotif.meaning}"
-                      </p>
-                    </div>
-
-                    <p className="text-xs sm:text-sm text-[#524639] leading-relaxed text-justify mb-4">
-                      {selectedMotif.desc}
-                    </p>
-
-                    <p className="italic text-[11px] text-[#7C7267] border-t border-[#EAE3D5] pt-3">
-                      * Họa tiết này được nghệ nhân {artisan.name} dùng ngòi bút đồng chấm sáp ong rừng nóng chảy vẽ trực tiếp trên vải lanh mộc mạc, không dùng thước kẻ hay bản in khuôn mẫu.
-                    </p>
-                  </div>
-                )}
-              </div>
-
-            </div>
-          </div>
-        )}
-
-        {/* 🌟 KHỐI CHUYỆN ĐỜI NGHỆ NHÂN & KHÔNG GIAN BẢN ĐỊA */}
-        <div className="bg-white rounded-[2.2rem] p-6 sm:p-8 md:p-10 shadow-sm border border-[#E8E2D5] mb-14">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
-            
-            <div className="lg:col-span-6 space-y-4">
-              <span className="text-[10px] font-black uppercase tracking-[0.2em] text-[#9C6237] bg-[#EFE9DC] px-3.5 py-1 rounded-full border border-[#DDD5C7] inline-block">
-                HÀNH TRÌNH GIỮ LỬA
-              </span>
-
-              <h2 className="text-2xl sm:text-3xl font-black text-[#1F2923] tracking-tight uppercase leading-snug">
-                Chuyện Đời & Bàn Tay Nghệ Nhân {artisan.name}
-              </h2>
-
-              <p className="text-xs sm:text-sm text-[#4A3E31] leading-relaxed font-medium">
-                {artisan.bio}
-              </p>
-
-              <div className="space-y-2.5 pt-2">
-                {(artisan.story || []).map((st, i) => (
-                  <div key={i} className="flex gap-3 bg-[#FAF7F0] p-3.5 rounded-xl border border-[#EADBCA]">
-                    <span className="size-5 rounded-full bg-primary text-white text-[11px] font-bold flex items-center justify-center shrink-0 mt-0.5">
-                      {i + 1}
-                    </span>
-                    <p className="text-xs text-[#524639] leading-relaxed font-medium">
-                      {st}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="lg:col-span-6">
-              <div className="grid grid-cols-2 gap-3.5">
-                <div className="space-y-3.5">
-                  <div className="rounded-2xl overflow-hidden border border-[#EADBCA] shadow-md aspect-[4/5] bg-gray-100">
-                    <img
-                      src={artisan.coverImg}
-                      alt={`Không gian chế tác của ${artisan.name}`}
-                      className="w-full h-full object-cover hover:scale-105 transition-transform duration-700"
-                    />
-                  </div>
-                  <div className="bg-[#FAF7F0] p-3 rounded-2xl border border-[#EADBCA] text-center">
-                    <span className="text-2xl font-black text-[#9C6237] block leading-none">{artisan.yearsOfCraft}+</span>
-                    <span className="text-[10px] font-bold uppercase text-[#7C7267] mt-1 block">Năm tuổi nghề cống hiến</span>
-                  </div>
-                </div>
-
-                <div className="space-y-3.5 pt-4">
-                  <div 
-                    style={{ backgroundColor: '#781012', backgroundImage: 'linear-gradient(135deg, #8A1517 0%, #660C0E 100%)' }}
-                    className="text-white p-4 rounded-2xl shadow-md text-left border border-gold/30"
-                  >
-                    <span className="material-symbols-outlined text-gold text-xl mb-1">eco</span>
-                    <h4 className="font-bold text-xs uppercase tracking-wider mb-1">Bản Sắc Bền Vững</h4>
-                    <p className="text-[11px] text-white/90 leading-relaxed">
-                      Sản phẩm làm từ nguyên liệu địa phương thuần khiết, gìn giữ môi sinh và tri thức ngàn đời.
-                    </p>
-                  </div>
-                  <div className="rounded-2xl overflow-hidden border border-[#EADBCA] shadow-md aspect-[4/5] bg-gray-100">
-                    <img
-                      src={artisan.gallery && artisan.gallery[1] ? artisan.gallery[1] : artisan.avatar}
-                      alt={`Tác phẩm thủ công ${artisan.craftType}`}
-                      className="w-full h-full object-cover hover:scale-105 transition-transform duration-700"
-                    />
-                  </div>
-                </div>
-              </div>
-            </div>
-
-          </div>
         </div>
 
         {/* 🌟 GIA TÀI BẢN SẮC - BỘ SƯU TẬP TÁC PHẨM CỦA NGHỆ NHÂN */}
-        <div className="mb-14">
-          <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-8 gap-4">
+        <div className="mb-10 sm:mb-14">
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-5 sm:mb-8 gap-2 sm:gap-4">
             <div>
-              <span className="text-[10px] font-extrabold uppercase tracking-[0.2em] text-[#9C6237] bg-[#EFE9DC] px-3.5 py-1 rounded-full border border-[#DDD5C7] inline-block mb-1.5">
+              <span className="text-[10px] font-extrabold uppercase tracking-[0.2em] text-[#9C6237] bg-[#EFE9DC] px-3 py-1 rounded-full border border-[#DDD5C7] inline-block mb-1.5">
                 TÁC PHẨM ĐỘC BẢN
               </span>
-              <h2 className="text-2xl sm:text-3xl font-black text-[#1F2923] tracking-tight uppercase">
+              <h2 className="text-xl sm:text-3xl font-black text-[#1F2923] tracking-tight uppercase">
                 Gia Tài Bản Sắc Của {artisan.name}
               </h2>
               <p className="text-xs text-[#635342] mt-0.5 font-medium">
@@ -698,17 +418,17 @@ const ArtisanDetail: React.FC = () => {
             </div>
             <Link
               to="/marketplace"
-              className="text-[#9C6237] font-black uppercase text-xs hover:underline flex items-center gap-1 shrink-0"
+              className="text-[#9C6237] font-black uppercase text-xs hover:underline flex items-center gap-1 shrink-0 self-start sm:self-auto"
             >
-              Xem chợ phiên <span className="material-symbols-outlined text-sm">arrow_forward</span>
+              Xem tất cả chợ phiên <span className="material-symbols-outlined text-sm">arrow_forward</span>
             </Link>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5 sm:gap-6">
             {(artisan.products || []).map((p) => (
               <div
                 key={p.id}
-                className="bg-white rounded-2xl border border-[#E5DDD0] overflow-hidden shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col group"
+                className="bg-white rounded-2xl border border-[#E5DDD0] overflow-hidden shadow-xs hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col group"
               >
                 <div className="relative aspect-square overflow-hidden bg-gray-100">
                   <img
@@ -728,9 +448,9 @@ const ArtisanDetail: React.FC = () => {
                   </div>
                 </div>
 
-                <div className="p-5 flex-1 flex flex-col justify-between">
+                <div className="p-3.5 sm:p-5 flex-1 flex flex-col justify-between">
                   <div>
-                    <h3 className="font-bold text-[#1F2923] text-sm group-hover:text-[#9C6237] transition-colors line-clamp-2 mb-1.5">
+                    <h3 className="font-bold text-[#1F2923] text-sm group-hover:text-[#9C6237] transition-colors line-clamp-2 mb-1">
                       {p.name}
                     </h3>
                     <p className="text-xs text-[#6B7280] line-clamp-2 leading-relaxed mb-3">
@@ -738,16 +458,16 @@ const ArtisanDetail: React.FC = () => {
                     </p>
                   </div>
 
-                  <div className="pt-3 border-t border-[#EAE3D5] flex items-center justify-between gap-3">
+                  <div className="pt-2.5 border-t border-[#EAE3D5] flex items-center justify-between gap-3">
                     <div>
                       <span className="text-[10px] text-[#7C7267] uppercase font-bold block">Giá tác phẩm</span>
-                      <span className="text-[#9C6237] font-black text-base leading-none">
+                      <span className="text-[#9C6237] font-black text-sm sm:text-base leading-none">
                         {p.price}
                       </span>
                     </div>
                     <button
                       onClick={() => handleBuyProduct(p)}
-                      className="px-4 py-2 bg-primary hover:brightness-110 text-white rounded-xl text-xs font-bold uppercase tracking-wider active:scale-95 transition-all flex items-center gap-1.5 shadow-xs"
+                      className="px-3.5 py-1.5 sm:px-4 sm:py-2 bg-primary hover:brightness-110 text-white rounded-xl text-xs font-bold uppercase tracking-wider active:scale-95 transition-all flex items-center gap-1.5 shadow-xs cursor-pointer"
                     >
                       <span className="material-symbols-outlined text-sm">shopping_bag</span>
                       Đặt mua
@@ -756,6 +476,180 @@ const ArtisanDetail: React.FC = () => {
                 </div>
               </div>
             ))}
+          </div>
+        </div>
+
+        {/* 🌟 KHỐI GIẢI MÃ MẬT MÃ HOA VĂN THIÊNG (MOTIFS DECODER) */}
+        {artisan.motifs && artisan.motifs.length > 0 && (
+          <div className="mb-10 sm:mb-14">
+            <div className="text-center max-w-2xl mx-auto mb-6 sm:mb-8 space-y-2">
+              <span className="text-[11px] font-extrabold uppercase tracking-[0.2em] text-[#9C6237] bg-[#EFE9DC] px-3.5 py-1 rounded-full border border-[#DDD5C7] inline-block">
+                MẬT MÃ BẢN SẮC
+              </span>
+              <h2 className="text-xl sm:text-3xl font-black text-[#1F2923] tracking-tight uppercase">
+                Giải Mã Từng Đường Nét Hoa Văn Thiêng
+              </h2>
+              <p className="text-xs sm:text-sm text-[#635342] leading-relaxed">
+                Mỗi họa tiết là một triết lý nhân sinh, lời chúc phúc cho vụ mùa no ấm và sự che chở tâm linh của tổ tiên người Mông.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+              
+              {/* Cột Trái: Danh sách tab hoa văn */}
+              <div className="lg:col-span-5 space-y-3">
+                {(artisan.motifs || []).map((motif, index) => {
+                  const isSelected = selectedMotif?.name === motif.name;
+                  return (
+                    <div
+                      key={index}
+                      onClick={() => setSelectedMotif(motif)}
+                      className={`p-3.5 sm:p-4 rounded-2xl border-2 cursor-pointer transition-all flex items-start gap-3 sm:gap-4 ${
+                        isSelected
+                          ? 'bg-white border-[#9C6237] shadow-lg scale-[1.01]'
+                          : 'bg-white/70 border-[#E5DDD0] hover:border-[#9C6237]/50 hover:bg-white'
+                      }`}
+                    >
+                      <div className={`size-10 sm:size-12 rounded-xl flex items-center justify-center text-xl sm:text-2xl shrink-0 border ${
+                        isSelected ? 'bg-[#9C6237] text-white border-[#9C6237]' : 'bg-[#FAF7F0] text-[#9C6237] border-[#EADBCA]'
+                      }`}>
+                        {motif.symbol}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between gap-2">
+                          <h3 className="font-bold text-xs sm:text-sm text-[#1F2923] truncate">
+                            {motif.name}
+                          </h3>
+                          {motif.originalName && (
+                            <span className="text-[10px] bg-[#EFE9DC] text-[#7A4B24] font-black uppercase px-2 py-0.5 rounded-md shrink-0">
+                              {motif.originalName}
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-xs text-[#9C6237] font-semibold mt-0.5 line-clamp-1">
+                          {motif.meaning}
+                        </p>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Cột Phải: Bảng Chi Tiết Hoa Văn */}
+              <div className="lg:col-span-7">
+                {selectedMotif && (
+                  <div className="bg-white p-5 sm:p-8 rounded-2xl sm:rounded-3xl border border-[#E8E2D5] shadow-md relative overflow-hidden animate-fade-in">
+                    <div className="absolute top-0 right-0 p-4 sm:p-6 text-6xl sm:text-7xl opacity-10 select-none pointer-events-none">
+                      {selectedMotif.symbol}
+                    </div>
+                    
+                    <div className="flex items-center gap-3 mb-3 sm:mb-4">
+                      <span className="text-2xl sm:text-3xl">{selectedMotif.symbol}</span>
+                      <div>
+                        <span className="text-[10px] font-black uppercase tracking-wider text-[#9C6237] bg-[#EFE9DC] px-2.5 py-0.5 rounded-full border border-[#DDD5C7]">
+                          Tên bản địa: {selectedMotif.originalName || 'Cổ truyền'}
+                        </span>
+                        <h3 className="text-lg sm:text-2xl font-black text-[#1F2923] mt-1">
+                          {selectedMotif.name}
+                        </h3>
+                      </div>
+                    </div>
+
+                    <div className="h-0.5 w-12 sm:w-14 bg-[#9C6237] mb-4 sm:mb-5"></div>
+
+                    <div className="bg-[#FAF7F0] p-3 sm:p-4 rounded-xl sm:rounded-2xl border border-[#EADBCA] mb-4 sm:mb-5">
+                      <p className="text-[10px] font-black uppercase text-[#9C6237] tracking-widest mb-0.5">
+                        Ý NGHĨA BIỂU TRƯNG:
+                      </p>
+                      <p className="text-sm sm:text-base font-bold text-[#1F2923]">
+                        "{selectedMotif.meaning}"
+                      </p>
+                    </div>
+
+                    <p className="text-xs sm:text-sm text-[#524639] leading-relaxed text-justify mb-3 sm:mb-4">
+                      {selectedMotif.desc}
+                    </p>
+
+                    <p className="italic text-[11px] text-[#7C7267] border-t border-[#EAE3D5] pt-2.5">
+                      * Họa tiết này được nghệ nhân {artisan.name} dùng ngòi bút đồng chấm sáp ong rừng nóng chảy vẽ trực tiếp trên vải lanh mộc mạc, không dùng thước kẻ hay bản in khuôn mẫu.
+                    </p>
+                  </div>
+                )}
+              </div>
+
+            </div>
+          </div>
+        )}
+
+        {/* 🌟 KHỐI CHUYỆN ĐỜI NGHỆ NHÂN & KHÔNG GIAN BẢN ĐỊA */}
+        <div className="bg-white rounded-2xl md:rounded-[2.2rem] p-4 sm:p-8 md:p-10 shadow-sm border border-[#E8E2D5] mb-10 sm:mb-14">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 items-center">
+            
+            <div className="lg:col-span-6 space-y-3 sm:space-y-4">
+              <span className="text-[10px] font-black uppercase tracking-[0.2em] text-[#9C6237] bg-[#EFE9DC] px-3 py-1 rounded-full border border-[#DDD5C7] inline-block">
+                HÀNH TRÌNH GIỮ LỬA
+              </span>
+
+              <h2 className="text-xl sm:text-3xl font-black text-[#1F2923] tracking-tight uppercase leading-snug">
+                Chuyện Đời & Bàn Tay Nghệ Nhân {artisan.name}
+              </h2>
+
+              <p className="text-xs sm:text-sm text-[#4A3E31] leading-relaxed font-medium">
+                {artisan.bio}
+              </p>
+
+              <div className="space-y-2 pt-1">
+                {(artisan.story || []).map((st, i) => (
+                  <div key={i} className="flex gap-2.5 bg-[#FAF7F0] p-3 rounded-xl border border-[#EADBCA]">
+                    <span className="size-5 rounded-full bg-primary text-white text-[11px] font-bold flex items-center justify-center shrink-0 mt-0.5">
+                      {i + 1}
+                    </span>
+                    <p className="text-xs text-[#524639] leading-relaxed font-medium">
+                      {st}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="lg:col-span-6">
+              <div className="grid grid-cols-2 gap-2.5 sm:gap-3.5">
+                <div className="space-y-2.5 sm:space-y-3.5">
+                  <div className="rounded-xl sm:rounded-2xl overflow-hidden border border-[#EADBCA] shadow-sm aspect-[4/5] bg-gray-100">
+                    <img
+                      src={artisan.coverImg}
+                      alt={`Không gian chế tác của ${artisan.name}`}
+                      className="w-full h-full object-cover hover:scale-105 transition-transform duration-700"
+                    />
+                  </div>
+                  <div className="bg-[#FAF7F0] p-2.5 sm:p-3 rounded-xl sm:rounded-2xl border border-[#EADBCA] text-center">
+                    <span className="text-xl sm:text-2xl font-black text-[#9C6237] block leading-none">{artisan.yearsOfCraft}+</span>
+                    <span className="text-[10px] font-bold uppercase text-[#7C7267] mt-0.5 block">Năm tuổi nghề cống hiến</span>
+                  </div>
+                </div>
+
+                <div className="space-y-2.5 sm:space-y-3.5 pt-2 sm:pt-4">
+                  <div 
+                    style={{ backgroundColor: '#781012', backgroundImage: 'linear-gradient(135deg, #8A1517 0%, #660C0E 100%)' }}
+                    className="text-white p-3 sm:p-4 rounded-xl sm:rounded-2xl shadow-sm text-left border border-gold/30"
+                  >
+                    <span className="material-symbols-outlined text-gold text-lg sm:text-xl mb-1">eco</span>
+                    <h4 className="font-bold text-[11px] sm:text-xs uppercase tracking-wider mb-0.5">Bản Sắc Bền Vững</h4>
+                    <p className="text-[10px] sm:text-[11px] text-white/90 leading-relaxed">
+                      Sản phẩm làm từ nguyên liệu địa phương thuần khiết, gìn giữ môi sinh và tri thức ngàn đời.
+                    </p>
+                  </div>
+                  <div className="rounded-xl sm:rounded-2xl overflow-hidden border border-[#EADBCA] shadow-sm aspect-[4/5] bg-gray-100">
+                    <img
+                      src={artisan.gallery && artisan.gallery[1] ? artisan.gallery[1] : artisan.avatar}
+                      alt={`Tác phẩm thủ công ${artisan.craftType}`}
+                      className="w-full h-full object-cover hover:scale-105 transition-transform duration-700"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
           </div>
         </div>
 

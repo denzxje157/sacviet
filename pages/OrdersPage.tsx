@@ -153,15 +153,15 @@ const OrdersPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[#F9F5EA] pt-32 pb-20 px-4 sm:px-6 lg:px-8 font-display">
+    <div className="min-h-screen bg-[#F9F5EA] pt-20 sm:pt-32 pb-24 px-3 sm:px-6 lg:px-8 font-display">
       <div className="max-w-4xl mx-auto">
-        <div className="flex items-center gap-4 mb-8">
-           <button onClick={() => navigate(-1)} className="size-10 rounded-full bg-white border border-gold/20 flex items-center justify-center hover:bg-gold hover:text-white transition-colors shadow-sm">
-              <span className="material-symbols-outlined">arrow_back</span>
+        <div className="flex items-center gap-3 sm:gap-4 mb-6 sm:mb-8">
+           <button onClick={() => navigate(-1)} className="size-9 sm:size-10 rounded-full bg-white border border-gold/20 flex items-center justify-center hover:bg-gold hover:text-white transition-colors shadow-sm cursor-pointer">
+              <span className="material-symbols-outlined text-lg sm:text-xl">arrow_back</span>
            </button>
            <div>
-              <h1 className="text-3xl font-black text-text-main uppercase tracking-wide">Đơn hàng của tôi</h1>
-              <p className="text-sm text-text-soft font-medium mt-1">Theo dõi hành trình di sản về nhà</p>
+              <h1 className="text-2xl sm:text-3xl font-black text-text-main uppercase tracking-wide">Đơn hàng của tôi</h1>
+              <p className="text-xs sm:text-sm text-text-soft font-medium mt-0.5">Theo dõi hành trình di sản về nhà</p>
            </div>
         </div>
 
@@ -170,94 +170,94 @@ const OrdersPage: React.FC = () => {
              <div className="w-10 h-10 border-4 border-gold border-t-transparent rounded-full animate-spin"></div>
           </div>
         ) : orders.length === 0 ? (
-          <div className="bg-white rounded-3xl p-12 text-center border border-gold/10 shadow-sm animate-fade-in">
-             <div className="size-24 bg-background-light rounded-full flex items-center justify-center mx-auto mb-6">
-                <span className="material-symbols-outlined text-5xl text-gold">receipt_long</span>
+          <div className="bg-white rounded-3xl p-8 sm:p-12 text-center border border-gold/10 shadow-sm animate-fade-in">
+             <div className="size-20 sm:size-24 bg-background-light rounded-full flex items-center justify-center mx-auto mb-5 sm:mb-6">
+                <span className="material-symbols-outlined text-4xl sm:text-5xl text-gold">receipt_long</span>
              </div>
-             <h3 className="text-xl font-black text-text-main mb-2">Chưa có đơn hàng nào</h3>
-             <p className="text-text-soft mb-8 max-w-md mx-auto">Hãy ghé thăm Chợ Phiên để tìm kiếm những món quà di sản độc đáo cho riêng mình.</p>
-             <Link to="/marketplace" className="inline-flex items-center gap-2 bg-primary text-white px-8 py-4 rounded-2xl font-black uppercase tracking-widest hover:brightness-110 shadow-lg shadow-primary/20 transition-all active:scale-95">
+             <h3 className="text-lg sm:text-xl font-black text-text-main mb-2">Chưa có đơn hàng nào</h3>
+             <p className="text-text-soft text-xs sm:text-sm mb-6 sm:mb-8 max-w-md mx-auto">Hãy ghé thăm Chợ Phiên để tìm kiếm những món quà di sản độc đáo cho riêng mình.</p>
+             <Link to="/marketplace" className="inline-flex items-center gap-2 bg-primary text-white px-6 sm:px-8 py-3.5 sm:py-4 rounded-2xl font-black uppercase tracking-widest hover:brightness-110 shadow-lg shadow-primary/20 transition-all active:scale-95 text-xs sm:text-sm">
                 Khám phá ngay
-                <span className="material-symbols-outlined">arrow_forward</span>
+                <span className="material-symbols-outlined text-base">arrow_forward</span>
              </Link>
           </div>
         ) : (
-          <div className="space-y-6">
+          <div className="space-y-4 sm:space-y-6">
             {orders.map((order) => (
               <motion.div 
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 key={order.id || Math.random().toString()} 
-                className="bg-white rounded-[2rem] border border-gold/20 overflow-hidden shadow-sm hover:shadow-md transition-shadow"
+                className="bg-white rounded-2xl sm:rounded-[2rem] border border-gold/20 overflow-hidden shadow-sm hover:shadow-md transition-shadow"
               >
                 {/* Order Header */}
-                <div className="bg-background-light p-6 border-b border-gold/10 flex flex-wrap gap-4 justify-between items-center">
-                   <div className="flex items-center gap-4">
-                      <div className="bg-white p-2.5 rounded-xl border border-gold/10 shadow-sm">
-                         <span className="material-symbols-outlined text-primary text-2xl">local_mall</span>
+                <div className="bg-background-light p-4 sm:p-6 border-b border-gold/10 flex flex-wrap gap-3 sm:gap-4 justify-between items-center">
+                   <div className="flex items-center gap-3 sm:gap-4">
+                      <div className="bg-white p-2 sm:p-2.5 rounded-xl border border-gold/10 shadow-sm">
+                         <span className="material-symbols-outlined text-primary text-xl sm:text-2xl">local_mall</span>
                       </div>
                       <div>
-                         <p className="text-[10px] text-text-soft font-black uppercase tracking-widest">Mã đơn hàng</p>
-                         <p className="text-lg font-black text-text-main leading-none mt-1">{order.id}</p>
+                         <p className="text-[9px] sm:text-[10px] text-text-soft font-black uppercase tracking-widest">Mã đơn hàng</p>
+                         <p className="text-base sm:text-lg font-black text-text-main leading-none mt-1">{order.id}</p>
                       </div>
                    </div>
                    <div className="text-left md:text-right">
-                      <p className="text-[10px] text-text-soft font-black uppercase tracking-widest">Ngày đặt</p>
-                      <p className="text-sm font-bold text-text-main mt-1">
+                      <p className="text-[9px] sm:text-[10px] text-text-soft font-black uppercase tracking-widest">Ngày đặt</p>
+                      <p className="text-xs sm:text-sm font-bold text-text-main mt-0.5 sm:mt-1">
                          {new Date(order.date).toLocaleDateString('vi-VN')} - {new Date(order.date).toLocaleTimeString('vi-VN', {hour: '2-digit', minute:'2-digit'})}
                       </p>
                    </div>
                 </div>
 
                 {/* Order Body */}
-                <div className="p-6 md:p-8">
+                <div className="p-4 sm:p-6 md:p-8">
                    {/* Status & Total */}
-                   <div className="flex flex-wrap gap-4 justify-between items-center mb-6 pb-6 border-b border-dashed border-gold/20">
-                      <div className="flex items-center gap-3">
-                         <span className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest shadow-sm border ${
+                   <div className="flex flex-wrap gap-3 sm:gap-4 justify-between items-center mb-4 sm:mb-6 pb-4 sm:pb-6 border-b border-dashed border-gold/20">
+                      <div className="flex items-center gap-2 sm:gap-3">
+                         <span className={`px-3 sm:px-4 py-1 sm:py-1.5 rounded-full text-[9px] sm:text-[10px] font-black uppercase tracking-widest shadow-sm border ${
                             order.status === 'Đã thanh toán' ? 'bg-green-100 text-green-700 border-green-200' :
                             'bg-gold/20 text-text-main border-gold/30'
                          }`}>
                             {order.status}
                          </span>
-                         <span className="text-xs text-text-soft font-medium border-l border-gold/30 pl-3">
+                         <span className="text-xs text-text-soft font-medium border-l border-gold/30 pl-2.5 sm:pl-3">
                             {order.paymentMethod}
                          </span>
                       </div>
                       <div className="flex items-center gap-2">
-                         <span className="text-sm font-bold text-text-soft">Tổng tiền:</span>
-                         <span className="text-xl font-black text-primary">{(order.total || 0).toLocaleString('vi-VN')} đ</span>
+                         <span className="text-xs sm:text-sm font-bold text-text-soft">Tổng:</span>
+                         <span className="text-lg sm:text-xl font-black text-primary">{(order.total || 0).toLocaleString('vi-VN')} đ</span>
                       </div>
                    </div>
 
                    {/* Items List */}
-                   <div className="space-y-4">
+                   <div className="space-y-3 sm:space-y-4">
                       {(order.items || []).map((item, idx) => (
-                         <div key={idx} className="flex gap-4 items-center p-2">
-                            <img src={item?.img || ''} alt={item?.name} className="size-16 md:size-20 rounded-xl object-cover border border-gold/20 bg-gray-100 shrink-0" />
+                         <div key={idx} className="flex gap-3 sm:gap-4 items-center p-1.5 sm:p-2">
+                            <img src={item?.img || ''} alt={item?.name} className="size-14 sm:size-20 rounded-xl object-cover border border-gold/20 bg-gray-100 shrink-0" />
                             <div className="flex-1 min-w-0">
-                               <h4 className="font-black text-text-main text-sm truncate">{item?.name}</h4>
-                               <p className="text-[10px] text-bronze uppercase font-black tracking-widest mt-1">{item?.ethnic}</p>
+                               <h4 className="font-black text-text-main text-xs sm:text-sm truncate">{item?.name}</h4>
+                               <p className="text-[9px] sm:text-[10px] text-bronze uppercase font-black tracking-widest mt-0.5 sm:mt-1">{item?.ethnic}</p>
                             </div>
                             <div className="text-right shrink-0">
-                               <p className="text-sm font-bold text-text-main">{item?.price}</p>
-                               <p className="text-xs text-text-soft font-medium mt-1">x{item?.quantity}</p>
+                               <p className="text-xs sm:text-sm font-bold text-text-main">{item?.price}</p>
+                               <p className="text-[11px] sm:text-xs text-text-soft font-medium mt-0.5 sm:mt-1">x{item?.quantity}</p>
                             </div>
                          </div>
                       ))}
                    </div>
                    
                    {/* Actions */}
-                   <div className="mt-6 pt-6 border-t border-gold/10 flex justify-end gap-3">
+                   <div className="mt-5 sm:mt-6 pt-5 sm:pt-6 border-t border-gold/10 grid grid-cols-2 sm:flex sm:justify-end gap-2.5">
                       <button 
                         onClick={() => handleContactSupport(order.id)}
-                        className="px-6 py-2.5 rounded-xl border-2 border-gold/30 text-text-main text-xs uppercase font-bold hover:bg-gold/10 transition-colors active:scale-95"
+                        className="w-full sm:w-auto px-4 py-2.5 rounded-xl border-2 border-gold/30 text-text-main text-xs uppercase font-bold hover:bg-gold/10 transition-colors active:scale-95 text-center cursor-pointer"
                       >
-                         Liên hệ hỗ trợ
+                         Hỗ trợ
                       </button>
                       <button 
                         onClick={() => handleBuyAgain(order.items || [])}
-                        className="px-6 py-2.5 rounded-xl bg-primary text-white text-xs uppercase font-black hover:brightness-110 shadow-md shadow-primary/20 transition-all active:scale-95 flex items-center gap-2"
+                        className="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-primary text-white text-xs uppercase font-black hover:brightness-110 shadow-md shadow-primary/20 transition-all active:scale-95 flex items-center justify-center gap-1.5 cursor-pointer"
                       >
                          <span className="material-symbols-outlined text-sm">shopping_bag</span>
                          Mua lại

@@ -128,43 +128,70 @@ export const authService = {
 
   // 3. LẤY THÔNG TIN USER HIỆN TẠI
   getCurrentUser: async (): Promise<User | null> => {
-    if (!isSupabaseConfigured) {
-      // Fallback to localStorage
-      return new Promise((resolve) => {
-        const token = localStorage.getItem('mock_token');
-        if (token) {
-          resolve(JSON.parse(token));
-        } else {
-          resolve(null);
+    // 1. Kiểm tra session từ Supabase nếu có cấu hình
+    if (isSupabaseConfigured) {
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession();
+        if (!error && session?.user) {
+          return {
+            id: session.user.id,
+            fullName: session.user.user_metadata?.full_name || session.user.email?.split('@')[0] || 'User',
+            email: session.user.email || '',
+            role: session.user.user_metadata?.role || 'user',
+            phone: session.user.user_metadata?.phone,
+            avatar: session.user.user_metadata?.avatar,
+            artisanId: session.user.user_metadata?.artisanId,
+            village: session.user.user_metadata?.village,
+            ethnic: session.user.user_metadata?.ethnic,
+            bio: session.user.user_metadata?.bio
+          };
         }
-      });
+      } catch (error) {
+        console.warn('Failed to fetch session from Supabase:', error);
+      }
     }
 
-    try {
-      const { data: { session }, error } = await supabase.auth.getSession();
-      if (error || !session?.user) return null;
-      
-      return {
-        id: session.user.id,
-        fullName: session.user.user_metadata?.full_name || session.user.email?.split('@')[0] || 'User',
-        email: session.user.email || '',
-        role: session.user.user_metadata?.role || 'user',
-        phone: session.user.user_metadata?.phone,
-        avatar: session.user.user_metadata?.avatar,
-        artisanId: session.user.user_metadata?.artisanId,
-        village: session.user.user_metadata?.village,
-        ethnic: session.user.user_metadata?.ethnic,
-        bio: session.user.user_metadata?.bio
-      };
-    } catch (error) {
-      console.warn('Failed to fetch session from Supabase, likely due to missing config.');
-      return null;
+    // 2. Fallback: Kiểm tra mock_token trong localStorage (cho tài khoản nghệ nhân / local user)
+    const token = localStorage.getItem('mock_token');
+    if (token) {
+      try {
+        return JSON.parse(token);
+      } catch (e) {}
     }
+
+    // 3. Fallback: Nếu đang có phiên nghệ nhân 'sacviet_active_artisan_id'
+    const activeArtisanId = localStorage.getItem('sacviet_active_artisan_id');
+    if (activeArtisanId) {
+      try {
+        const artisansStr = localStorage.getItem('sacviet_artisans_list');
+        if (artisansStr) {
+          const list = JSON.parse(artisansStr);
+          const found = list.find((a: any) => a.id === activeArtisanId);
+          if (found) {
+            const artisanUser: User = {
+              id: `user-${found.id}`,
+              fullName: found.name,
+              email: found.email || `${found.phone || found.id}@sacviet.vn`,
+              phone: found.phone,
+              role: 'artisan',
+              artisanId: found.id,
+              village: found.village,
+              ethnic: found.ethnic,
+              bio: found.bio
+            };
+            localStorage.setItem('mock_token', JSON.stringify(artisanUser));
+            return artisanUser;
+          }
+        }
+      } catch (e) {}
+    }
+
+    return null;
   },
 
   // 4. CẬP NHẬT HỒ SƠ NGƯỜI DÙNG / NGHỆ NHÂN
   updateUserProfile: async (userId: string, updates: Partial<User>): Promise<User> => {
-    if (!isSupabaseConfigured) {
+    if (!isSupabaseConfigured || userId.startsWith('user-') || userId.startsWith('artisan-') || userId === 'admin-local') {
       const usersStr = localStorage.getItem('mock_db_users');
       let users = usersStr ? JSON.parse(usersStr) : [];
       let foundUser = users.find((u: any) => u.id === userId);
@@ -175,7 +202,7 @@ export const authService = {
 
       const tokenStr = localStorage.getItem('mock_token');
       let currentToken = tokenStr ? JSON.parse(tokenStr) : null;
-      if (currentToken && (currentToken.id === userId || currentToken.id === 'admin-local')) {
+      if (currentToken) {
         currentToken = { ...currentToken, ...updates };
         localStorage.setItem('mock_token', JSON.stringify(currentToken));
         return currentToken;
@@ -203,11 +230,12 @@ export const authService = {
 
   // 5. ĐĂNG XUẤT
   logout: async (): Promise<void> => {
-    if (!isSupabaseConfigured) {
-      localStorage.removeItem('mock_token');
-      return;
+    localStorage.removeItem('mock_token');
+    localStorage.removeItem('sacviet_active_artisan_id');
+    if (isSupabaseConfigured) {
+      try {
+        await supabase.auth.signOut();
+      } catch (e) {}
     }
-    const { error } = await supabase.auth.signOut();
-    if (error) throw error;
   }
 };

@@ -3,6 +3,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { useCart } from '../context/CartContext.tsx';
 import { useAuth } from '../context/AuthContext.tsx';
 import AIChatWidget from './AIChatWidget.tsx';
+import MobileBottomNav from './MobileBottomNav.tsx';
 import { User, LogOut, UserCircle2, ShoppingBag, MessageSquare, ShieldCheck, Lock } from 'lucide-react'; // Đã thêm Lock
 
 const Navbar: React.FC = () => {
@@ -13,14 +14,19 @@ const Navbar: React.FC = () => {
   const { toggleCart, totalItems } = useCart();
   const { user, toggleAuthModal, logout } = useAuth();
 
-  const navLinks = [
-    { name: 'Trang chủ', path: '/' },
-    { name: 'Nghệ Nhân', path: '/artisans' },
-    { name: 'Chợ Phiên', path: '/marketplace' },
-    { name: 'Kênh Nghệ Nhân', path: '/seller-portal' },
-    { name: 'Thư viện', path: '/library' },
-    { name: 'Cộng đồng', path: '/community' },
-  ];
+  const navLinks = React.useMemo(() => {
+    const links = [
+      { name: 'Trang chủ', path: '/' },
+      { name: 'Chợ Phiên', path: '/marketplace' },
+      { name: 'Nghệ Nhân', path: '/artisans' },
+      { name: 'Thư viện', path: '/library' },
+      { name: 'Cộng đồng', path: '/community' },
+    ];
+    if (user?.role === 'artisan') {
+      links.push({ name: 'Kênh Nghệ Nhân', path: '/seller-portal' });
+    }
+    return links;
+  }, [user?.role]);
 
   return (
     <>
@@ -128,15 +134,23 @@ const Navbar: React.FC = () => {
               {user ? (
                 <button 
                   onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-                  className="flex items-center gap-2 bg-white border border-gold/20 rounded-full pl-1 pr-2 py-1 md:pr-3 hover:bg-gold/5 transition-colors shadow-sm max-w-[120px] md:max-w-[150px]"
+                  className="flex items-center gap-1.5 md:gap-2 bg-white border border-gold/30 rounded-full pl-1 pr-2.5 py-1 md:pr-3 hover:bg-gold/5 transition-colors shadow-xs max-w-[135px] md:max-w-[175px]"
                 >
-                  <div className="size-6 md:size-8 rounded-full bg-primary/10 text-primary flex items-center justify-center border border-gold/30 shrink-0">
-                    <User size={14} className="md:w-4 md:h-4" strokeWidth={2.5} />
+                  <div className="size-6 md:size-8 rounded-full bg-primary/10 text-primary flex items-center justify-center border border-gold/30 shrink-0 overflow-hidden">
+                    {user.avatar ? (
+                      <img src={user.avatar} alt={user.fullName} className="w-full h-full object-cover" />
+                    ) : (
+                      <User size={14} className="md:w-4 md:h-4" strokeWidth={2.5} />
+                    )}
                   </div>
-                  {/* GIỚI HẠN CHIỀU DÀI TÊN - NGUYÊN NHÂN VỠ LAYOUT LÀ ĐÂY */}
-                  <span className="text-[10px] md:text-xs font-bold text-text-main truncate max-w-[50px] md:max-w-[70px]">
-                    {user.fullName.split(' ').pop()}
+                  <span className="text-[10px] md:text-xs font-bold text-text-main truncate max-w-[65px] md:max-w-[95px]">
+                    {user.fullName.split(' ').pop() || user.fullName}
                   </span>
+                  {user.role === 'artisan' && (
+                    <span className="text-[9px] font-black text-amber-700 bg-amber-100 border border-amber-300/80 px-1 py-0.2 rounded hidden sm:inline shrink-0">
+                      Thợ
+                    </span>
+                  )}
                 </button>
               ) : (
                 <button 
@@ -210,6 +224,23 @@ const Navbar: React.FC = () => {
         {/* Mobile Nav Menu */}
         {isMenuOpen && (
           <div className="lg:hidden bg-background-light border-t border-gold/20 p-6 flex flex-col gap-4 animate-fade-in absolute w-full shadow-2xl h-[calc(100vh-70px)] top-full z-[90] overflow-y-auto">
+            {/* Banner đăng nhập nhanh nếu chưa đăng nhập */}
+            {!user && (
+              <div className="bg-white border border-gold/30 p-4 rounded-2xl shadow-xs flex items-center justify-between gap-3">
+                <div>
+                  <p className="font-black text-xs text-text-main uppercase">Tài Khoản Sắc Việt</p>
+                  <p className="text-[11px] text-text-soft mt-0.5">Đăng nhập để xem đơn hàng & mở gian hàng</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => { setIsMenuOpen(false); toggleAuthModal(); }}
+                  className="bg-primary text-white text-xs font-black uppercase tracking-wider px-3.5 py-2 rounded-xl shrink-0 shadow-sm active:scale-95 cursor-pointer"
+                >
+                  Đăng nhập
+                </button>
+              </div>
+            )}
+
             {user?.role === 'admin' && (
               <Link
                 to="/admin/dashboard"
@@ -225,17 +256,19 @@ const Navbar: React.FC = () => {
 
             {user && (
               <>
-                <Link
-                  to="/seller-portal"
-                  onClick={() => setIsMenuOpen(false)}
-                  className="bg-amber-50 text-[#8B1A1A] border border-gold/30 p-3.5 rounded-2xl flex items-center justify-between shadow-xs"
-                >
-                  <div className="flex items-center gap-2.5 font-bold uppercase tracking-wider text-xs">
-                    <span className="material-symbols-outlined text-lg text-amber-700">storefront</span>
-                    <span>{user.role === 'artisan' ? 'Gian hàng của tôi' : 'Kênh Nghệ Nhân'}</span>
-                  </div>
-                  <span className="material-symbols-outlined text-sm">arrow_forward</span>
-                </Link>
+                {user.role === 'artisan' && (
+                  <Link
+                    to="/seller-portal"
+                    onClick={() => setIsMenuOpen(false)}
+                    className="bg-amber-50 text-[#8B1A1A] border border-gold/30 p-3.5 rounded-2xl flex items-center justify-between shadow-xs"
+                  >
+                    <div className="flex items-center gap-2.5 font-bold uppercase tracking-wider text-xs">
+                      <span className="material-symbols-outlined text-lg text-amber-700">storefront</span>
+                      <span>Kênh Nghệ Nhân</span>
+                    </div>
+                    <span className="material-symbols-outlined text-sm">arrow_forward</span>
+                  </Link>
+                )}
 
                 <Link
                   to="/orders"
@@ -250,6 +283,24 @@ const Navbar: React.FC = () => {
                 </Link>
               </>
             )}
+
+            {/* Hỏi Già Làng AI cho Mobile Drawer */}
+            <button
+              type="button"
+              onClick={() => { setIsMenuOpen(false); setIsChatOpen(true); }}
+              className="bg-gradient-to-r from-amber-50 to-orange-50 border border-gold/40 p-3.5 rounded-2xl flex items-center justify-between shadow-xs text-left group active:scale-98 transition-all cursor-pointer"
+            >
+              <div className="flex items-center gap-2.5">
+                <div className="size-8 rounded-full bg-primary text-white flex items-center justify-center shadow-xs">
+                  <MessageSquare size={16} />
+                </div>
+                <div>
+                  <p className="font-black text-xs uppercase tracking-wider text-primary">Hỏi Già Làng AI</p>
+                  <p className="text-[10px] text-text-soft">Trợ lý di sản & tư vấn văn hóa 24/7</p>
+                </div>
+              </div>
+              <span className="material-symbols-outlined text-gold text-sm group-hover:translate-x-1 transition-transform">arrow_forward</span>
+            </button>
             
             {navLinks.map((link) => (
               <Link
@@ -264,19 +315,23 @@ const Navbar: React.FC = () => {
                 <span className="material-symbols-outlined text-gold/50 text-sm">arrow_forward</span>
               </Link>
             ))}
+
+            {user && (
+              <button
+                type="button"
+                onClick={() => { logout(); setIsMenuOpen(false); }}
+                className="text-xs font-black uppercase tracking-wider flex items-center gap-2 text-rose-700 py-3 mt-2 border-t border-gold/15 cursor-pointer"
+              >
+                <LogOut size={16} />
+                <span>Đăng xuất ({user.fullName})</span>
+              </button>
+            )}
           </div>
         )}
       </header>
 
-      {/* MOBILE FLOATING CHAT BUTTON */}
-      {!isChatOpen && (
-        <button 
-          onClick={() => setIsChatOpen(true)}
-          className="lg:hidden fixed bottom-6 right-6 z-[90] size-12 flex items-center justify-center bg-primary text-white rounded-full shadow-2xl border-2 border-gold animate-bounce-slow hover:scale-105 active:scale-95 transition-transform"
-        >
-           <MessageSquare size={24} />
-        </button>
-      )}
+      {/* THANH ĐIỀU HƯỚNG DƯỚI CÙNG CHO MOBILE (BOTTOM NAV BAR) */}
+      <MobileBottomNav onOpenChat={() => setIsChatOpen(true)} isChatOpen={isChatOpen} />
 
       <AIChatWidget isOpen={isChatOpen} onClose={() => setIsChatOpen(false)} />
       
