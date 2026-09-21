@@ -17,11 +17,15 @@ interface Product {
   priceValue: number;
   desc: string;
   artisan: string;
+  artisanId?: string;
+  artisanAvatar?: string;
+  artisanVillage?: string;
   exp: string;
   img: string;
   sold: number;
   category: string;
   likes: number; // Thêm số lượt thích thay cho rating
+  status?: string;
 }
 
 export { marketplaceData };
@@ -89,7 +93,29 @@ const ProductModal = ({ product, onClose, showToastMsg }: { product: Product, on
   const navigate = useNavigate();
   const isOutOfStock = product.stock <= 0;
   
-  const linkedArtisan = useMemo(() => getArtisanByEthnic(product.ethnic) || artisanData[0], [product.ethnic]);
+  const linkedArtisan = useMemo(() => {
+    // 1. Nếu sản phẩm gắn với nghệ nhân cụ thể đã đăng ký
+    if (product.artisan && product.artisan !== 'Nghệ nhân bản địa') {
+      return {
+        id: product.artisanId || 'artisan',
+        name: product.artisan,
+        avatar: product.artisanAvatar || 'https://cazllsidgvysyxbvrftq.supabase.co/storage/v1/object/public/images-sacviet/logo.png',
+        village: product.artisanVillage || `Làng nghề truyền thống đồng bào ${product.ethnic}`,
+        ethnic: product.ethnic
+      };
+    }
+    // 2. Tìm theo dân tộc trong dữ liệu nghệ nhân mẫu
+    const byEthnic = getArtisanByEthnic(product.ethnic);
+    if (byEthnic) return byEthnic;
+    // 3. Fallback theo dân tộc của sản phẩm thay vì gán cứng Vàng Thị Mai
+    return {
+      id: 'native-artisan',
+      name: `Nghệ nhân đồng bào ${product.ethnic || 'Việt Nam'}`,
+      avatar: 'https://cazllsidgvysyxbvrftq.supabase.co/storage/v1/object/public/images-sacviet/logo.png',
+      village: `Làng nghề truyền thống đồng bào ${product.ethnic || 'bản địa'}`,
+      ethnic: product.ethnic || 'Khác'
+    };
+  }, [product]);
 
   useEffect(() => {
     document.body.style.overflow = 'hidden';
@@ -159,7 +185,16 @@ const ProductModal = ({ product, onClose, showToastMsg }: { product: Product, on
              {/* THẺ NGHỆ NHÂN CHẾ TÁC - ĐỘC QUYỀN SẮC VIỆT */}
              {linkedArtisan && (
                <div 
-                 onClick={() => { onClose(); navigate(`/artisan/${linkedArtisan.id}`); }}
+                 onClick={() => { 
+                   onClose(); 
+                   if (product.artisanId && !product.artisanId.startsWith('artisan-unknown')) {
+                     navigate(`/artisan/${product.artisanId}`);
+                   } else if (linkedArtisan.id && linkedArtisan.id !== 'native-artisan') {
+                     navigate(`/artisan/${linkedArtisan.id}`);
+                   } else {
+                     navigate(`/artisans?search=${encodeURIComponent(product.artisan || product.ethnic)}`);
+                   }
+                 }}
                  className="bg-gradient-to-r from-primary/10 via-amber-50 to-gold/15 hover:from-primary/15 hover:to-gold/25 border-2 border-gold/40 p-3.5 rounded-2xl flex items-center justify-between cursor-pointer transition-all group shadow-sm hover:shadow-md"
                >
                  <div className="flex items-center gap-3 min-w-0">
@@ -231,44 +266,76 @@ const Marketplace: React.FC = () => {
     const fetchProducts = async () => {
       setIsLoading(true);
       try {
-        // 1. Tải sản phẩm từ Kênh Nghệ Nhân (sản phẩm đã được Admin thẩm định và duyệt)
+        // 0. Lấy danh sách nghệ nhân để ánh xạ thông tin (avatar, làng nghề, dân tộc)
+        const allArtisansList = await artisanPortalService.getAllArtisans();
+        const artisanMap = new Map(allArtisansList.map(a => [a.id, a]));
+
+        // 1. Tải sản phẩm từ Kênh Nghệ Nhân (CHỈ LẤY SẢN PHẨM ĐÃ ĐƯỢC ADMIN DUYỆT - status === 'approved')
         const artisanProds = await artisanPortalService.getApprovedProductsForMarketplace();
-        const mappedArtisanProds: Product[] = (artisanProds || []).map(ap => ({
-          id: ap.id,
-          name: ap.name,
-          ethnic: ap.ethnic || 'Khác',
-          stock: ap.stock ?? 10,
-          price: `${ap.price.toLocaleString('vi-VN')} đ`,
-          priceValue: ap.price,
-          desc: ap.heritageStory || 'Sản phẩm thủ công truyền thống do nghệ nhân bản địa chế tác.',
-          artisan: ap.artisanName || 'Nghệ nhân bản địa',
-          exp: ap.craftTimeDays ? `Chế tác ${ap.craftTimeDays} ngày` : 'Nghệ nhân di sản',
-          img: ap.image || 'https://placehold.co/600x600?text=Sac+Viet',
-          sold: ap.sold || 0,
-          likes: Math.floor(Math.random() * 200) + 60,
-          category: ap.category || 'Thủ công'
-        }));
+        const mappedArtisanProds: Product[] = (artisanProds || []).map(ap => {
+          const matchedArtisan = artisanMap.get(ap.artisanId);
+          return {
+            id: ap.id,
+            name: ap.name,
+            ethnic: ap.ethnic || (matchedArtisan ? matchedArtisan.ethnic : 'Khác'),
+            stock: ap.stock ?? 10,
+            price: `${ap.price.toLocaleString('vi-VN')} đ`,
+            priceValue: ap.price,
+            desc: ap.heritageStory || 'Sản phẩm thủ công truyền thống do nghệ nhân bản địa chế tác.',
+            artisan: ap.artisanName || (matchedArtisan ? matchedArtisan.name : 'Nghệ nhân bản địa'),
+            artisanId: ap.artisanId,
+            artisanVillage: matchedArtisan?.village || `Làng nghề truyền thống đồng bào ${ap.ethnic}`,
+            artisanAvatar: matchedArtisan?.avatar || matchedArtisan?.proofUrl || 'https://cazllsidgvysyxbvrftq.supabase.co/storage/v1/object/public/images-sacviet/logo.png',
+            exp: ap.craftTimeDays ? `Chế tác ${ap.craftTimeDays} ngày` : 'Nghệ nhân di sản',
+            img: ap.image || 'https://placehold.co/600x600?text=Sac+Viet',
+            sold: ap.sold || 0,
+            likes: Math.floor(Math.random() * 200) + 60,
+            category: ap.category || 'Thủ công',
+            status: ap.status
+          };
+        });
 
         // 2. Tải sản phẩm từ cơ sở dữ liệu Supabase
         let mappedSupabase: Product[] = [];
         try {
           const { data, error } = await supabase.from('san_pham').select('*, dan_toc(ten_dan_toc)');
           if (!error && data) {
-            mappedSupabase = data.map(p => ({
-              id: p.id,
-              name: p.ten_san_pham,
-              ethnic: p.dan_toc?.ten_dan_toc || 'Khác',
-              stock: p.so_luong || 0,
-              price: p.gia,
-              priceValue: parseInt(p.gia?.replace(/\D/g, '') || '0'),
-              desc: p.mo_ta,
-              artisan: "Nghệ nhân bản địa",
-              exp: "Lâu năm",
-              img: p.anh_san_pham?.replace('/public/images/', '/public/images-sacviet/'),
-              sold: Math.floor(Math.random() * 50) + 10,
-              likes: Math.floor(Math.random() * 300) + 50,
-              category: 'Thủ công'
-            }));
+            // LỌC BỎ HOÀN TOÀN CÁC SẢN PHẨM CHỜ DUYỆT (pending) HOẶC BỊ TỪ CHỐI (rejected)
+            const approvedOrCatalogData = data.filter(p => {
+              if (p.mo_ta) {
+                if (p.mo_ta.includes('Trạng thái: pending')) return false;
+                if (p.mo_ta.includes('Trạng thái: rejected')) return false;
+              }
+              return true;
+            });
+
+            mappedSupabase = approvedOrCatalogData.map(p => {
+              const match = p.mo_ta ? p.mo_ta.match(/\[Nghệ nhân:\s*([^|]+)\s*\|\s*ID:\s*([^|]+)\s*\|\s*Trạng thái:\s*([^|]+)(?:\s*\|\s*Chế tác:\s*(\d+)\s*ngày)?(?:\s*\|\s*Danh mục:\s*([^\]]+))?\]/) : null;
+              const cleanStory = p.mo_ta ? p.mo_ta.replace(/\[Nghệ nhân:[^\]]+\]/, '').trim() : '';
+              const artisanName = match ? match[1].trim() : "Nghệ nhân bản địa";
+              const artisanId = match ? match[2].trim() : undefined;
+              const matchedArtisan = artisanId ? artisanMap.get(artisanId) : undefined;
+
+              return {
+                id: p.id,
+                name: p.ten_san_pham,
+                ethnic: p.dan_toc?.ten_dan_toc || 'Khác',
+                stock: p.so_luong || 0,
+                price: p.gia,
+                priceValue: parseInt(String(p.gia || '0').replace(/\D/g, '') || '0'),
+                desc: cleanStory || p.mo_ta || 'Sản phẩm thủ công truyền thống do nghệ nhân bản địa chế tác.',
+                artisan: artisanName,
+                artisanId: artisanId,
+                artisanVillage: matchedArtisan?.village || `Làng nghề truyền thống đồng bào ${p.dan_toc?.ten_dan_toc || 'Việt Nam'}`,
+                artisanAvatar: matchedArtisan?.avatar || matchedArtisan?.proofUrl || 'https://cazllsidgvysyxbvrftq.supabase.co/storage/v1/object/public/images-sacviet/logo.png',
+                exp: match && match[4] ? `Chế tác ${match[4]} ngày` : "Lâu năm",
+                img: p.anh_san_pham?.replace('/public/images/', '/public/images-sacviet/'),
+                sold: Math.floor(Math.random() * 50) + 10,
+                likes: Math.floor(Math.random() * 300) + 50,
+                category: match && match[5] ? match[5].trim() : 'Thủ công',
+                status: match ? match[3].trim() : 'approved'
+              };
+            });
           }
         } catch (dbErr) {
           console.warn("Lỗi tải Supabase (tiếp tục với sản phẩm nghệ nhân):", dbErr);

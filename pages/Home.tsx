@@ -184,10 +184,16 @@ const Home: React.FC = () => {
         const { data: productData, error: productError } = await supabase
           .from('san_pham')
           .select('*, dan_toc(ten_dan_toc)')
-          .limit(5);
+          .limit(15);
         if (productError) throw productError;
         if (productData) {
-          setTrendingProducts(productData);
+          const approved = productData.filter(p => {
+            if (p.mo_ta && (p.mo_ta.includes('Trạng thái: pending') || p.mo_ta.includes('Trạng thái: rejected'))) {
+              return false;
+            }
+            return true;
+          }).slice(0, 5);
+          setTrendingProducts(approved);
         }
       } catch (error) {
         console.error("Lỗi khi tải dữ liệu từ Supabase:", error);

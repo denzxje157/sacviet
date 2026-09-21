@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { getArtisanById, artisanData, Artisan, Motif, ArtisanProduct } from '../data/artisanData';
 import { useCart } from '../context/CartContext';
+import { artisanPortalService } from '../services/artisanPortalService';
 
 const ArtisanDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -18,21 +19,66 @@ const ArtisanDetail: React.FC = () => {
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
-    if (id) {
-      const found = getArtisanById(id);
-      if (found) {
-        setArtisan(found);
-        if (found.motifs && found.motifs.length > 0) {
-          setSelectedMotif(found.motifs[0]);
+    const loadArtisan = async () => {
+      if (id) {
+        const found = getArtisanById(id);
+        if (found) {
+          setArtisan(found);
+          if (found.motifs && found.motifs.length > 0) {
+            setSelectedMotif(found.motifs[0]);
+          }
+          return;
         }
+
+        // Kiểm tra nghệ nhân đăng ký trực tuyến từ Kênh Nghệ Nhân
+        try {
+          const allDynamic = await artisanPortalService.getAllArtisans();
+          const foundDynamic = allDynamic.find(a => a.id === id || a.name.toLowerCase() === id.toLowerCase());
+          if (foundDynamic) {
+            const dynamicProds = await artisanPortalService.getProductsByArtisanId(foundDynamic.id);
+            const approvedDynamicProds = dynamicProds.filter(p => p.status === 'approved');
+
+            const mapped: Artisan = {
+              id: foundDynamic.id,
+              name: foundDynamic.name,
+              ethnic: foundDynamic.ethnic,
+              village: foundDynamic.village,
+              bio: foundDynamic.bio,
+              experience: 'Nghệ nhân di sản',
+              role: foundDynamic.isRepresentative ? `Đại diện: ${foundDynamic.representative || 'Gia đình'}` : 'Nghệ nhân làng nghề',
+              avatar: foundDynamic.avatar || foundDynamic.proofUrl || 'https://cazllsidgvysyxbvrftq.supabase.co/storage/v1/object/public/images-sacviet/logo.png',
+              coverImg: foundDynamic.proofUrl || 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=1200',
+              quote: `Tôn vinh và trao truyền bản sắc văn hóa của đồng bào ${foundDynamic.ethnic}.`,
+              specialties: ['Thủ công truyền thống', 'Di sản bản địa'],
+              gallery: foundDynamic.proofUrl ? [foundDynamic.proofUrl] : [],
+              motifs: [],
+              products: approvedDynamicProds.map(p => ({
+                id: p.id,
+                name: p.name,
+                price: `${p.price.toLocaleString('vi-VN')} đ`,
+                priceValue: p.price,
+                img: p.image,
+                desc: p.heritageStory,
+                tag: 'Thủ công',
+                dimensions: 'Tiêu chuẩn',
+                material: 'Tự nhiên'
+              }))
+            };
+            setArtisan(mapped);
+            return;
+          }
+        } catch (e) {
+          console.warn('Lỗi tải nghệ nhân trực tuyến:', e);
+        }
+
+        setArtisan(artisanData[0]);
+        setSelectedMotif(artisanData[0].motifs[0]);
       } else {
         setArtisan(artisanData[0]);
         setSelectedMotif(artisanData[0].motifs[0]);
       }
-    } else {
-      setArtisan(artisanData[0]);
-      setSelectedMotif(artisanData[0].motifs[0]);
-    }
+    };
+    loadArtisan();
   }, [id]);
 
   const showToast = (msg: string) => {
