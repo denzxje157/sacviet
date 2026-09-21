@@ -94,9 +94,31 @@ const ArtisanPortal: React.FC = () => {
     setTimeout(() => setToastMessage(null), 3000);
   };
 
-  const { user, toggleAuthModal } = useAuth();
+  const { user, login: authLogin, register: authRegister, logout: authLogout, toggleAuthModal, updateUser } = useAuth();
   const isAdmin = user?.role === 'admin';
   const [allPendingProductsCount, setAllPendingProductsCount] = useState(0);
+
+  // Form đăng nhập / đăng ký tài khoản User khi chưa đăng nhập
+  const [loginEmail, setLoginEmail] = useState('');
+  const [loginPassword, setLoginPassword] = useState('');
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
+  const [loginError, setLoginError] = useState('');
+  const [regEmail, setRegEmail] = useState('');
+  const [regPassword, setRegPassword] = useState('');
+  const [regConfirmPassword, setRegConfirmPassword] = useState('');
+
+  // Modal chỉnh sửa hồ sơ Nghệ nhân
+  const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
+  const [editName, setEditName] = useState('');
+  const [editPhone, setEditPhone] = useState('');
+  const [editVillage, setEditVillage] = useState('');
+  const [editEthnic, setEditEthnic] = useState('');
+  const [editBio, setEditBio] = useState('');
+  const [editAvatar, setEditAvatar] = useState('');
+  const [editBankName, setEditBankName] = useState('');
+  const [editBankAccountNumber, setEditBankAccountNumber] = useState('');
+  const [editBankAccountHolder, setEditBankAccountHolder] = useState('');
+  const [isSavingProfile, setIsSavingProfile] = useState(false);
 
   // Chế độ kiểm duyệt dành cho Quản Trị Viên (Admin)
   const [adminViewMode, setAdminViewMode] = useState<'moderation' | 'artisan_portal'>('moderation');
@@ -227,7 +249,7 @@ const ArtisanPortal: React.FC = () => {
 
   useEffect(() => {
     loadData();
-  }, []);
+  }, [user]);
 
   const loadData = async () => {
     setIsLoading(true);
@@ -242,6 +264,7 @@ const ArtisanPortal: React.FC = () => {
       const activeArtisanId = localStorage.getItem('sacviet_active_artisan_id');
       const forceParam = searchParams.get('force') === 'true';
 
+      // 1. Ưu tiên xem theo paramId (Admin soi gian hàng cụ thể)
       if (paramId) {
         const foundParam = artisans.find(a => a.id === paramId);
         if (foundParam) {
@@ -254,7 +277,32 @@ const ArtisanPortal: React.FC = () => {
         }
       }
 
-      // Check saved session in localStorage FIRST (prioritize active session over stale register param on F5)
+      // 2. Nếu User đã đăng nhập: Tự động nhận diện hồ sơ Nghệ nhân liên kết
+      if (user) {
+        const userArtisan = await artisanPortalService.getArtisanByUser(user);
+        if (userArtisan && !forceParam) {
+          localStorage.setItem('sacviet_active_artisan_id', userArtisan.id);
+          setCurrentArtisan(userArtisan);
+          setIsRegisterMode(false);
+          await refreshArtisanData(userArtisan.id);
+          if (user.role !== 'artisan' && user.role !== 'admin') {
+            updateUser({ role: 'artisan', artisanId: userArtisan.id });
+          }
+          setIsLoading(false);
+          return;
+        }
+
+        // User đã đăng nhập nhưng chưa mở gian hàng -> Chuyển sang form Đăng ký với tên điền sẵn
+        setCurrentArtisan(null);
+        setIsRegisterMode(true);
+        setAuthTab('register');
+        setRegName(user.fullName || '');
+        setRegPhone(user.phone || '');
+        setIsLoading(false);
+        return;
+      }
+
+      // 3. Nếu chưa đăng nhập: Kiểm tra phiên lưu cũ
       if (activeArtisanId && !forceParam) {
         const found = artisans.find(a => a.id === activeArtisanId);
         if (found) {
@@ -275,7 +323,7 @@ const ArtisanPortal: React.FC = () => {
         return;
       }
 
-      // Khách truy cập hoặc nghệ nhân chưa lưu phiên: hiển thị tab đăng nhập
+      // Khách chưa đăng nhập: hiển thị form đăng nhập tài khoản Sắc Việt
       setIsRegisterMode(true);
       setAuthTab('login');
       setCurrentArtisan(null);
@@ -318,13 +366,142 @@ const ArtisanPortal: React.FC = () => {
     }
   };
 
-  const handleLogout = () => {
+  const handleUserLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoginError('');
+    if (!loginEmail.trim() || !loginPassword) {
+      setLoginError('Vui lòng nhập đầy đủ Email và Mật khẩu!');
+      return;
+    }
+    setIsLoggingIn(true);
+    try {
+      await authLogin(loginEmail.trim(), loginPassword);
+      showToast('🎉 Đăng nhập tài khoản Sắc Việt thành công!');
+    } catch (err: any) {
+      console.error(err);
+      setLoginError(err.message || 'Đăng nhập không thành công. Vui lòng kiểm tra lại!');
+    } finally {
+      setIsLoggingIn(false);
+    }
+  };
+
+  const handleUserRegister = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoginError('');
+    if (!regName.trim() || !regEmail.trim() || !regPassword) {
+      setLoginError('Vui lòng nhập đầy đủ Họ tên, Email và Mật khẩu!');
+      return;
+    }
+    if (regPassword !== regConfirmPassword) {
+      setLoginError('Mật khẩu xác nhận không khớp!');
+      return;
+    }
+    setIsLoggingIn(true);
+    try {
+      await authRegister(regName.trim(), regEmail.trim(), regPassword);
+      showToast('🎉 Tạo tài khoản thành công! Đang chuyển đến bước mở gian hàng...');
+    } catch (err: any) {
+      console.error(err);
+      setLoginError(err.message || 'Đăng ký tài khoản thất bại.');
+    } finally {
+      setIsLoggingIn(false);
+    }
+  };
+
+  const handleDemoArtisanLogin = async (artisanName: string) => {
+    setIsLoggingIn(true);
+    try {
+      const all = await artisanPortalService.getAllArtisans();
+      const match = all.find(a => a.name.toLowerCase().includes(artisanName.toLowerCase()));
+      if (match) {
+        const mockUser: any = {
+          id: `user-${match.id}`,
+          fullName: match.name,
+          email: `${match.id.replace('artisan-', '')}@sacviet.vn`,
+          phone: match.phone,
+          role: 'artisan',
+          village: match.village,
+          ethnic: match.ethnic,
+          bio: match.bio,
+          artisanId: match.id
+        };
+        localStorage.setItem('mock_token', JSON.stringify(mockUser));
+        localStorage.setItem('sacviet_active_artisan_id', match.id);
+        setCurrentArtisan(match);
+        setIsRegisterMode(false);
+        await refreshArtisanData(match.id);
+        window.location.reload();
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setIsLoggingIn(false);
+    }
+  };
+
+  const handleOpenEditProfile = () => {
+    if (!currentArtisan) return;
+    setEditName(currentArtisan.name || '');
+    setEditPhone(currentArtisan.phone || '');
+    setEditVillage(currentArtisan.village || '');
+    setEditEthnic(currentArtisan.ethnic || '');
+    setEditBio(currentArtisan.bio || '');
+    setEditAvatar(currentArtisan.proofUrl || '');
+    setEditBankName(currentArtisan.bankAccount?.bankName || '');
+    setEditBankAccountNumber(currentArtisan.bankAccount?.accountNumber || '');
+    setEditBankAccountHolder(currentArtisan.bankAccount?.accountHolder || '');
+    setIsEditProfileOpen(true);
+  };
+
+  const handleSaveProfile = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!currentArtisan) return;
+    setIsSavingProfile(true);
+    try {
+      const updated = await artisanPortalService.updateArtisanProfile(currentArtisan.id, {
+        name: editName,
+        phone: editPhone,
+        village: editVillage,
+        ethnic: editEthnic,
+        bio: editBio,
+        proofUrl: editAvatar || currentArtisan.proofUrl,
+        bankAccount: {
+          bankName: editBankName,
+          accountNumber: editBankAccountNumber,
+          accountHolder: editBankAccountHolder
+        }
+      });
+      setCurrentArtisan(updated);
+      const all = await artisanPortalService.getAllArtisans();
+      setAllArtisans(all);
+
+      if (user) {
+        await updateUser({
+          fullName: editName,
+          phone: editPhone,
+          village: editVillage,
+          ethnic: editEthnic,
+          bio: editBio
+        });
+      }
+      setIsEditProfileOpen(false);
+      showToast('✓ Đã cập nhật thông tin hồ sơ nghệ nhân thành công!');
+    } catch (err) {
+      console.error(err);
+      showToast('Có lỗi xảy ra khi lưu hồ sơ.');
+    } finally {
+      setIsSavingProfile(false);
+    }
+  };
+
+  const handleLogout = async () => {
     localStorage.removeItem('sacviet_active_artisan_id');
     setCurrentArtisan(null);
     setIsRegisterMode(true);
     setAuthTab('login');
     setSearchParams({});
-    showToast('Đã đăng xuất khỏi phiên làm việc.');
+    await authLogout();
+    showToast('Đã đăng xuất khỏi tài khoản.');
   };
 
   // ============================
@@ -416,6 +593,8 @@ const ArtisanPortal: React.FC = () => {
 
     try {
       const newArtisan = await artisanPortalService.registerArtisan({
+        userId: user?.id,
+        email: user?.email,
         name: regName,
         representative: regIsRep ? (regRepName || 'Con cháu đại diện') : '',
         isRepresentative: regIsRep,
@@ -435,6 +614,17 @@ const ArtisanPortal: React.FC = () => {
       setIsRegisterMode(false);
       setSearchParams({});
       await refreshArtisanData(newArtisan.id);
+
+      if (user) {
+        await updateUser({
+          role: 'artisan',
+          artisanId: newArtisan.id,
+          phone: regPhone,
+          village: regVillage,
+          ethnic: regEthnic
+        });
+      }
+
       showToast('🎉 Gửi hồ sơ thành công! Đang chờ Ban Quản Trị thẩm định.');
     } catch (error) {
       console.error(error);
@@ -1054,25 +1244,58 @@ const ArtisanPortal: React.FC = () => {
 
               {!isRegisterMode && currentArtisan ? (
                 <div className="flex flex-wrap items-center gap-2 shrink-0">
+                  {/* Nút Khám Phá & Mua Sắm Chợ Phiên (Quyền Khách Hàng) */}
+                  <Link
+                    to="/marketplace"
+                    className="px-3.5 py-2 bg-stone-100 hover:bg-stone-200 text-stone-800 font-bold text-xs rounded-xl border border-stone-200 transition-all flex items-center gap-1.5 shadow-2xs"
+                    title="Khám phá và mua sắm sản phẩm thủ công từ các nghệ nhân khác"
+                  >
+                    <span className="material-symbols-outlined text-base text-primary">storefront</span>
+                    <span>Chợ Phiên</span>
+                  </Link>
+
+                  {/* Nút Đơn Hàng Đã Mua (Quyền Khách Hàng) */}
+                  <Link
+                    to="/orders"
+                    className="px-3.5 py-2 bg-stone-100 hover:bg-stone-200 text-stone-800 font-bold text-xs rounded-xl border border-stone-200 transition-all flex items-center gap-1.5 shadow-2xs"
+                    title="Xem danh sách đơn hàng bạn đã mua trên Sắc Việt"
+                  >
+                    <span className="material-symbols-outlined text-base text-amber-700">receipt_long</span>
+                    <span>Đơn Mua Của Tôi</span>
+                  </Link>
+
+                  {/* Nút Chỉnh Sửa Hồ Sơ Nghệ Nhân & Số Tài Khoản Ngân Hàng */}
+                  <button
+                    type="button"
+                    onClick={handleOpenEditProfile}
+                    className="px-3.5 py-2 bg-amber-50 hover:bg-amber-100 text-amber-900 font-bold text-xs rounded-xl border border-amber-300 transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs"
+                    title="Chỉnh sửa thông tin cá nhân, tiểu sử, số tài khoản ngân hàng nhận tiền"
+                  >
+                    <span className="material-symbols-outlined text-base text-amber-700">manage_accounts</span>
+                    <span>Hồ Sơ & Ngân Hàng</span>
+                  </button>
+
+                  {/* Nút Đăng Sản Phẩm (Dành cho nghệ nhân đã có Tích Vàng) */}
                   {currentArtisan.status === 'approved' && (
                     <button
                       type="button"
                       onClick={() => setIsAddModalOpen(true)}
-                      className="px-4 py-2.5 bg-primary hover:brightness-110 text-white font-bold text-xs uppercase tracking-wider rounded-xl shadow-sm flex items-center justify-center gap-1.5 transition-all active:scale-95 cursor-pointer"
+                      className="px-4 py-2 bg-primary hover:brightness-110 text-white font-bold text-xs uppercase tracking-wider rounded-xl shadow-sm flex items-center justify-center gap-1.5 transition-all active:scale-95 cursor-pointer"
                     >
                       <span className="material-symbols-outlined text-base">add_circle</span>
                       <span>Đăng Sản Phẩm</span>
                     </button>
                   )}
 
+                  {/* Nút Đăng Xuất */}
                   <button
                     type="button"
                     onClick={handleLogout}
-                    className="px-3.5 py-2.5 bg-stone-100 hover:bg-stone-200 text-stone-700 font-bold text-xs uppercase tracking-wider rounded-xl border border-stone-200 transition-all flex items-center gap-1.5 cursor-pointer"
-                    title="Đổi tài khoản khác"
+                    className="px-3 py-2 bg-stone-100 hover:bg-rose-50 hover:text-rose-700 hover:border-rose-200 text-stone-600 font-bold text-xs rounded-xl border border-stone-200 transition-all flex items-center gap-1 cursor-pointer"
+                    title="Đăng xuất khỏi tài khoản"
                   >
-                    <span className="material-symbols-outlined text-sm">logout</span>
-                    <span>Đổi Tài Khoản</span>
+                    <span className="material-symbols-outlined text-base">logout</span>
+                    <span>Đăng Xuất</span>
                   </button>
                 </div>
               ) : null}
@@ -1082,42 +1305,74 @@ const ArtisanPortal: React.FC = () => {
         <div className="py-4 sm:py-6">
           {isRegisterMode ? (
             <div className="space-y-6">
-              {/* THANH CHUYỂN ĐỔI TAB: ĐĂNG KÝ HOẶC ĐĂNG NHẬP */}
-              <div className="flex items-center justify-center">
-                <div className="bg-white p-1 rounded-xl border border-gold/30 shadow-sm flex items-center gap-1 w-full max-w-xs">
+              {/* NẾU ĐÃ CÓ TÀI KHOẢN USER ĐĂNG NHẬP: THÔNG BÁO TÀI KHOẢN ĐANG LIÊN KẾT */}
+              {user ? (
+                <div className="max-w-2xl mx-auto bg-amber-50/80 border border-amber-200/80 rounded-2xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-xs">
+                  <div className="flex items-center gap-3">
+                    <div className="size-10 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-sm shrink-0">
+                      {user.avatar ? (
+                        <img src={user.avatar} alt={user.fullName} className="w-full h-full object-cover rounded-full" />
+                      ) : (
+                        user.fullName ? user.fullName.charAt(0).toUpperCase() : 'U'
+                      )}
+                    </div>
+                    <div>
+                      <div className="text-xs font-bold text-stone-800">
+                        Đang đăng ký bằng tài khoản: <span className="text-primary font-black">{user.fullName || user.email}</span>
+                      </div>
+                      <div className="text-[11px] text-stone-500">
+                        Email: {user.email} • Vai trò: <span className="uppercase font-bold text-amber-800">{user.role || 'user'}</span>
+                      </div>
+                    </div>
+                  </div>
                   <button
                     type="button"
-                    onClick={() => setAuthTab('login')}
-                    className={`flex-1 py-2 px-2.5 rounded-lg font-bold text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 active:scale-95 ${
-                      authTab === 'login'
-                        ? 'bg-primary text-white shadow-xs'
-                        : 'text-text-soft hover:text-text-main hover:bg-gold/10'
-                    }`}
+                    onClick={handleLogout}
+                    className="text-xs font-bold text-stone-600 hover:text-rose-600 hover:underline flex items-center gap-1 cursor-pointer self-end sm:self-center"
                   >
-                    <span className="material-symbols-outlined text-sm">login</span>
-                    <span>Đăng Nhập SĐT</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setAuthTab('register')}
-                    className={`flex-1 py-2 px-2.5 rounded-lg font-bold text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 active:scale-95 ${
-                      authTab === 'register'
-                        ? 'bg-primary text-white shadow-xs'
-                        : 'text-text-soft hover:text-text-main hover:bg-gold/10'
-                    }`}
-                  >
-                    <span className="material-symbols-outlined text-sm">how_to_reg</span>
-                    <span>Đăng Ký Mới</span>
+                    <span className="material-symbols-outlined text-sm">switch_account</span>
+                    <span>Đổi tài khoản</span>
                   </button>
                 </div>
-              </div>
+              ) : (
+                /* THANH CHUYỂN ĐỔI TAB: ĐĂNG NHẬP HOẶC ĐĂNG KÝ TÀI KHOẢN SẮC VIỆT */
+                <div className="flex items-center justify-center">
+                  <div className="bg-white p-1 rounded-xl border border-gold/30 shadow-sm flex items-center gap-1 w-full max-w-sm">
+                    <button
+                      type="button"
+                      onClick={() => setAuthTab('login')}
+                      className={`flex-1 py-2 px-2.5 rounded-lg font-bold text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 active:scale-95 cursor-pointer ${
+                        authTab === 'login'
+                          ? 'bg-primary text-white shadow-xs'
+                          : 'text-text-soft hover:text-text-main hover:bg-gold/10'
+                      }`}
+                    >
+                      <span className="material-symbols-outlined text-sm">login</span>
+                      <span>Đăng Nhập</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setAuthTab('register')}
+                      className={`flex-1 py-2 px-2.5 rounded-lg font-bold text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 active:scale-95 cursor-pointer ${
+                        authTab === 'register'
+                          ? 'bg-primary text-white shadow-xs'
+                          : 'text-text-soft hover:text-text-main hover:bg-gold/10'
+                      }`}
+                    >
+                      <span className="material-symbols-outlined text-sm">person_add</span>
+                      <span>Tạo Tài Khoản Mới</span>
+                    </button>
+                  </div>
+                </div>
+              )}
 
-              {authTab === 'login' ? (
+              {/* NẾU CHƯA CÓ USER: HIỂN THỊ FORM ĐĂNG NHẬP HOẶC ĐĂNG KÝ USER */}
+              {!user && authTab === 'login' ? (
                 /* ====================================================
-                    MÀN HÌNH ĐĂNG NHẬP GIAN HÀNG BẰNG SĐT (TỐI ƯU GỌN GÀNG)
+                    MÀN HÌNH ĐĂNG NHẬP TÀI KHOẢN SẮC VIỆT (TÍCH HỢP NGHỆ NHÂN)
                    ==================================================== */
-                <div className="max-w-md mx-auto bg-white rounded-2xl shadow-lg border border-gold/30 p-5 sm:p-6 animate-fade-in">
-                  <div className="text-center mb-5">
+                <div className="max-w-md mx-auto bg-white rounded-2xl shadow-lg border border-gold/30 p-5 sm:p-7 animate-fade-in space-y-4">
+                  <div className="text-center">
                     <span className="size-12 bg-primary/10 text-primary rounded-xl flex items-center justify-center mx-auto mb-2.5 border border-primary/20 shadow-inner">
                       <span className="material-symbols-outlined text-2xl">storefront</span>
                     </span>
@@ -1125,52 +1380,251 @@ const ArtisanPortal: React.FC = () => {
                       Đăng Nhập Kênh Nghệ Nhân
                     </h2>
                     <p className="text-text-soft text-xs mt-1 font-medium">
-                      Nhập số điện thoại đã đăng ký để vào quản lý gian hàng
+                      Đăng nhập tài khoản Sắc Việt để đồng bộ quản lý gian hàng và mua sắm di sản
                     </p>
                   </div>
 
-                  {/* Ô NHẬP SỐ ĐIỆN THOẠI */}
-                  <div className="space-y-3">
+                  {loginError && (
+                    <div className="p-3 bg-rose-50 border border-rose-200 text-rose-700 text-xs rounded-xl flex items-center gap-2">
+                      <span className="material-symbols-outlined text-sm">error</span>
+                      <span>{loginError}</span>
+                    </div>
+                  )}
+
+                  <form onSubmit={handleUserLogin} className="space-y-3">
                     <div>
-                      <label className="block text-[11px] font-bold text-text-main uppercase tracking-wider mb-1.5">
-                        Số điện thoại gian hàng
+                      <label className="block text-[11px] font-bold text-text-main uppercase tracking-wider mb-1">
+                        Email tài khoản
                       </label>
-                      <div className="flex items-center h-10 bg-[#FAF7F0] border border-stone-300 focus-within:border-primary focus-within:bg-white focus-within:ring-2 focus-within:ring-primary/15 rounded-xl px-3 transition-all shadow-inner">
-                        <span className="material-symbols-outlined text-primary text-lg shrink-0 select-none flex items-center justify-center leading-none">
-                          call
-                        </span>
-                        <input
-                          type="tel"
-                          value={searchPhone}
-                          onChange={(e) => setSearchPhone(e.target.value)}
-                          onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleLookupByPhone(); } }}
-                          placeholder="Nhập SĐT (VD: 0988 888 888)..."
-                          style={{ outline: 'none', boxShadow: 'none', WebkitTapHighlightColor: 'transparent' }}
-                          className="w-full h-full bg-transparent border-0 outline-none ring-0 focus:outline-none focus:ring-0 focus:border-0 focus-visible:outline-none text-xs sm:text-sm font-bold text-text-main placeholder:font-normal placeholder:text-stone-400 ml-2.5 py-0"
-                        />
-                      </div>
+                      <input
+                        type="email"
+                        required
+                        value={loginEmail}
+                        onChange={e => setLoginEmail(e.target.value)}
+                        placeholder="VD: artisan@sacviet.vn hoặc email của bạn"
+                        className="w-full h-10 px-3 bg-[#FAF7F0] border border-stone-300 focus:border-primary focus:bg-white rounded-xl text-xs sm:text-sm font-medium text-text-main outline-none"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-[11px] font-bold text-text-main uppercase tracking-wider mb-1">
+                        Mật khẩu
+                      </label>
+                      <input
+                        type="password"
+                        required
+                        value={loginPassword}
+                        onChange={e => setLoginPassword(e.target.value)}
+                        placeholder="Nhập mật khẩu..."
+                        className="w-full h-10 px-3 bg-[#FAF7F0] border border-stone-300 focus:border-primary focus:bg-white rounded-xl text-xs sm:text-sm font-medium text-text-main outline-none"
+                      />
                     </div>
 
                     <button
-                      type="button"
-                      onClick={handleLookupByPhone}
-                      className="h-10 w-full bg-primary hover:bg-primary/90 text-white font-bold text-xs uppercase tracking-wider rounded-xl shadow-md active:scale-95 transition-all flex items-center justify-center gap-1.5"
+                      type="submit"
+                      disabled={isLoggingIn}
+                      className="h-10 w-full bg-primary hover:bg-primary/90 text-white font-bold text-xs uppercase tracking-wider rounded-xl shadow-md active:scale-95 transition-all flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
                     >
-                      <span className="material-symbols-outlined text-base">login</span>
-                      <span>Vào Kênh Quản Lý</span>
+                      {isLoggingIn ? (
+                        <>
+                          <span className="material-symbols-outlined text-base animate-spin">progress_activity</span>
+                          <span>Đang Đăng Nhập...</span>
+                        </>
+                      ) : (
+                        <>
+                          <span className="material-symbols-outlined text-base">login</span>
+                          <span>Đăng Nhập Tài Khoản</span>
+                        </>
+                      )}
                     </button>
+                  </form>
+
+                  {/* ⚡ PHẦN ĐĂNG NHẬP NHANH BẰNG NGHỆ NHÂN MẪU (CHO PHÉP TEST 1 CHẠM) */}
+                  <div className="pt-3 border-t border-stone-200">
+                    <div className="text-[11px] font-bold text-stone-500 uppercase tracking-wider text-center mb-2">
+                      ⚡ Trải nghiệm nhanh bằng tài khoản mẫu:
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                      <button
+                        type="button"
+                        onClick={() => handleDemoArtisanLogin("H'Yam Bkrông")}
+                        className="p-2 bg-stone-50 hover:bg-amber-50 border border-stone-200 hover:border-amber-300 rounded-xl text-left transition-all cursor-pointer flex items-center gap-2"
+                      >
+                        <span className="text-lg">👩‍🌾</span>
+                        <div className="min-w-0">
+                          <div className="text-xs font-bold text-stone-800 truncate">H'Yam Bkrông</div>
+                          <div className="text-[10px] text-stone-500">Dệt thổ cẩm Ê Đê</div>
+                        </div>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => handleDemoArtisanLogin("Đàng Thị Phan")}
+                        className="p-2 bg-stone-50 hover:bg-amber-50 border border-stone-200 hover:border-amber-300 rounded-xl text-left transition-all cursor-pointer flex items-center gap-2"
+                      >
+                        <span className="text-lg">🏺</span>
+                        <div className="min-w-0">
+                          <div className="text-xs font-bold text-stone-800 truncate">Đàng Thị Phan</div>
+                          <div className="text-[10px] text-stone-500">Gốm Bàu Trúc Chăm</div>
+                        </div>
+                      </button>
+                    </div>
                   </div>
 
-                  {/* Chuyển qua đăng ký */}
-                  <div className="text-center mt-5 pt-4 border-t border-gold/15">
+                  {/* TRA CỨU NHANH BẰNG SỐ ĐIỆN THOẠI (DỰ PHÒNG CHO NGHỆ NHÂN CŨ) */}
+                  <div className="pt-3 border-t border-stone-200">
+                    <details className="group">
+                      <summary className="text-[11px] font-bold text-primary hover:underline cursor-pointer flex items-center justify-center gap-1 select-none">
+                        <span className="material-symbols-outlined text-sm">phone_iphone</span>
+                        <span>Hoặc tra cứu bằng Số điện thoại đã mở gian hàng</span>
+                      </summary>
+                      <div className="mt-3 space-y-2">
+                        <div className="flex items-center h-10 bg-[#FAF7F0] border border-stone-300 focus-within:border-primary focus-within:bg-white rounded-xl px-3">
+                          <span className="material-symbols-outlined text-primary text-base shrink-0">call</span>
+                          <input
+                            type="tel"
+                            value={searchPhone}
+                            onChange={(e) => setSearchPhone(e.target.value)}
+                            onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleLookupByPhone(); } }}
+                            placeholder="Nhập SĐT gian hàng cũ..."
+                            className="w-full bg-transparent border-0 outline-none text-xs font-bold text-text-main placeholder:font-normal ml-2 py-0"
+                          />
+                        </div>
+                        <button
+                          type="button"
+                          onClick={handleLookupByPhone}
+                          className="w-full h-8 bg-stone-800 hover:bg-black text-white text-xs font-bold rounded-lg transition-all flex items-center justify-center gap-1 cursor-pointer"
+                        >
+                          <span>Tra Cứu Gian Hàng</span>
+                        </button>
+                      </div>
+                    </details>
+                  </div>
+
+                  {/* Chuyển qua tạo tài khoản mới */}
+                  <div className="text-center pt-2">
                     <p className="text-xs text-text-soft">
-                      Chưa có tài khoản gian hàng?{' '}
+                      Chưa có tài khoản Sắc Việt?{' '}
                       <button
                         type="button"
                         onClick={() => setAuthTab('register')}
-                        className="font-black text-primary hover:underline inline-flex items-center gap-0.5"
+                        className="font-black text-primary hover:underline inline-flex items-center gap-0.5 cursor-pointer"
                       >
-                        <span>Đăng ký mới ngay</span>
+                        <span>Tạo tài khoản mới ngay</span>
+                        <span>&rarr;</span>
+                      </button>
+                    </p>
+                  </div>
+                </div>
+              ) : !user && authTab === 'register' ? (
+                /* ====================================================
+                    MÀN HÌNH TẠO TÀI KHOẢN SẮC VIỆT MỚI (BƯỚC 1 CỦA NGHỆ NHÂN)
+                   ==================================================== */
+                <div className="max-w-md mx-auto bg-white rounded-2xl shadow-lg border border-gold/30 p-5 sm:p-7 animate-fade-in space-y-4">
+                  <div className="text-center">
+                    <span className="size-12 bg-primary/10 text-primary rounded-xl flex items-center justify-center mx-auto mb-2.5 border border-primary/20 shadow-inner">
+                      <span className="material-symbols-outlined text-2xl">person_add</span>
+                    </span>
+                    <h2 className="text-xl sm:text-2xl font-black text-text-main uppercase tracking-tight">
+                      Tạo Tài Khoản Mới
+                    </h2>
+                    <p className="text-text-soft text-xs mt-1 font-medium">
+                      Tài khoản sẽ được dùng để quản lý gian hàng và mua sắm mọi sản phẩm trên Sắc Việt
+                    </p>
+                  </div>
+
+                  {loginError && (
+                    <div className="p-3 bg-rose-50 border border-rose-200 text-rose-700 text-xs rounded-xl flex items-center gap-2">
+                      <span className="material-symbols-outlined text-sm">error</span>
+                      <span>{loginError}</span>
+                    </div>
+                  )}
+
+                  <form onSubmit={handleUserRegister} className="space-y-3">
+                    <div>
+                      <label className="block text-[11px] font-bold text-text-main uppercase tracking-wider mb-1">
+                        Họ và tên nghệ nhân / Đại diện <span className="text-primary">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        value={regName}
+                        onChange={e => setRegName(e.target.value)}
+                        placeholder="VD: H'Yam Bkrông"
+                        className="w-full h-10 px-3 bg-[#FAF7F0] border border-stone-300 focus:border-primary focus:bg-white rounded-xl text-xs sm:text-sm font-medium text-text-main outline-none"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-[11px] font-bold text-text-main uppercase tracking-wider mb-1">
+                        Email đăng nhập <span className="text-primary">*</span>
+                      </label>
+                      <input
+                        type="email"
+                        required
+                        value={regEmail}
+                        onChange={e => setRegEmail(e.target.value)}
+                        placeholder="VD: artisan@example.com"
+                        className="w-full h-10 px-3 bg-[#FAF7F0] border border-stone-300 focus:border-primary focus:bg-white rounded-xl text-xs sm:text-sm font-medium text-text-main outline-none"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-[11px] font-bold text-text-main uppercase tracking-wider mb-1">
+                        Mật khẩu <span className="text-primary">*</span>
+                      </label>
+                      <input
+                        type="password"
+                        required
+                        value={regPassword}
+                        onChange={e => setRegPassword(e.target.value)}
+                        placeholder="Mật khẩu tối thiểu 6 ký tự..."
+                        className="w-full h-10 px-3 bg-[#FAF7F0] border border-stone-300 focus:border-primary focus:bg-white rounded-xl text-xs sm:text-sm font-medium text-text-main outline-none"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-[11px] font-bold text-text-main uppercase tracking-wider mb-1">
+                        Nhập lại mật khẩu <span className="text-primary">*</span>
+                      </label>
+                      <input
+                        type="password"
+                        required
+                        value={regConfirmPassword}
+                        onChange={e => setRegConfirmPassword(e.target.value)}
+                        placeholder="Xác nhận mật khẩu..."
+                        className="w-full h-10 px-3 bg-[#FAF7F0] border border-stone-300 focus:border-primary focus:bg-white rounded-xl text-xs sm:text-sm font-medium text-text-main outline-none"
+                      />
+                    </div>
+
+                    <button
+                      type="submit"
+                      disabled={isLoggingIn}
+                      className="h-10 w-full bg-primary hover:bg-primary/90 text-white font-bold text-xs uppercase tracking-wider rounded-xl shadow-md active:scale-95 transition-all flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
+                    >
+                      {isLoggingIn ? (
+                        <>
+                          <span className="material-symbols-outlined text-base animate-spin">progress_activity</span>
+                          <span>Đang Tạo Tài Khoản...</span>
+                        </>
+                      ) : (
+                        <>
+                          <span className="material-symbols-outlined text-base">person_add</span>
+                          <span>Tạo Tài Khoản & Tiếp Tục</span>
+                        </>
+                      )}
+                    </button>
+                  </form>
+
+                  <div className="text-center pt-2">
+                    <p className="text-xs text-text-soft">
+                      Đã có tài khoản?{' '}
+                      <button
+                        type="button"
+                        onClick={() => setAuthTab('login')}
+                        className="font-black text-primary hover:underline inline-flex items-center gap-0.5 cursor-pointer"
+                      >
+                        <span>Đăng nhập ngay</span>
                         <span>&rarr;</span>
                       </button>
                     </p>
@@ -2291,6 +2745,175 @@ const ArtisanPortal: React.FC = () => {
                 <span>Gửi Phản Hồi Từ Chối</span>
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL CHỈNH SỬA HỒ SƠ NGHỆ NHÂN & TÀI KHOẢN NGÂN HÀNG */}
+      {isEditProfileOpen && currentArtisan && (
+        <div 
+          onClick={() => setIsEditProfileOpen(false)}
+          className="fixed inset-0 z-[110] bg-black/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 animate-fade-in"
+        >
+          <div 
+            onClick={e => e.stopPropagation()}
+            className="bg-white rounded-2xl max-w-lg w-full max-h-[92vh] overflow-y-auto shadow-2xl border border-gold/30 p-5 sm:p-6 space-y-4"
+          >
+            <div className="flex items-center justify-between border-b border-gold/20 pb-3">
+              <div className="flex items-center gap-2">
+                <span className="material-symbols-outlined text-primary text-2xl">manage_accounts</span>
+                <div>
+                  <h3 className="font-black text-base sm:text-lg text-text-main">Hồ Sơ & Tài Khoản Nhận Tiền</h3>
+                  <p className="text-[11px] text-text-soft font-medium">Cập nhật thông tin nghệ nhân và tài khoản thanh toán</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsEditProfileOpen(false)}
+                className="size-8 rounded-full bg-stone-100 hover:bg-stone-200 text-stone-500 hover:text-stone-800 flex items-center justify-center transition-colors cursor-pointer"
+              >
+                <span className="material-symbols-outlined text-base">close</span>
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveProfile} className="space-y-4">
+              {/* Phần 1: Thông tin cá nhân nghệ nhân */}
+              <div className="space-y-3 bg-[#FAF7F0] p-3.5 rounded-xl border border-gold/20">
+                <div className="text-xs font-black uppercase text-primary tracking-wide flex items-center gap-1.5">
+                  <span className="material-symbols-outlined text-base">badge</span>
+                  <span>1. Thông tin nghệ nhân</span>
+                </div>
+
+                <div>
+                  <label className="block text-[11px] font-bold text-text-main mb-1">Họ và tên nghệ nhân</label>
+                  <input
+                    type="text"
+                    required
+                    value={editName}
+                    onChange={e => setEditName(e.target.value)}
+                    className="w-full h-10 px-3 bg-white border border-stone-300 rounded-xl text-xs sm:text-sm font-bold text-text-main focus:border-primary outline-none"
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-[11px] font-bold text-text-main mb-1">Số điện thoại</label>
+                    <input
+                      type="tel"
+                      required
+                      value={editPhone}
+                      onChange={e => setEditPhone(e.target.value)}
+                      className="w-full h-10 px-3 bg-white border border-stone-300 rounded-xl text-xs sm:text-sm font-bold text-text-main focus:border-primary outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[11px] font-bold text-text-main mb-1">Dân tộc</label>
+                    <input
+                      type="text"
+                      required
+                      value={editEthnic}
+                      onChange={e => setEditEthnic(e.target.value)}
+                      className="w-full h-10 px-3 bg-white border border-stone-300 rounded-xl text-xs sm:text-sm font-bold text-text-main focus:border-primary outline-none"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-[11px] font-bold text-text-main mb-1">Làng nghề / Buôn bản</label>
+                  <input
+                    type="text"
+                    required
+                    value={editVillage}
+                    onChange={e => setEditVillage(e.target.value)}
+                    className="w-full h-10 px-3 bg-white border border-stone-300 rounded-xl text-xs sm:text-sm font-bold text-text-main focus:border-primary outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-[11px] font-bold text-text-main mb-1">Tiểu sử / Giới thiệu di sản</label>
+                  <textarea
+                    rows={3}
+                    value={editBio}
+                    onChange={e => setEditBio(e.target.value)}
+                    placeholder="Mô tả quá trình gắn bó với nghề, kỹ thuật truyền thống..."
+                    className="w-full p-3 bg-white border border-stone-300 rounded-xl text-xs sm:text-sm text-text-main focus:border-primary outline-none resize-none"
+                  />
+                </div>
+              </div>
+
+              {/* Phần 2: Tài khoản ngân hàng nhận doanh thu bán sản phẩm */}
+              <div className="space-y-3 bg-[#FAF7F0] p-3.5 rounded-xl border border-gold/20">
+                <div className="text-xs font-black uppercase text-amber-800 tracking-wide flex items-center gap-1.5">
+                  <span className="material-symbols-outlined text-base">account_balance</span>
+                  <span>2. Tài khoản nhận tiền doanh thu</span>
+                </div>
+                <p className="text-[11px] text-stone-500">
+                  Khi khách hàng thanh toán qua Sắc Việt, tiền sau khi trừ phí sàn sẽ được đối soát và chuyển về tài khoản này.
+                </p>
+
+                <div>
+                  <label className="block text-[11px] font-bold text-text-main mb-1">Ngân hàng thụ hưởng</label>
+                  <input
+                    type="text"
+                    value={editBankName}
+                    onChange={e => setEditBankName(e.target.value)}
+                    placeholder="VD: Vietcombank, MB Bank, Agribank..."
+                    className="w-full h-10 px-3 bg-white border border-stone-300 rounded-xl text-xs sm:text-sm font-bold text-text-main focus:border-primary outline-none"
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-[11px] font-bold text-text-main mb-1">Số tài khoản</label>
+                    <input
+                      type="text"
+                      value={editBankAccountNumber}
+                      onChange={e => setEditBankAccountNumber(e.target.value)}
+                      placeholder="VD: 1029384756"
+                      className="w-full h-10 px-3 bg-white border border-stone-300 rounded-xl text-xs sm:text-sm font-bold text-text-main focus:border-primary outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[11px] font-bold text-text-main mb-1">Tên chủ tài khoản</label>
+                    <input
+                      type="text"
+                      value={editBankAccountHolder}
+                      onChange={e => setEditBankAccountHolder(e.target.value)}
+                      placeholder="VD: NGUYEN VAN A"
+                      className="w-full h-10 px-3 bg-white border border-stone-300 rounded-xl text-xs sm:text-sm font-bold text-text-main uppercase focus:border-primary outline-none"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Nút hành động */}
+              <div className="flex items-center justify-end gap-2 pt-2 border-t border-stone-100">
+                <button
+                  type="button"
+                  onClick={() => setIsEditProfileOpen(false)}
+                  className="px-4 py-2.5 text-xs font-bold text-stone-600 hover:bg-stone-100 rounded-xl cursor-pointer"
+                >
+                  Hủy Bỏ
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSavingProfile}
+                  className="px-5 py-2.5 bg-primary hover:brightness-110 text-white font-bold text-xs uppercase tracking-wider rounded-xl shadow-sm transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+                >
+                  {isSavingProfile ? (
+                    <>
+                      <span className="material-symbols-outlined text-sm animate-spin">progress_activity</span>
+                      <span>Đang Lưu...</span>
+                    </>
+                  ) : (
+                    <>
+                      <span className="material-symbols-outlined text-sm">check</span>
+                      <span>Lưu Thay Đổi</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

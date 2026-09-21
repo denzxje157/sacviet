@@ -155,9 +155,10 @@ const Navbar: React.FC = () => {
                   <div className="absolute top-full right-0 mt-2 w-56 bg-white rounded-2xl shadow-2xl border border-gold/20 overflow-hidden z-[100] animate-fade-in-up origin-top-right">
                     <div className="p-4 border-b border-gold/10 bg-background-light">
                       <p className="text-sm font-black text-text-main truncate">{user.fullName}</p>
-                      <div className="flex items-center gap-2 mt-1">
+                      <div className="flex items-center gap-1.5 mt-1">
                         <p className="text-[10px] text-text-soft truncate">{user.email}</p>
                         {user.role === 'admin' && <span className="text-[8px] bg-primary/10 text-primary px-1.5 py-0.5 rounded-full font-black uppercase shrink-0">Admin</span>}
+                        {user.role === 'artisan' && <span className="text-[8px] bg-amber-100 text-amber-800 border border-amber-300 px-1.5 py-0.5 rounded-full font-black uppercase shrink-0">Nghệ Nhân</span>}
                       </div>
                     </div>
                     <div className="p-2 space-y-1">
@@ -167,12 +168,13 @@ const Navbar: React.FC = () => {
                         </Link>
                       )}
                       
-                      <Link to="/orders" className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-text-main hover:bg-gold/10 rounded-xl transition-colors" onClick={() => setIsUserMenuOpen(false)}>
-                        <span className="material-symbols-outlined text-base">receipt_long</span> Đơn hàng của tôi
+                      <Link to="/seller-portal" className="flex items-center gap-3 px-3 py-2.5 text-sm font-bold text-[#8B1A1A] bg-amber-50/70 hover:bg-amber-100/60 rounded-xl transition-colors border border-gold/20" onClick={() => setIsUserMenuOpen(false)}>
+                        <span className="material-symbols-outlined text-base text-[#9C6237]">storefront</span> 
+                        <span>{user.role === 'artisan' ? 'Gian hàng của tôi' : 'Kênh Nghệ Nhân'}</span>
                       </Link>
 
-                      <Link to="/seller-portal" className="flex items-center gap-3 px-3 py-2.5 text-sm font-bold text-primary bg-primary/5 hover:bg-primary/10 rounded-xl transition-colors" onClick={() => setIsUserMenuOpen(false)}>
-                        <span className="material-symbols-outlined text-base text-primary">storefront</span> Kênh Bán Hàng Nghệ Nhân
+                      <Link to="/orders" className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-text-main hover:bg-gold/10 rounded-xl transition-colors" onClick={() => setIsUserMenuOpen(false)}>
+                        <span className="material-symbols-outlined text-base">receipt_long</span> Đơn hàng đã mua
                       </Link>
                       
                       {/* NÚT ĐỔI MẬT KHẨU MỚI THÊM VÀO ĐÂY */}
@@ -219,6 +221,34 @@ const Navbar: React.FC = () => {
                 </div>
                 <span className="material-symbols-outlined">arrow_forward</span>
               </Link>
+            )}
+
+            {user && (
+              <>
+                <Link
+                  to="/seller-portal"
+                  onClick={() => setIsMenuOpen(false)}
+                  className="bg-amber-50 text-[#8B1A1A] border border-gold/30 p-3.5 rounded-2xl flex items-center justify-between shadow-xs"
+                >
+                  <div className="flex items-center gap-2.5 font-bold uppercase tracking-wider text-xs">
+                    <span className="material-symbols-outlined text-lg text-amber-700">storefront</span>
+                    <span>{user.role === 'artisan' ? 'Gian hàng của tôi' : 'Kênh Nghệ Nhân'}</span>
+                  </div>
+                  <span className="material-symbols-outlined text-sm">arrow_forward</span>
+                </Link>
+
+                <Link
+                  to="/orders"
+                  onClick={() => setIsMenuOpen(false)}
+                  className="bg-white text-stone-800 border border-stone-200 p-3.5 rounded-2xl flex items-center justify-between shadow-xs"
+                >
+                  <div className="flex items-center gap-2.5 font-bold uppercase tracking-wider text-xs">
+                    <span className="material-symbols-outlined text-lg text-stone-600">receipt_long</span>
+                    <span>Đơn hàng đã mua</span>
+                  </div>
+                  <span className="material-symbols-outlined text-sm">arrow_forward</span>
+                </Link>
+              </>
             )}
             
             {navLinks.map((link) => (

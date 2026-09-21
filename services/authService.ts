@@ -4,7 +4,13 @@ export interface User {
   id: string;
   fullName: string;
   email: string;
-  role?: 'admin' | 'user';
+  phone?: string;
+  role?: 'admin' | 'user' | 'artisan';
+  avatar?: string;
+  artisanId?: string;
+  village?: string;
+  ethnic?: string;
+  bio?: string;
 }
 
 export const authService = {
@@ -142,7 +148,13 @@ export const authService = {
         id: session.user.id,
         fullName: session.user.user_metadata?.full_name || session.user.email?.split('@')[0] || 'User',
         email: session.user.email || '',
-        role: session.user.user_metadata?.role || 'user'
+        role: session.user.user_metadata?.role || 'user',
+        phone: session.user.user_metadata?.phone,
+        avatar: session.user.user_metadata?.avatar,
+        artisanId: session.user.user_metadata?.artisanId,
+        village: session.user.user_metadata?.village,
+        ethnic: session.user.user_metadata?.ethnic,
+        bio: session.user.user_metadata?.bio
       };
     } catch (error) {
       console.warn('Failed to fetch session from Supabase, likely due to missing config.');
@@ -150,7 +162,46 @@ export const authService = {
     }
   },
 
-  // 4. ĐĂNG XUẤT
+  // 4. CẬP NHẬT HỒ SƠ NGƯỜI DÙNG / NGHỆ NHÂN
+  updateUserProfile: async (userId: string, updates: Partial<User>): Promise<User> => {
+    if (!isSupabaseConfigured) {
+      const usersStr = localStorage.getItem('mock_db_users');
+      let users = usersStr ? JSON.parse(usersStr) : [];
+      let foundUser = users.find((u: any) => u.id === userId);
+      if (foundUser) {
+        Object.assign(foundUser, updates);
+        localStorage.setItem('mock_db_users', JSON.stringify(users));
+      }
+
+      const tokenStr = localStorage.getItem('mock_token');
+      let currentToken = tokenStr ? JSON.parse(tokenStr) : null;
+      if (currentToken && (currentToken.id === userId || currentToken.id === 'admin-local')) {
+        currentToken = { ...currentToken, ...updates };
+        localStorage.setItem('mock_token', JSON.stringify(currentToken));
+        return currentToken;
+      }
+      return foundUser || { id: userId, fullName: '', email: '', ...updates };
+    }
+
+    const { data, error } = await supabase.auth.updateUser({
+      data: updates
+    });
+    if (error) throw error;
+    return {
+      id: data.user.id,
+      fullName: data.user.user_metadata?.full_name || updates.fullName || 'User',
+      email: data.user.email || '',
+      role: data.user.user_metadata?.role || updates.role || 'user',
+      phone: data.user.user_metadata?.phone || updates.phone,
+      avatar: data.user.user_metadata?.avatar || updates.avatar,
+      artisanId: data.user.user_metadata?.artisanId || updates.artisanId,
+      village: data.user.user_metadata?.village || updates.village,
+      ethnic: data.user.user_metadata?.ethnic || updates.ethnic,
+      bio: data.user.user_metadata?.bio || updates.bio
+    };
+  },
+
+  // 5. ĐĂNG XUẤT
   logout: async (): Promise<void> => {
     if (!isSupabaseConfigured) {
       localStorage.removeItem('mock_token');

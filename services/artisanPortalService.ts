@@ -2,6 +2,9 @@ import { supabase, isSupabaseConfigured } from './supabaseClient';
 
 export interface ArtisanProfile {
   id: string;
+  userId?: string;
+  email?: string;
+  avatar?: string;
   name: string;
   representative?: string;
   isRepresentative: boolean;
@@ -258,6 +261,80 @@ export const artisanPortalService = {
     const list = await artisanPortalService.getAllArtisans();
     const cleanQuery = query.replace(/\D/g, '');
     return list.find(a => a.id === query || a.phone === query || (cleanQuery && a.phone.replace(/\D/g, '') === cleanQuery)) || null;
+  },
+
+  getArtisanByUserId: async (userId: string): Promise<ArtisanProfile | null> => {
+    if (!userId) return null;
+    const list = await artisanPortalService.getAllArtisans();
+    return list.find(a => a.userId === userId) || null;
+  },
+
+  getArtisanByUser: async (user: { id?: string; email?: string; phone?: string; fullName?: string }): Promise<ArtisanProfile | null> => {
+    if (!user) return null;
+    const list = await artisanPortalService.getAllArtisans();
+    
+    // 1. Khớp chính xác theo userId
+    if (user.id) {
+      const byId = list.find(a => a.userId === user.id);
+      if (byId) return byId;
+    }
+
+    // 2. Khớp theo số điện thoại
+    if (user.phone) {
+      const cleanUserPhone = user.phone.replace(/\D/g, '');
+      if (cleanUserPhone) {
+        const byPhone = list.find(a => a.phone && a.phone.replace(/\D/g, '') === cleanUserPhone);
+        if (byPhone) return byPhone;
+      }
+    }
+
+    // 3. Khớp theo email
+    if (user.email) {
+      const cleanEmail = user.email.toLowerCase().trim();
+      const byEmail = list.find(a => a.email && a.email.toLowerCase().trim() === cleanEmail);
+      if (byEmail) return byEmail;
+    }
+
+    // 4. Khớp theo tên nghệ nhân / họ tên user (case-insensitive)
+    if (user.fullName) {
+      const cleanName = user.fullName.toLowerCase().trim();
+      const byName = list.find(a => a.name && a.name.toLowerCase().trim() === cleanName);
+      if (byName) return byName;
+    }
+
+    return null;
+  },
+
+  updateArtisanProfile: async (artisanId: string, updates: Partial<ArtisanProfile>): Promise<ArtisanProfile> => {
+    const list = await artisanPortalService.getAllArtisans();
+    const idx = list.findIndex(a => a.id === artisanId);
+    if (idx === -1) throw new Error('Không tìm thấy nghệ nhân để cập nhật');
+
+    const updated: ArtisanProfile = {
+      ...list[idx],
+      ...updates
+    };
+    list[idx] = updated;
+    localStorage.setItem(ARTISANS_STORAGE_KEY, JSON.stringify(list));
+
+    try {
+      if (isSupabaseConfigured) {
+        await supabase.from('nghe_nhan').update({
+          name: updated.name,
+          representative: updated.representative || '',
+          village: updated.village,
+          ethnic: updated.ethnic,
+          phone: updated.phone,
+          bio: updated.bio,
+          proof_url: updated.proofUrl,
+          bank_account: updated.bankAccount || null
+        }).eq('id', artisanId);
+      }
+    } catch (e) {
+      console.warn('Lỗi cập nhật nghệ nhân trên Supabase:', e);
+    }
+
+    return updated;
   },
 
   registerArtisan: async (data: Omit<ArtisanProfile, 'id' | 'status' | 'badgeLevel' | 'createdAt'>): Promise<ArtisanProfile> => {
