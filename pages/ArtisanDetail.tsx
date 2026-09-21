@@ -38,33 +38,60 @@ const ArtisanDetail: React.FC = () => {
             const dynamicProds = await artisanPortalService.getProductsByArtisanId(foundDynamic.id);
             const approvedDynamicProds = dynamicProds.filter(p => p.status === 'approved');
 
+            const defaultMotifs: Motif[] = [
+              {
+                name: `Hoa văn truyền thống ${foundDynamic.ethnic || 'bản địa'}`,
+                originalName: 'Bản sắc cổ truyền',
+                meaning: 'Biểu tượng của sự gắn kết cội nguồn, mùa màng no ấm và che chở tâm linh cho bản làng.',
+                symbol: '🌸',
+                desc: `Họa tiết đặc trưng kết tinh giá trị văn hóa ngàn đời của đồng bào ${foundDynamic.ethnic || 'bản địa'}, được gìn giữ và trao truyền tại làng nghề ${foundDynamic.village || ''}.`
+              }
+            ];
+
             const mapped: Artisan = {
               id: foundDynamic.id,
               name: foundDynamic.name,
-              ethnic: foundDynamic.ethnic,
-              village: foundDynamic.village,
-              bio: foundDynamic.bio,
-              experience: 'Nghệ nhân di sản',
-              role: foundDynamic.isRepresentative ? `Đại diện: ${foundDynamic.representative || 'Gia đình'}` : 'Nghệ nhân làng nghề',
+              title: foundDynamic.badgeLevel === 'master' ? 'Nghệ nhân Nhân dân' : (foundDynamic.badgeLevel === 'verified_heritage' ? 'Nghệ nhân Ưu tú' : 'Nghệ nhân Bản địa'),
+              ethnic: foundDynamic.ethnic || 'Việt Nam',
+              village: foundDynamic.village || 'Làng nghề truyền thống',
+              province: foundDynamic.village ? (foundDynamic.village.split(',').pop()?.trim() || 'Việt Nam') : 'Việt Nam',
+              region: 'Việt Nam',
+              coords: [21.0285, 105.8542],
+              yearsOfCraft: 25,
+              craftType: foundDynamic.proofType === 'workshop' ? 'Thủ công xưởng truyền thống' : 'Thủ công di sản bản địa',
               avatar: foundDynamic.avatar || foundDynamic.proofUrl || 'https://cazllsidgvysyxbvrftq.supabase.co/storage/v1/object/public/images-sacviet/logo.png',
               coverImg: foundDynamic.proofUrl || 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=1200',
-              quote: `Tôn vinh và trao truyền bản sắc văn hóa của đồng bào ${foundDynamic.ethnic}.`,
-              specialties: ['Thủ công truyền thống', 'Di sản bản địa'],
-              gallery: foundDynamic.proofUrl ? [foundDynamic.proofUrl] : [],
-              motifs: [],
+              quote: foundDynamic.bio || `Tôn vinh và trao truyền bản sắc văn hóa của đồng bào ${foundDynamic.ethnic}.`,
+              bio: foundDynamic.bio || `Nghệ nhân ${foundDynamic.name} đã gắn bó cả cuộc đời với nghề thủ công tại ${foundDynamic.village}, miệt mài lưu giữ và phát triển tinh hoa văn hóa truyền thống của dân tộc ${foundDynamic.ethnic}.`,
+              story: [
+                `Khởi đầu từ tình yêu tha thiết với những đường nét hoa văn và nguyên liệu tự nhiên tại bản làng ${foundDynamic.village || ''}.`,
+                `Trải qua nhiều năm gắn bó và miệt mài gìn giữ bí quyết chế tác thủ công truyền thống của dân tộc ${foundDynamic.ethnic || ''}.`,
+                `Tự hào giới thiệu các sản phẩm văn hóa bản địa chân thực tới cộng đồng bảo tồn Sắc Việt.`
+              ],
+              metrics: [
+                { label: 'Thời gian chế tác', value: '15 – 30 ngày', sub: 'Thực hiện thủ công từng công đoạn', icon: 'hourglass_top' },
+                { label: 'Nguyên liệu', value: '100% Bản địa', sub: 'Thu hoạch tự nhiên từ buôn làng', icon: 'eco' },
+                { label: 'Kỹ nghệ lưu truyền', value: 'Độc bản', sub: 'Không sản xuất công nghiệp hàng loạt', icon: 'handshake' },
+                { label: 'Cấp chứng nhận', value: 'Sắc Việt Bảo Chứng', sub: 'Xác minh danh tính làng nghề', icon: 'verified' }
+              ],
+              motifs: defaultMotifs,
               products: approvedDynamicProds.map(p => ({
                 id: p.id,
                 name: p.name,
-                price: `${p.price.toLocaleString('vi-VN')} đ`,
-                priceValue: p.price,
-                img: p.image,
-                desc: p.heritageStory,
-                tag: 'Thủ công',
-                dimensions: 'Tiêu chuẩn',
-                material: 'Tự nhiên'
-              }))
+                price: `${Number(p.price).toLocaleString('vi-VN')} đ`,
+                priceValue: Number(p.price),
+                timeToCraft: p.craftTimeDays ? `${p.craftTimeDays} ngày` : '15 ngày',
+                img: p.image || 'https://cazllsidgvysyxbvrftq.supabase.co/storage/v1/object/public/images-sacviet/logo.png',
+                category: p.category || 'Thủ công',
+                soldCount: p.sold || 0,
+                desc: p.heritageStory || 'Sản phẩm thủ công truyền thống chứa đựng tâm huyết của nghệ nhân.'
+              })),
+              gallery: foundDynamic.proofUrl ? [foundDynamic.proofUrl] : []
             };
             setArtisan(mapped);
+            if (mapped.motifs && mapped.motifs.length > 0) {
+              setSelectedMotif(mapped.motifs[0]);
+            }
             return;
           }
         } catch (e) {
@@ -291,7 +318,7 @@ const ArtisanDetail: React.FC = () => {
             {/* Quick Actions (Bản đồ & Tri ân) */}
             <div className="flex flex-wrap items-center gap-3 pt-2">
               <a
-                href={`https://www.google.com/maps/search/?api=1&query=${artisan.coords[0]},${artisan.coords[1]}`}
+                href={artisan.coords && artisan.coords.length >= 2 ? `https://www.google.com/maps/search/?api=1&query=${artisan.coords[0]},${artisan.coords[1]}` : `https://www.google.com/maps`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-1.5 px-4 py-2 bg-white hover:bg-gray-50 text-primary rounded-xl text-xs font-bold border border-[#DDD5C7] shadow-2xs transition-colors"
@@ -422,7 +449,7 @@ const ArtisanDetail: React.FC = () => {
                 </span>
               </div>
               <div>
-                <p className="text-sm font-black text-[#9C6237]">{artisan.metrics[0]?.value || '30 – 45 ngày'}</p>
+                <p className="text-sm font-black text-[#9C6237]">{artisan.metrics?.[0]?.value || '15 – 30 ngày'}</p>
                 <p className="text-[11px] text-[#6B7280] font-medium mt-0.5">41 công đoạn thủ công</p>
               </div>
             </div>
@@ -454,7 +481,7 @@ const ArtisanDetail: React.FC = () => {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {artisan.metrics.map((m, idx) => (
+            {(artisan.metrics || []).map((m, idx) => (
               <div
                 key={idx}
                 className="bg-[#FAF7F0] p-5 rounded-2xl border border-[#EADBCA] hover:border-[#9C6237]/50 transition-all flex flex-col justify-between"
@@ -482,104 +509,106 @@ const ArtisanDetail: React.FC = () => {
         </div>
 
         {/* 🌟 KHỐI GIẢI MÃ MẬT MÃ HOA VĂN THIÊNG (MOTIFS DECODER) */}
-        <div className="mb-14">
-          <div className="text-center max-w-2xl mx-auto mb-8 space-y-2">
-            <span className="text-[11px] font-extrabold uppercase tracking-[0.2em] text-[#9C6237] bg-[#EFE9DC] px-3.5 py-1 rounded-full border border-[#DDD5C7] inline-block">
-              MẬT MÃ BẢN SẮC
-            </span>
-            <h2 className="text-2xl sm:text-3xl font-black text-[#1F2923] tracking-tight uppercase">
-              Giải Mã Từng Đường Nét Hoa Văn Thiêng
-            </h2>
-            <p className="text-xs sm:text-sm text-[#635342] leading-relaxed">
-              Mỗi họa tiết là một triết lý nhân sinh, lời chúc phúc cho vụ mùa no ấm và sự che chở tâm linh của tổ tiên người Mông.
-            </p>
-          </div>
+        {artisan.motifs && artisan.motifs.length > 0 && (
+          <div className="mb-14">
+            <div className="text-center max-w-2xl mx-auto mb-8 space-y-2">
+              <span className="text-[11px] font-extrabold uppercase tracking-[0.2em] text-[#9C6237] bg-[#EFE9DC] px-3.5 py-1 rounded-full border border-[#DDD5C7] inline-block">
+                MẬT MÃ BẢN SẮC
+              </span>
+              <h2 className="text-2xl sm:text-3xl font-black text-[#1F2923] tracking-tight uppercase">
+                Giải Mã Từng Đường Nét Hoa Văn Thiêng
+              </h2>
+              <p className="text-xs sm:text-sm text-[#635342] leading-relaxed">
+                Mỗi họa tiết là một triết lý nhân sinh, lời chúc phúc cho vụ mùa no ấm và sự che chở tâm linh của tổ tiên người Mông.
+              </p>
+            </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-            
-            {/* Cột Trái: Danh sách tab hoa văn */}
-            <div className="lg:col-span-5 space-y-3">
-              {artisan.motifs.map((motif, index) => {
-                const isSelected = selectedMotif?.name === motif.name;
-                return (
-                  <div
-                    key={index}
-                    onClick={() => setSelectedMotif(motif)}
-                    className={`p-4 rounded-2xl border-2 cursor-pointer transition-all flex items-start gap-4 ${
-                      isSelected
-                        ? 'bg-white border-[#9C6237] shadow-lg scale-[1.01]'
-                        : 'bg-white/70 border-[#E5DDD0] hover:border-[#9C6237]/50 hover:bg-white'
-                    }`}
-                  >
-                    <div className={`size-12 rounded-xl flex items-center justify-center text-2xl shrink-0 border ${
-                      isSelected ? 'bg-[#9C6237] text-white border-[#9C6237]' : 'bg-[#FAF7F0] text-[#9C6237] border-[#EADBCA]'
-                    }`}>
-                      {motif.symbol}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between gap-2">
-                        <h3 className="font-bold text-sm text-[#1F2923]">
-                          {motif.name}
-                        </h3>
-                        {motif.originalName && (
-                          <span className="text-[10px] bg-[#EFE9DC] text-[#7A4B24] font-black uppercase px-2 py-0.5 rounded-md">
-                            {motif.originalName}
-                          </span>
-                        )}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+              
+              {/* Cột Trái: Danh sách tab hoa văn */}
+              <div className="lg:col-span-5 space-y-3">
+                {(artisan.motifs || []).map((motif, index) => {
+                  const isSelected = selectedMotif?.name === motif.name;
+                  return (
+                    <div
+                      key={index}
+                      onClick={() => setSelectedMotif(motif)}
+                      className={`p-4 rounded-2xl border-2 cursor-pointer transition-all flex items-start gap-4 ${
+                        isSelected
+                          ? 'bg-white border-[#9C6237] shadow-lg scale-[1.01]'
+                          : 'bg-white/70 border-[#E5DDD0] hover:border-[#9C6237]/50 hover:bg-white'
+                      }`}
+                    >
+                      <div className={`size-12 rounded-xl flex items-center justify-center text-2xl shrink-0 border ${
+                        isSelected ? 'bg-[#9C6237] text-white border-[#9C6237]' : 'bg-[#FAF7F0] text-[#9C6237] border-[#EADBCA]'
+                      }`}>
+                        {motif.symbol}
                       </div>
-                      <p className="text-xs text-[#9C6237] font-semibold mt-0.5 line-clamp-1">
-                        {motif.meaning}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between gap-2">
+                          <h3 className="font-bold text-sm text-[#1F2923]">
+                            {motif.name}
+                          </h3>
+                          {motif.originalName && (
+                            <span className="text-[10px] bg-[#EFE9DC] text-[#7A4B24] font-black uppercase px-2 py-0.5 rounded-md">
+                              {motif.originalName}
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-xs text-[#9C6237] font-semibold mt-0.5 line-clamp-1">
+                          {motif.meaning}
+                        </p>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Cột Phải: Bảng Chi Tiết Hoa Văn */}
+              <div className="lg:col-span-7">
+                {selectedMotif && (
+                  <div className="bg-white p-6 sm:p-8 rounded-3xl border border-[#E8E2D5] shadow-lg relative overflow-hidden animate-fade-in">
+                    <div className="absolute top-0 right-0 p-6 text-7xl opacity-10 select-none pointer-events-none">
+                      {selectedMotif.symbol}
+                    </div>
+                    
+                    <div className="flex items-center gap-3 mb-4">
+                      <span className="text-3xl">{selectedMotif.symbol}</span>
+                      <div>
+                        <span className="text-[10px] font-black uppercase tracking-wider text-[#9C6237] bg-[#EFE9DC] px-2.5 py-0.5 rounded-full border border-[#DDD5C7]">
+                          Tên bản địa: {selectedMotif.originalName || 'Cổ truyền'}
+                        </span>
+                        <h3 className="text-xl sm:text-2xl font-black text-[#1F2923] mt-1">
+                          {selectedMotif.name}
+                        </h3>
+                      </div>
+                    </div>
+
+                    <div className="h-0.5 w-14 bg-[#9C6237] mb-5"></div>
+
+                    <div className="bg-[#FAF7F0] p-4 rounded-2xl border border-[#EADBCA] mb-5">
+                      <p className="text-[10px] font-black uppercase text-[#9C6237] tracking-widest mb-1">
+                        Ý NGHĨA BIỂU TRƯNG:
+                      </p>
+                      <p className="text-base font-bold text-[#1F2923]">
+                        "{selectedMotif.meaning}"
                       </p>
                     </div>
-                  </div>
-                );
-              })}
-            </div>
 
-            {/* Cột Phải: Bảng Chi Tiết Hoa Văn */}
-            <div className="lg:col-span-7">
-              {selectedMotif && (
-                <div className="bg-white p-6 sm:p-8 rounded-3xl border border-[#E8E2D5] shadow-lg relative overflow-hidden animate-fade-in">
-                  <div className="absolute top-0 right-0 p-6 text-7xl opacity-10 select-none pointer-events-none">
-                    {selectedMotif.symbol}
-                  </div>
-                  
-                  <div className="flex items-center gap-3 mb-4">
-                    <span className="text-3xl">{selectedMotif.symbol}</span>
-                    <div>
-                      <span className="text-[10px] font-black uppercase tracking-wider text-[#9C6237] bg-[#EFE9DC] px-2.5 py-0.5 rounded-full border border-[#DDD5C7]">
-                        Tên bản địa: {selectedMotif.originalName || 'Cổ truyền'}
-                      </span>
-                      <h3 className="text-xl sm:text-2xl font-black text-[#1F2923] mt-1">
-                        {selectedMotif.name}
-                      </h3>
-                    </div>
-                  </div>
-
-                  <div className="h-0.5 w-14 bg-[#9C6237] mb-5"></div>
-
-                  <div className="bg-[#FAF7F0] p-4 rounded-2xl border border-[#EADBCA] mb-5">
-                    <p className="text-[10px] font-black uppercase text-[#9C6237] tracking-widest mb-1">
-                      Ý NGHĨA BIỂU TRƯNG:
+                    <p className="text-xs sm:text-sm text-[#524639] leading-relaxed text-justify mb-4">
+                      {selectedMotif.desc}
                     </p>
-                    <p className="text-base font-bold text-[#1F2923]">
-                      "{selectedMotif.meaning}"
+
+                    <p className="italic text-[11px] text-[#7C7267] border-t border-[#EAE3D5] pt-3">
+                      * Họa tiết này được nghệ nhân {artisan.name} dùng ngòi bút đồng chấm sáp ong rừng nóng chảy vẽ trực tiếp trên vải lanh mộc mạc, không dùng thước kẻ hay bản in khuôn mẫu.
                     </p>
                   </div>
+                )}
+              </div>
 
-                  <p className="text-xs sm:text-sm text-[#524639] leading-relaxed text-justify mb-4">
-                    {selectedMotif.desc}
-                  </p>
-
-                  <p className="italic text-[11px] text-[#7C7267] border-t border-[#EAE3D5] pt-3">
-                    * Họa tiết này được nghệ nhân {artisan.name} dùng ngòi bút đồng chấm sáp ong rừng nóng chảy vẽ trực tiếp trên vải lanh mộc mạc, không dùng thước kẻ hay bản in khuôn mẫu.
-                  </p>
-                </div>
-              )}
             </div>
-
           </div>
-        </div>
+        )}
 
         {/* 🌟 KHỐI CHUYỆN ĐỜI NGHỆ NHÂN & KHÔNG GIAN BẢN ĐỊA */}
         <div className="bg-white rounded-[2.2rem] p-6 sm:p-8 md:p-10 shadow-sm border border-[#E8E2D5] mb-14">
@@ -599,7 +628,7 @@ const ArtisanDetail: React.FC = () => {
               </p>
 
               <div className="space-y-2.5 pt-2">
-                {artisan.story.map((st, i) => (
+                {(artisan.story || []).map((st, i) => (
                   <div key={i} className="flex gap-3 bg-[#FAF7F0] p-3.5 rounded-xl border border-[#EADBCA]">
                     <span className="size-5 rounded-full bg-primary text-white text-[11px] font-bold flex items-center justify-center shrink-0 mt-0.5">
                       {i + 1}
@@ -676,7 +705,7 @@ const ArtisanDetail: React.FC = () => {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {artisan.products.map((p) => (
+            {(artisan.products || []).map((p) => (
               <div
                 key={p.id}
                 className="bg-white rounded-2xl border border-[#E5DDD0] overflow-hidden shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col group"

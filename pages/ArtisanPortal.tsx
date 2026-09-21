@@ -211,12 +211,17 @@ const ArtisanPortal: React.FC = () => {
 
 
   useEffect(() => {
-    if (searchParams.get('register') === 'true' || searchParams.get('tab') === 'register') {
-      setIsRegisterMode(true);
-      setAuthTab('register');
-    } else if (searchParams.get('tab') === 'login') {
-      setIsRegisterMode(true);
-      setAuthTab('login');
+    // Only switch mode if no active artisan session or force requested
+    const activeArtisanId = localStorage.getItem('sacviet_active_artisan_id');
+    const forceParam = searchParams.get('force') === 'true';
+    if (!activeArtisanId || forceParam) {
+      if (searchParams.get('register') === 'true' || searchParams.get('tab') === 'register') {
+        setIsRegisterMode(true);
+        setAuthTab('register');
+      } else if (searchParams.get('tab') === 'login') {
+        setIsRegisterMode(true);
+        setAuthTab('login');
+      }
     }
   }, [searchParams]);
 
@@ -232,9 +237,10 @@ const ArtisanPortal: React.FC = () => {
       const allProds = await artisanPortalService.getAllArtisanProducts();
       setAllPendingProductsCount(allProds.filter(p => p.status === 'pending').length);
 
-      // Check URL query parameters first
+      // Check URL query parameters & active session
       const paramId = searchParams.get('artisanId');
-      const shouldRegister = searchParams.get('register') === 'true' || searchParams.get('tab') === 'register';
+      const activeArtisanId = localStorage.getItem('sacviet_active_artisan_id');
+      const forceParam = searchParams.get('force') === 'true';
 
       if (paramId) {
         const foundParam = artisans.find(a => a.id === paramId);
@@ -248,17 +254,8 @@ const ArtisanPortal: React.FC = () => {
         }
       }
 
-      if (shouldRegister) {
-        setIsRegisterMode(true);
-        setAuthTab('register');
-        setCurrentArtisan(null);
-        setIsLoading(false);
-        return;
-      }
-
-      // Check saved session in localStorage
-      const activeArtisanId = localStorage.getItem('sacviet_active_artisan_id');
-      if (activeArtisanId) {
+      // Check saved session in localStorage FIRST (prioritize active session over stale register param on F5)
+      if (activeArtisanId && !forceParam) {
         const found = artisans.find(a => a.id === activeArtisanId);
         if (found) {
           setCurrentArtisan(found);
@@ -267,6 +264,15 @@ const ArtisanPortal: React.FC = () => {
           setIsLoading(false);
           return;
         }
+      }
+
+      const shouldRegister = searchParams.get('register') === 'true' || searchParams.get('tab') === 'register';
+      if (shouldRegister) {
+        setIsRegisterMode(true);
+        setAuthTab('register');
+        setCurrentArtisan(null);
+        setIsLoading(false);
+        return;
       }
 
       // Khách truy cập hoặc nghệ nhân chưa lưu phiên: hiển thị tab đăng nhập
@@ -290,6 +296,7 @@ const ArtisanPortal: React.FC = () => {
     localStorage.setItem('sacviet_active_artisan_id', artisan.id);
     setCurrentArtisan(artisan);
     setIsRegisterMode(false);
+    setSearchParams({});
     await refreshArtisanData(artisan.id);
   };
 
@@ -303,6 +310,7 @@ const ArtisanPortal: React.FC = () => {
       localStorage.setItem('sacviet_active_artisan_id', found.id);
       setCurrentArtisan(found);
       setIsRegisterMode(false);
+      setSearchParams({});
       await refreshArtisanData(found.id);
       showToast(`🎉 Chào mừng ${found.name}!`);
     } else {
@@ -389,6 +397,7 @@ const ArtisanPortal: React.FC = () => {
     localStorage.setItem('sacviet_active_artisan_id', artisan.id);
     setCurrentArtisan(artisan);
     setIsRegisterMode(false);
+    setSearchParams({});
     await refreshArtisanData(artisan.id);
     setAdminViewMode('artisan_portal');
     showToast(`🏪 Đang xem gian hàng: ${artisan.name}`);
@@ -424,6 +433,7 @@ const ArtisanPortal: React.FC = () => {
       localStorage.setItem('sacviet_active_artisan_id', newArtisan.id);
       setCurrentArtisan(newArtisan);
       setIsRegisterMode(false);
+      setSearchParams({});
       await refreshArtisanData(newArtisan.id);
       showToast('🎉 Gửi hồ sơ thành công! Đang chờ Ban Quản Trị thẩm định.');
     } catch (error) {
@@ -555,7 +565,7 @@ const ArtisanPortal: React.FC = () => {
   });
 
   return (
-    <div className="min-h-screen bg-[#FAF7F0] font-display text-text-main pb-20 w-full max-w-full overflow-x-hidden">
+    <div className="bg-[#FAF7F0] font-display text-text-main pb-8 sm:pb-12 w-full max-w-full overflow-x-hidden">
       {/* Toast thông báo */}
       {toastMessage && (
         <div className="fixed top-24 left-1/2 -translate-x-1/2 z-[100] bg-white text-primary px-6 py-3 rounded-full shadow-2xl flex items-center gap-2 border-2 border-gold font-bold text-sm animate-fade-in">
@@ -1069,7 +1079,7 @@ const ArtisanPortal: React.FC = () => {
             </div>
 
         {/* NỘI DUNG CHÍNH */}
-        <div className="py-8">
+        <div className="py-4 sm:py-6">
           {isRegisterMode ? (
             <div className="space-y-6">
               {/* THANH CHUYỂN ĐỔI TAB: ĐĂNG KÝ HOẶC ĐĂNG NHẬP */}
@@ -1135,7 +1145,8 @@ const ArtisanPortal: React.FC = () => {
                           onChange={(e) => setSearchPhone(e.target.value)}
                           onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleLookupByPhone(); } }}
                           placeholder="Nhập SĐT (VD: 0988 888 888)..."
-                          className="w-full h-full bg-transparent border-none outline-none text-xs sm:text-sm font-bold text-text-main placeholder:font-normal placeholder:text-stone-400 ml-2.5 py-0"
+                          style={{ outline: 'none', boxShadow: 'none', WebkitTapHighlightColor: 'transparent' }}
+                          className="w-full h-full bg-transparent border-0 outline-none ring-0 focus:outline-none focus:ring-0 focus:border-0 focus-visible:outline-none text-xs sm:text-sm font-bold text-text-main placeholder:font-normal placeholder:text-stone-400 ml-2.5 py-0"
                         />
                       </div>
                     </div>
@@ -1264,7 +1275,8 @@ const ArtisanPortal: React.FC = () => {
                           value={regPhone}
                           onChange={e => setRegPhone(e.target.value)}
                           placeholder="0912 xxx xxx (Để nhận tin báo bưu tá)"
-                          className="h-9 sm:h-10 w-full px-3 bg-white border border-gold/25 rounded-lg text-xs font-bold text-text-main focus:border-primary outline-none"
+                          style={{ outline: 'none', boxShadow: 'none', WebkitTapHighlightColor: 'transparent' }}
+                          className="h-9 sm:h-10 w-full px-3 bg-white border border-gold/25 rounded-lg text-xs font-bold text-text-main focus:border-primary outline-none focus:outline-none focus:ring-0"
                         />
                       </div>
                     </div>
