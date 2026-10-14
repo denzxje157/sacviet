@@ -114,11 +114,11 @@ export const HeroView: React.FC<HeroViewProps> = ({ config, onSelectSection }) =
 
               <a
                 href={config.links.proposalDocxDownloadUrl}
-                download
+                download={config.links.proposalDocxFileName}
                 className="inline-flex items-center gap-2 px-4 py-3.5 rounded-xl bg-white hover:bg-gold/10 border border-gold/35 text-text-main font-bold text-xs md:text-sm transition-all whitespace-nowrap"
               >
                 <FileDown size={15} className="text-primary shrink-0" />
-                <span>Tải Bản Word (.DOCX)</span>
+                <span>Tải Mô Tả Dự Án (.DOCX)</span>
               </a>
             </div>
           </div>

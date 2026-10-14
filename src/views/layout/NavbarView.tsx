@@ -81,12 +81,12 @@ export const NavbarView: React.FC<NavbarViewProps> = ({
         <div className="hidden md:flex items-center gap-2 shrink-0 whitespace-nowrap">
           <a
             href={config.links.proposalDocxDownloadUrl}
-            download
+            download={config.links.proposalDocxFileName}
             className="flex items-center gap-1.5 px-3 py-2 rounded-full border border-gold/45 bg-white hover:bg-gold/15 text-text-main text-xs font-bold transition-all whitespace-nowrap shrink-0"
-            title="Tải Bản Mô Tả Đề Án (.DOCX)"
+            title="Tải Bản Mô Tả Dự Án Sắc Việt (.DOCX)"
           >
             <FileDown size={14} className="text-primary shrink-0" />
-            <span>Tải Đề Án</span>
+            <span>Tải Mô Tả Dự Án</span>
           </a>
           <a
             href={config.links.liveMvpUrl}
@@ -145,11 +145,11 @@ export const NavbarView: React.FC<NavbarViewProps> = ({
             </a>
             <a
               href={config.links.proposalDocxDownloadUrl}
-              download
+              download={config.links.proposalDocxFileName}
               className="flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl border border-gold/40 bg-white text-text-main text-xs font-bold whitespace-nowrap"
             >
               <FileDown size={14} className="text-primary" />
-              <span>Tải Bản Đề Án (.DOCX)</span>
+              <span>Tải Mô Tả Dự Án (.DOCX)</span>
             </a>
           </div>
         </div>

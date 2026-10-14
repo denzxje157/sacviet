@@ -30,7 +30,8 @@ export const projectConfigModel = {
     // Thay bằng link Vercel thực tế của web sản phẩm Sắc Việt (hoặc subdomain app.sacviet.id.vn)
     liveMvpUrl: 'https://sacviet.vercel.app',
     githubMvpRepo: 'https://github.com/denzxje157/sacviet',
-    proposalDocxDownloadUrl: '/docs/Ban_Mo_Ta_Du_An_Sac_Viet.docx',
+    proposalDocxDownloadUrl: '/docs/Mo_Ta_Du_An_Sac_Viet.docx',
+    proposalDocxFileName: 'Mô Tả Dự Án Sắc Việt.docx',
     vecomFanpageUrl: 'https://www.facebook.com/VecomNet?locale=vi_VN',
   },
 

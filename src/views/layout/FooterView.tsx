@@ -116,11 +116,11 @@ export const FooterView: React.FC<FooterViewProps> = ({ config, onSelectSection 
               </a>
               <a
                 href={config.links.proposalDocxDownloadUrl}
-                download
+                download={config.links.proposalDocxFileName}
                 className="flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-xl border border-gold/40 hover:bg-white/10 text-white font-bold text-xs transition-all whitespace-nowrap"
               >
                 <FileDown size={14} className="shrink-0" />
-                <span>Tải .DOCX</span>
+                <span>Tải Bản Mô Tả (.DOCX)</span>
               </a>
             </div>
           </div>
