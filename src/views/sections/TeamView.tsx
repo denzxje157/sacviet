@@ -103,12 +103,12 @@ export const TeamView: React.FC<TeamViewProps> = ({
             >
               <div>
                 {/* Huy hiệu Vai trò & Lớp */}
-                <div className="flex items-center justify-between gap-2 mb-4">
+                <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
                   <span
-                    className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide whitespace-nowrap ${
+                    className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide inline-block ${
                       member.isLeader
-                        ? 'bg-primary text-white'
-                        : 'bg-gold/25 text-text-main'
+                        ? 'bg-primary text-white shadow-xs'
+                        : 'bg-gold/20 text-text-main border border-gold/30'
                     }`}
                   >
                     {member.className}
