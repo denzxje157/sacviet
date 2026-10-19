@@ -111,7 +111,7 @@ export const TeamView: React.FC<TeamViewProps> = ({
                         : 'bg-gold/25 text-text-main'
                     }`}
                   >
-                    {member.roleCode} • {member.className}
+                    {member.className}
                   </span>
                   {member.isLeader && (
                     <span className="inline-flex items-center gap-1 text-xs font-bold text-primary whitespace-nowrap">
