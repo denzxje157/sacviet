@@ -19,11 +19,11 @@ interface TeamViewProps {
 
 const ROLE_FILTERS = [
   { code: 'ALL', label: 'Tất Cả (05 Thành Viên)' },
-  { code: 'CEO', label: 'CEO • Chiến Lược' },
-  { code: 'CTO', label: 'CTO • Công Nghệ & AI' },
-  { code: 'COO', label: 'COO • Vận Hành HTX' },
-  { code: 'CMO', label: 'CMO • Truyền Thông' },
-  { code: 'CCO', label: 'CCO • Nội Dung Di Sản' },
+  { code: 'LEAD', label: 'Trưởng Nhóm' },
+  { code: 'DEV', label: 'Công Nghệ & AI' },
+  { code: 'OPS', label: 'Vận Hành & Khảo Sát' },
+  { code: 'MKT', label: 'Marketing Số' },
+  { code: 'CONTENT', label: 'Dữ Liệu Di Sản' },
 ];
 
 export const TeamView: React.FC<TeamViewProps> = ({

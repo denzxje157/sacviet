@@ -27,8 +27,8 @@ export const projectConfigModel = {
 
   // ĐƯỜNG LINK QUAN TRỌNG (Đổi link web sản phẩm thực tế của nhóm tại đây)
   links: {
-    // Thay bằng link Vercel thực tế của web sản phẩm Sắc Việt (hoặc subdomain app.sacviet.id.vn)
-    liveMvpUrl: 'https://sacviet.vercel.app',
+    // Tên miền chính thức của web sản phẩm Sắc Việt
+    liveMvpUrl: 'https://sacviet.id.vn',
     githubMvpRepo: 'https://github.com/denzxje157/sacviet',
     proposalDocxDownloadUrl: '/docs/Mo_Ta_Du_An_Sac_Viet.docx',
     proposalDocxFileName: 'Mô Tả Dự Án Sắc Việt.docx',
@@ -38,8 +38,8 @@ export const projectConfigModel = {
   // Thông tin liên hệ đại diện Đội thi
   leaderContact: {
     fullName: 'Hà Văn Kiên',
-    role: 'Trưởng nhóm Dự án Sắc Việt (CEO)',
-    classInfo: 'Lớp 25CT111 – Trường Đại học Lạc Hồng',
+    role: 'Trưởng nhóm Dự án Sắc Việt',
+    classInfo: 'Sinh viên Năm 2 • Khoa Công nghệ Thông tin – ĐH Lạc Hồng',
     phone: '0971565426',
     email: 'hakien2525@gmail.com',
   },
