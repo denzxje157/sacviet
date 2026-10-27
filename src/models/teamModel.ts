@@ -45,7 +45,7 @@ export const teamMembersData: TeamMember[] = [
     isLeader: false,
     className: 'Năm 2 • Lớp 25CT111',
     university: 'Khoa Công nghệ Thông tin – ĐH Lạc Hồng',
-    phone: '0971565426',
+    phone: '0792628262',
     email: 'nguyenhoangannh1507@gmail.com',
     avatarUrl: '/assets/team/nguyen-hoang-anh.jpg',
     responsibilities: [
