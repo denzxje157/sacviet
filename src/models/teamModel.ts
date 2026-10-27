@@ -46,7 +46,7 @@ export const teamMembersData: TeamMember[] = [
     className: 'Năm 2 • Lớp 25CT111',
     university: 'Khoa Công nghệ Thông tin – ĐH Lạc Hồng',
     phone: '0971565426',
-    email: 'hakien2525@gmail.com',
+    email: 'nguyenhoangannh1507@gmail.com',
     avatarUrl: '/assets/team/nguyen-hoang-anh.jpg',
     responsibilities: [
       'Xây dựng và phát triển mã nguồn website với React, TypeScript & Supabase Cloud',
