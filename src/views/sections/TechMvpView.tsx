@@ -76,10 +76,10 @@ export const TechMvpView: React.FC<TechMvpViewProps> = ({
             <div>
               <div className="inline-flex items-center gap-2 text-gold-light text-xs font-bold uppercase tracking-wider">
                 <Layers size={15} className="shrink-0" />
-                <span>Minh Chứng Sản Phẩm Đã Lập Trình Hoàn Thiện (Live MVP Showcase)</span>
+                <span>Minh chứng sản phẩm đã lập trình hoàn thiện (Live MVP Showcase)</span>
               </div>
               <h3 className="font-black text-xl md:text-2xl text-white mt-1">
-                Khám Phá 04 Phân Khu Của Nền Tảng Sắc Việt
+                Khám phá các phân khu sản phẩm của nền tảng Sắc Việt
               </h3>
             </div>
             <a
@@ -88,20 +88,20 @@ export const TechMvpView: React.FC<TechMvpViewProps> = ({
               rel="noopener noreferrer"
               className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-gold hover:bg-amber-500 text-[#2B0505] font-bold text-xs uppercase tracking-wider transition-all shrink-0 whitespace-nowrap"
             >
-              <span>Mở Toàn Bộ Web App Sắc Việt</span>
+              <span>Mở toàn bộ Web App Sắc Việt</span>
               <ExternalLink size={15} className="shrink-0" />
             </a>
           </div>
 
-          {/* Thanh chuyển Tab 4 Phân khu - Đồng đều chiều cao */}
-          <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
+          {/* Thanh chuyển Tab 5 Phân khu */}
+          <div className="mt-6 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2">
             {data.mvpModules.map((mod) => {
               const isSelected = mod.id === activeTabId;
               return (
                 <button
                   key={mod.id}
                   onClick={() => onSelectTab(mod.id)}
-                  className={`px-4 py-3 rounded-xl text-left text-xs font-bold transition-all cursor-pointer border truncate ${
+                  className={`px-3 py-2.5 rounded-xl text-left text-xs font-bold transition-all cursor-pointer border truncate ${
                     isSelected
                       ? 'bg-primary text-white border-gold shadow-md'
                       : 'bg-white/5 text-white/80 border-white/10 hover:bg-white/10 hover:text-white'
@@ -155,20 +155,38 @@ export const TechMvpView: React.FC<TechMvpViewProps> = ({
                     <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
                   </div>
                   <span className="font-mono text-gold-light">
-                    sacviet.app{activeModule.routePath}
+                    sacviet.id.vn{activeModule.routePath}
                   </span>
                 </div>
-                <div className="aspect-[16/10] relative">
-                  <img
-                    src={activeModule.imageUrl}
-                    alt={activeModule.headline}
-                    className="w-full h-full object-cover"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent flex items-end p-4">
-                    <div className="text-xs text-white/95">
-                      <span className="font-bold text-gold-light">Trạng thái:</span> Đã tích hợp cơ sở dữ liệu Supabase & sẵn sàng giao dịch thực tế.
+                <div className="relative bg-[#FAF7F2] min-h-[240px] flex items-center justify-center overflow-hidden">
+                  {activeModule.isPlaceholderImage ? (
+                    <div className="p-6 text-center space-y-2.5 bg-[#1A0303] w-full h-full min-h-[240px] flex flex-col items-center justify-center">
+                      <div className="inline-block px-3.5 py-1.5 rounded-xl bg-amber-500/20 border border-amber-400/40 text-amber-300 font-mono text-xs font-bold">
+                        {activeModule.placeholderText || '[CẦN ẢNH: Giao diện Kênh Nghệ nhân]'}
+                      </div>
+                      <p className="text-xs text-white/60 max-w-sm mx-auto">
+                        Tài liệu đề án chưa có ảnh chụp màn hình riêng cho phân khu này. Không sử dụng ảnh phong cảnh thay thế để bảo đảm tính xác thực.
+                      </p>
                     </div>
+                  ) : (
+                    <img
+                      src={activeModule.imageUrl}
+                      alt={activeModule.imageAlt || activeModule.headline}
+                      loading="lazy"
+                      className="w-full h-auto max-h-[380px] object-contain block"
+                    />
+                  )}
+                </div>
+                <div className="px-4 py-2.5 bg-black/75 border-t border-white/10 flex items-center justify-between text-xs text-white/80">
+                  <div className="flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shrink-0" />
+                    <span className="text-[11px] text-white/90">
+                      <strong className="text-gold-light">Trạng thái:</strong> Giao diện thử nghiệm (kết nối Supabase & Gemini AI).
+                    </span>
                   </div>
+                  <span className="text-[10px] text-white/50 font-mono hidden sm:inline">
+                    Live MVP
+                  </span>
                 </div>
               </div>
             </div>

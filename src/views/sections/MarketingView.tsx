@@ -130,7 +130,7 @@ export const MarketingView: React.FC<MarketingViewProps> = ({ data }) => {
             <div className="flex items-center gap-2">
               <Wrench size={18} className="text-primary shrink-0" />
               <h3 className="font-black text-lg md:text-xl text-primary">
-                Bộ Công Cụ Truyền Thông Chuẩn Hóa
+                Bộ công cụ truyền thông chuẩn hóa
               </h3>
             </div>
             <div className="space-y-3">
@@ -152,7 +152,7 @@ export const MarketingView: React.FC<MarketingViewProps> = ({ data }) => {
             <div className="flex items-center gap-2">
               <BarChart3 size={20} className="text-primary shrink-0" />
               <h3 className="font-black text-lg md:text-xl text-primary">
-                Đo Lường Hiệu Quả Truyền Thông Thời Gian Thực (KPIs)
+                Đo lường hiệu quả truyền thông thời gian thực (KPIs)
               </h3>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

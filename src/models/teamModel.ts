@@ -1,4 +1,4 @@
-import { TeamMember, PartnerGroup } from './types';
+import { TeamMember, PartnerGroup, FieldworkProof } from './types';
 
 /**
  * ============================================================================
@@ -11,11 +11,85 @@ import { TeamMember, PartnerGroup } from './types';
 
 export const teamOverviewModel = {
   sectionBadge: 'HẠNG MỤC 01 & MỤC 6 ĐỀ ÁN • ĐỘI NGŨ & NGUỒN LỰC',
-  sectionTitle: 'Đội Thi Trường Đại Học Lạc Hồng',
+  sectionTitle: 'Đội thi Trường Đại học Lạc Hồng',
   sectionSubtitle:
-    'Đội ngũ nòng cốt gồm 05 thành viên đa ngành từ Công nghệ thông tin, Quản trị vận hành đến Truyền thông đa phương tiện – những người đã trực tiếp kiến trúc và lập trình hoàn thiện mã nguồn nền tảng MVP Sắc Việt mà không phụ thuộc đơn vị gia công bên ngoài.',
+    'Đội ngũ nòng cốt gồm 05 sinh viên từ các ngành Công nghệ thông tin và Thương mại điện tử – trực tiếp kiến trúc và lập trình hoàn thiện mã nguồn nền tảng MVP Sắc Việt.',
   incubationSupport:
-    'Dự án đang trong giai đoạn ươm tạo và nhận được sự bảo trợ, cố vấn chuyên môn sát sao từ các giảng viên tại Trường Đại học Lạc Hồng về định hướng công nghệ lõi cũng như mô hình phát triển kinh doanh bền vững.',
+    'Dự án đang trong giai đoạn ươm tạo và nhận được sự bảo trợ, cố vấn chuyên môn từ các giảng viên tại Trường Đại học Lạc Hồng về định hướng công nghệ cũng như mô hình phát triển kinh doanh.',
+};
+
+export const fieldworkProofModel: FieldworkProof = {
+  badge: 'MINH CHỨNG THỰC ĐỊA & KẾT NỐI BẢN ĐỊA',
+  title: 'Khảo sát thực tế & đối thoại cùng nghệ nhân làng nghề',
+  subtitle:
+    'Đội ngũ Sắc Việt trực tiếp đến các làng nghề truyền thống để lắng nghe tâm tư, quy trình sản xuất thủ công và rào cản tiêu thụ sản phẩm của bà con.',
+  imageUrl: '/assets/fieldwork/fieldwork-1-artisan-talk.webp',
+  imageAlt: 'Đội ngũ gặp gỡ và lắng nghe nghệ nhân chia sẻ về văn hóa bản địa',
+  caption: 'Đội ngũ gặp gỡ và lắng nghe nghệ nhân chia sẻ về văn hóa bản địa (Hình 3 trong Bản mô tả dự án)',
+  location: 'Làng Bana, Xã Ea Rốk, Huyện Ea Súp, Tỉnh Đắk Lắk',
+  date: '31/08 – 02/09',
+  coopName: 'Hợp tác xã Ea Rốk / Hộ nghệ nhân Lữ Văn Phong',
+  permissionStatus: 'Được hộ nghệ nhân đồng ý phỏng vấn và khảo sát',
+  fieldworkSummary:
+    'Đội ngũ sinh viên trực tiếp đối thoại, tìm hiểu quy trình ủ men truyền thống và lắng nghe rào cản tiêu thụ thực tế của hộ nghệ nhân. Dữ liệu là căn cứ xây dựng phân khu Chợ phiên D2C và Kênh Nghệ nhân trên nền tảng Sắc Việt.',
+  isVerified: true,
+  slides: [
+    {
+      id: 'artisan-talk',
+      title: 'Đối thoại cùng nghệ nhân làm rượu cần',
+      imageUrl: '/assets/fieldwork/fieldwork-1-artisan-talk.webp',
+      imageAlt: 'Đội ngũ gặp gỡ và lắng nghe nghệ nhân chia sẻ về văn hóa bản địa',
+      caption: 'Đội ngũ gặp gỡ và lắng nghe nghệ nhân chia sẻ về văn hóa bản địa (Hình 3 trong Bản mô tả dự án)',
+      tag: 'Hình 3 Đề án Sắc Việt',
+      badge: 'Gặp gỡ nghệ nhân',
+    },
+    {
+      id: 'touching-jars',
+      title: 'Tìm hiểu quy trình và bình ủ rượu truyền thống',
+      imageUrl: '/assets/fieldwork/fieldwork-2-touching-jars.webp',
+      imageAlt: 'Sinh viên tận tay tìm hiểu bình rượu cần truyền thống',
+      caption: 'Sinh viên trực tiếp quan sát và tìm hiểu kỹ thuật làm chum, bình ủ rượu cần truyền thống của đồng bào',
+      tag: 'Quy trình sản xuất',
+      badge: 'Khảo sát kỹ thuật',
+    },
+    {
+      id: 'binh-ruou-can',
+      title: 'Chi tiết bình rượu cần truyền thống',
+      imageUrl: '/assets/fieldwork/fieldwork-4-binh-ruou-can.webp',
+      imageAlt: 'Chi tiết sản phẩm bình rượu cần truyền thống',
+      caption: 'Sản phẩm bình rượu cần thủ công truyền thống đặc trưng văn hóa bản địa vùng cao',
+      tag: 'Bình rượu cần',
+      badge: 'Sản phẩm rượu cần',
+    },
+    {
+      id: 'san-pham',
+      title: 'Sản phẩm thủ công và thổ cẩm làng nghề',
+      imageUrl: '/assets/fieldwork/fieldwork-5-san-pham.webp',
+      imageAlt: 'Sản phẩm thủ công làng nghề truyền thống',
+      caption: 'Các sản phẩm thủ công mỹ nghệ, thổ cẩm và sản vật địa phương phục vụ số hóa trên sàn Sắc Việt',
+      tag: 'Sản phẩm làng nghề',
+      badge: 'Sản vật địa phương',
+    },
+    {
+      id: 'cultural-experience',
+      title: 'Nhóm sinh viên trải nghiệm văn hóa bản địa',
+      imageUrl: '/assets/fieldwork/fieldwork-3-cultural-experience.webp',
+      imageAlt: 'Nhóm sinh viên khảo sát và trải nghiệm văn hóa',
+      caption: 'Các thành viên trong nhóm trực tiếp khảo sát thực địa và trải nghiệm các giá trị văn hóa độc bản',
+      tag: 'Trải nghiệm văn hóa',
+      badge: 'Kết nối cộng đồng',
+    },
+    {
+      id: 'e-de-experience',
+      title: 'Trải nghiệm văn hóa dân tộc Ê Đê',
+      imageUrl: '/assets/fieldwork/fieldwork-6-e-de-experience.webp',
+      imageAlt: 'Sinh viên trải nghiệm văn hóa dân tộc Ê Đê',
+      caption: 'Sinh viên tiếp cận và tìm hiểu sâu hơn về nếp sống, phong tục và văn hóa truyền thống Ê Đê',
+      tag: 'Văn hóa Ê Đê',
+      badge: 'Bản sắc dân tộc',
+      fitMode: 'contain',
+    },
+  ],
 };
 
 export const teamMembersData: TeamMember[] = [
@@ -113,20 +187,20 @@ export const teamMembersData: TeamMember[] = [
 
 export const strategicPartnersData: PartnerGroup[] = [
   {
-    category: 'Cố Vấn & Bảo Trợ',
-    title: 'Trường Đại Học Lạc Hồng',
+    category: 'Cố vấn & bảo trợ',
+    title: 'Trường Đại học Lạc Hồng',
     items: ['Giảng viên cố vấn Công nghệ & AI', 'Giảng viên cố vấn Quản trị Kinh doanh', 'Vườn ươm Khởi nghiệp Sinh viên'],
     description: 'Định hướng chiến lược học thuật, thẩm định mô hình tài chính và kết nối hệ sinh thái khởi nghiệp.',
   },
   {
-    category: 'Đối Tác Nguồn Cung',
-    title: 'Mạng Lưới Hợp Tác Xã Làng Nghề',
+    category: 'Đối tác nguồn cung',
+    title: 'Mạng lưới hợp tác xã làng nghề',
     items: ['HTX Gốm Chăm Bàu Trúc', 'HTX Dệt Lanh & Thổ Cẩm Tây Bắc', 'Tổ hợp tác Đan lát & Chế tác Tây Nguyên'],
     description: 'Cung cấp sản phẩm thủ công nguyên bản tận gốc (D2C) và đồng kiểm định chất lượng đầu ra.',
   },
   {
-    category: 'Đối Tác Hạ Tầng & Logistics',
-    title: 'Công Nghệ & Vận Chuyển Tuyến Xã',
+    category: 'Đối tác hạ tầng & logistics',
+    title: 'Công nghệ & vận chuyển tuyến xã',
     items: ['VNPost & Viettel Post (Phủ sóng vùng cao)', 'Google Gemini AI & Supabase Cloud', 'Hạ tầng triển khai Vercel Serverless'],
     description: 'Đảm bảo vận chuyển từ bản làng xa xôi đến đô thị và duy trì hệ thống công nghệ chi phí tối ưu.',
   },

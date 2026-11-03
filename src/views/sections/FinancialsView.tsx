@@ -90,7 +90,7 @@ export const FinancialsView: React.FC<FinancialsViewProps> = ({
             <div className="flex items-center gap-2">
               <Coins size={20} className="text-primary shrink-0" />
               <h3 className="font-black text-xl md:text-2xl text-primary">
-                Cơ Cấu 03 Nguồn Thu Bền Vững
+                Cơ cấu 03 nguồn thu bền vững
               </h3>
             </div>
             <div className="space-y-5">
@@ -125,7 +125,7 @@ export const FinancialsView: React.FC<FinancialsViewProps> = ({
           <div className="lg:col-span-6 p-6 md:p-7 rounded-2xl bg-white border border-gold/40 shadow-xs space-y-5 flex flex-col justify-between">
             <div>
               <h3 className="font-black text-xl md:text-2xl text-primary">
-                Dự Phóng Doanh Thu 03 Năm Đầu Tiên
+                Dự phóng doanh thu 03 năm đầu tiên
               </h3>
               <p className="text-xs text-text-soft mt-1">
                 Tăng trưởng từ thị trường nội địa sang xuất khẩu văn hóa đa ngôn ngữ
@@ -177,14 +177,14 @@ export const FinancialsView: React.FC<FinancialsViewProps> = ({
             <div className="flex items-center gap-2">
               <Landmark size={20} className="text-primary shrink-0" />
               <h3 className="font-black text-lg md:text-xl text-primary">
-                Giải Pháp Huy Động & Phân Bổ Vốn
+                Giải pháp huy động & phân bổ vốn
               </h3>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="p-4 rounded-xl bg-white border border-gold/30">
                 <div className="text-[11px] font-bold uppercase tracking-wider text-text-soft">
-                  Vốn Tự Có Đã Giải Ngân
+                  Vốn tự có đã giải ngân
                 </div>
                 <div className="font-black text-lg text-primary mt-1 whitespace-nowrap">
                   {data.fundingPlan.selfFundedAmount}
@@ -195,7 +195,7 @@ export const FinancialsView: React.FC<FinancialsViewProps> = ({
               </div>
               <div className="p-4 rounded-xl bg-primary text-white">
                 <div className="text-[11px] font-bold uppercase tracking-wider text-gold-light">
-                  Vốn Huy Động Thương Mại
+                  Vốn huy động thương mại
                 </div>
                 <div className="font-black text-lg text-gold-light mt-1 whitespace-nowrap">
                   {data.fundingPlan.targetRaiseAmount}
@@ -233,7 +233,7 @@ export const FinancialsView: React.FC<FinancialsViewProps> = ({
               <Calculator size={22} className="text-gold shrink-0 mt-0.5" />
               <div>
                 <h3 className="font-black text-lg md:text-xl text-gold-light">
-                  Mô Phỏng Doanh Thu & Tác Động Xã Hội (Interactive)
+                  Mô phỏng doanh thu & tác động xã hội (Interactive)
                 </h3>
                 <p className="text-xs text-white/75 mt-0.5">
                   Kéo thanh trượt để kiểm chứng bài toán tài chính và thu nhập chuyển trực tiếp về Nghệ nhân
@@ -292,7 +292,7 @@ export const FinancialsView: React.FC<FinancialsViewProps> = ({
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-1">
               <div className="p-3.5 rounded-xl bg-white/10 border border-gold/30">
                 <div className="text-[11px] font-bold uppercase text-white/75 whitespace-nowrap">
-                  Tổng GMV / Năm
+                  Tổng GMV / năm
                 </div>
                 <div className="font-black text-lg text-white mt-1 whitespace-nowrap">
                   {simulationResult.annualGmvMillion.toLocaleString('vi-VN')} Tr
@@ -300,7 +300,7 @@ export const FinancialsView: React.FC<FinancialsViewProps> = ({
               </div>
               <div className="p-3.5 rounded-xl bg-emerald-950/90 border border-emerald-400/40">
                 <div className="text-[11px] font-bold uppercase text-emerald-300 whitespace-nowrap">
-                  Về Nghệ Nhân (~89%)
+                  Về nghệ nhân (~89%)*
                 </div>
                 <div className="font-black text-lg text-emerald-300 mt-1 whitespace-nowrap">
                   {simulationResult.artisanIncomeMillion.toLocaleString('vi-VN')} Tr
@@ -308,7 +308,7 @@ export const FinancialsView: React.FC<FinancialsViewProps> = ({
               </div>
               <div className="p-3.5 rounded-xl bg-gold/20 border border-gold">
                 <div className="text-[11px] font-bold uppercase text-gold-light whitespace-nowrap">
-                  Doanh Thu Sàn/Năm
+                  Doanh thu sàn / năm
                 </div>
                 <div className="font-black text-lg text-gold-light mt-1 whitespace-nowrap">
                   {simulationResult.totalPlatformRevenueMillion.toLocaleString('vi-VN')} Tr
@@ -316,13 +316,17 @@ export const FinancialsView: React.FC<FinancialsViewProps> = ({
               </div>
               <div className="p-3.5 rounded-xl bg-white/10 border border-gold/30">
                 <div className="text-[11px] font-bold uppercase text-white/75 whitespace-nowrap">
-                  Lãi Ròng (~22.5%)
+                  Lãi ròng (~22.5%)
                 </div>
                 <div className="font-black text-lg text-white mt-1 whitespace-nowrap">
                   {simulationResult.netProfitMillion.toLocaleString('vi-VN')} Tr
                 </div>
               </div>
             </div>
+
+            <p className="text-[11px] text-white/60 italic pt-1 border-t border-white/10">
+              * Tỷ lệ 90% được tính trước phí vận chuyển và cổng thanh toán theo cam kết của nền tảng đối với nghệ nhân bản địa (phí nền tảng cố định 10%).
+            </p>
           </div>
         </div>
       </div>

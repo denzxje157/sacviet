@@ -12,9 +12,14 @@ import { projectConfigModel } from '../../models/projectConfigModel';
 interface FooterViewProps {
   config: typeof projectConfigModel;
   onSelectSection: (id: SectionId) => void;
+  onOpenPolicy: (policyId: string) => void;
 }
 
-export const FooterView: React.FC<FooterViewProps> = ({ config, onSelectSection }) => {
+export const FooterView: React.FC<FooterViewProps> = ({
+  config,
+  onSelectSection,
+  onOpenPolicy,
+}) => {
   return (
     <footer className="bg-[#2B0505] text-[#F9F5EA] border-t-4 border-gold pt-14 pb-10">
       <div className="mx-auto max-w-[1320px] px-4 md:px-8">
@@ -37,7 +42,7 @@ export const FooterView: React.FC<FooterViewProps> = ({ config, onSelectSection 
               </div>
             </div>
             <p className="text-sm text-white/80 leading-relaxed">
-              {config.projectFullTitle}. Nền tảng thương mại điện tử D2C kết hợp Bảo tàng văn hóa số ứng dụng Trí tuệ nhân tạo (Gemini AI) và Bản đồ di sản (Leaflet).
+              {config.projectFullTitle}. Nền tảng thương mại điện tử D2C kết hợp bảo tàng văn hóa số ứng dụng Trí tuệ nhân tạo (Gemini AI) và Bản đồ di sản (Leaflet).
             </p>
             <div className="inline-flex items-center gap-3 px-4 py-2.5 rounded-2xl bg-white text-text-main shadow-md">
               <img
@@ -56,11 +61,11 @@ export const FooterView: React.FC<FooterViewProps> = ({ config, onSelectSection 
             </div>
           </div>
 
-          {/* Cột 2: Điều hướng nhanh 7 phần báo cáo */}
+          {/* Cột 2: Điều hướng nhanh 8 phần báo cáo */}
           <div className="md:col-span-3 space-y-3">
             <h4 className="text-xs font-black uppercase tracking-wider text-gold-light flex items-center gap-2">
               <Award size={15} className="shrink-0" />
-              <span>Danh Mục Báo Cáo Đề Án</span>
+              <span>Danh mục báo cáo đề án</span>
             </h4>
             <ul className="space-y-2 text-xs">
               {config.navigationItems.map((item) => (
@@ -80,11 +85,11 @@ export const FooterView: React.FC<FooterViewProps> = ({ config, onSelectSection 
           {/* Cột 3: Liên hệ Trưởng nhóm & Truy cập Sản phẩm */}
           <div className="md:col-span-4 space-y-4">
             <h4 className="text-xs font-black uppercase tracking-wider text-gold-light">
-              Thông Tin Liên Hệ Đội Thi
+              Thông tin liên hệ đội thi
             </h4>
             <div className="p-4 rounded-2xl bg-white/5 border border-gold/25 space-y-2.5 text-xs">
               <div className="font-bold text-sm text-gold-light">
-                {config.leaderContact.fullName} — Trưởng Nhóm (CEO)
+                {config.leaderContact.fullName} — Trưởng nhóm (CEO)
               </div>
               <div className="flex items-center gap-2 text-white/85">
                 <MapPin size={14} className="text-gold shrink-0" />
@@ -114,14 +119,65 @@ export const FooterView: React.FC<FooterViewProps> = ({ config, onSelectSection 
                 <span>Mở Web Sản Phẩm MVP</span>
                 <ExternalLink size={14} className="shrink-0" />
               </a>
+              <button
+                onClick={() =>
+                  alert(
+                    'Bản PDF đề án chính thức đang được chuẩn bị. Bạn vui lòng tải tạm bản Mô tả dự án (.DOCX) bên cạnh!'
+                  )
+                }
+                className="flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl border border-amber-400 bg-amber-500/20 text-amber-200 text-xs font-bold hover:bg-amber-500/30 transition-all whitespace-nowrap cursor-pointer"
+                title="Đang chờ file PDF chính thức từ nhóm"
+              >
+                <FileDown size={14} className="shrink-0" />
+                <span>PDF [CẦN FILE PDF]</span>
+              </button>
               <a
                 href={config.links.proposalDocxDownloadUrl}
                 download={config.links.proposalDocxFileName}
-                className="flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-xl border border-gold/40 hover:bg-white/10 text-white font-bold text-xs transition-all whitespace-nowrap"
+                className="flex items-center justify-center gap-1 px-3 py-2.5 rounded-xl border border-gold/40 hover:bg-white/10 text-white font-bold text-xs transition-all whitespace-nowrap"
+                title="Tải Bản Mô Tả Dự Án (.DOCX)"
               >
                 <FileDown size={14} className="shrink-0" />
-                <span>Tải Bản Mô Tả (.DOCX)</span>
+                <span>.DOCX</span>
               </a>
+            </div>
+          </div>
+        </div>
+
+        {/* Khối Liên kết 4 Chính sách sàn TMĐT */}
+        <div className="py-5 border-b border-white/15">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+            <span className="font-bold uppercase tracking-wider text-gold-light">
+              Quy chế & chính sách sàn TMĐT (Dự thảo):
+            </span>
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs">
+              <button
+                onClick={() => onOpenPolicy('doi-tra-hoan-tien')}
+                className="text-white/80 hover:text-gold-light transition-colors cursor-pointer underline-offset-4 hover:underline"
+              >
+                Chính sách đổi trả & hoàn tiền
+              </button>
+              <span className="text-gold/40">•</span>
+              <button
+                onClick={() => onOpenPolicy('bao-mat-thong-tin')}
+                className="text-white/80 hover:text-gold-light transition-colors cursor-pointer underline-offset-4 hover:underline"
+              >
+                Chính sách bảo mật thông tin
+              </button>
+              <span className="text-gold/40">•</span>
+              <button
+                onClick={() => onOpenPolicy('dieu-khoan-su-dung')}
+                className="text-white/80 hover:text-gold-light transition-colors cursor-pointer underline-offset-4 hover:underline"
+              >
+                Điều khoản sử dụng
+              </button>
+              <span className="text-gold/40">•</span>
+              <button
+                onClick={() => onOpenPolicy('don-vi-van-hanh')}
+                className="text-white/80 hover:text-gold-light transition-colors cursor-pointer underline-offset-4 hover:underline"
+              >
+                Thông tin đơn vị vận hành
+              </button>
             </div>
           </div>
         </div>
@@ -130,9 +186,18 @@ export const FooterView: React.FC<FooterViewProps> = ({ config, onSelectSection 
           <p>
             © 2026 Dự án Khởi nghiệp <strong>Sắc Việt</strong> – Đội thi Sinh viên {config.universityName}.
           </p>
-          <p className="text-gold-light/85 font-medium">
-            Website Báo cáo Đề án & Đội thi – Cuộc thi Sinh viên Kinh doanh số 2026 (VECOM).
-          </p>
+          <div className="flex items-center gap-3">
+            <a
+              href={config.links.reportWebUrl}
+              className="text-gold-light/90 hover:underline font-medium"
+            >
+              {config.links.reportWebUrl}
+            </a>
+            <span className="text-gold/40">•</span>
+            <span className="text-gold-light/85">
+              Cuộc thi Sinh viên Kinh doanh số 2026 (VECOM)
+            </span>
+          </div>
         </div>
       </div>
     </footer>

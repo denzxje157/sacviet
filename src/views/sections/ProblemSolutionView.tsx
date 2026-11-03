@@ -67,7 +67,7 @@ export const ProblemSolutionView: React.FC<ProblemSolutionViewProps> = ({ data }
           <div className="flex items-center gap-2 mb-4">
             <Users2 size={20} className="text-primary shrink-0" />
             <h3 className="font-black text-xl md:text-2xl text-primary">
-              Chân Dung Khách Hàng Mục Tiêu Trọng Tâm
+              Chân dung khách hàng mục tiêu trọng tâm
             </h3>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
@@ -88,14 +88,14 @@ export const ProblemSolutionView: React.FC<ProblemSolutionViewProps> = ({ data }
         {/* Bảng Đối Chiếu Lý Do Khách Hàng Chọn Sắc Việt Thay Vì Sàn Đại Trà */}
         <div className="mt-10">
           <h3 className="font-black text-xl md:text-2xl text-primary mb-4">
-            Vì Sao Khách Hàng Chọn Sắc Việt Thay Vì Sàn TMĐT Đại Trà?
+            Vì sao khách hàng chọn Sắc Việt thay vì sàn TMĐT đại trà?
           </h3>
           <div className="overflow-x-auto rounded-2xl border border-gold/40 shadow-sm bg-white">
             <table className="w-full min-w-[720px] text-left border-collapse">
               <thead>
                 <tr className="bg-[#2B0505] text-white text-xs uppercase tracking-wider">
                   <th className="py-4 px-5 font-bold w-1/4 whitespace-nowrap">
-                    Tiêu Chí Đối Chiếu
+                    Tiêu chí đối chiếu
                   </th>
                   <th className="py-4 px-5 font-bold w-[37.5%] text-red-200 whitespace-nowrap">
                     Thương Lái Truyền Thống / Sàn Đại Trà

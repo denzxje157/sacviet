@@ -15,23 +15,39 @@ export const projectConfigModel = {
   dbcLogoUrl: '/assets/dbc-logo.png',
   sacVietLogoUrl: 'https://cazllsidgvysyxbvrftq.supabase.co/storage/v1/object/public/images-sacviet/logo.png?v=3',
   universityName: 'TRƯỜNG ĐẠI HỌC LẠC HỒNG',
-  submissionTime: 'Tháng 10 / 2026',
+  submissionTime: 'Tháng 11 / 2026',
 
   // Tên dự án & Thông điệp
   projectShortName: 'SẮC VIỆT',
   projectSubtitle: 'Nền tảng kết nối chợ phiên đến với muôn phương',
   projectFullTitle: 'Sắc Việt – Nền tảng kết nối chợ phiên đến với muôn phương',
-  coreSlogan: 'Chạm Vào Di Sản – Kiến Tạo Sinh Kế Bền Vững',
+  coreSlogan: 'Chạm vào di sản – Kiến tạo sinh kế bền vững',
   heroSummary:
     'Nền tảng Thương mại điện tử D2C kết hợp Bảo tàng văn hóa số tiên phong tại Việt Nam. Ứng dụng Trí tuệ nhân tạo (Gemini AI) làm trợ lý văn hóa ảo và Bản đồ số (Leaflet) định vị nguồn gốc sản phẩm của 54 dân tộc, giúp nghệ nhân vùng cao nâng cao thu nhập trực tiếp không qua trung gian.',
 
-  // ĐƯỜNG LINK QUAN TRỌNG (Đổi link web sản phẩm thực tế của nhóm tại đây)
+  // Thông báo dữ liệu mẫu
+  mockDataDisclaimer:
+    'Phiên bản thử nghiệm: Số lượng đã bán, đánh giá và một số hồ sơ nghệ nhân trên web sản phẩm là dữ liệu minh họa phục vụ trình diễn.',
+
+  // ĐƯỜNG LINK QUAN TRỌNG
   links: {
     // Tên miền chính thức của web sản phẩm Sắc Việt
     liveMvpUrl: 'https://sacviet.id.vn',
+    reportWebUrl: 'https://baocao.sacviet.id.vn',
     githubMvpRepo: 'https://github.com/denzxje157/sacviet',
-    proposalDocxDownloadUrl: '/docs/Mo_Ta_Du_An_Sac_Viet.docx',
-    proposalDocxFileName: 'Mô Tả Dự Án Sắc Việt.docx',
+    proposalDocxDownloadUrl: '/assets/DBC_ND3_SACVIET.docx',
+    proposalDocxFileName: 'DBC_ND3_SACVIET.docx',
+    proposalPdfDownloadUrl: '/assets/DBC_ND3_SACVIET.pdf',
+    proposalPdfFileName: 'DBC_ND3_SACVIET.pdf',
+    hasPdfFile: true,
+    demoVideoUrl: '[CẦN ĐIỀN: Link video demo]',
+    hasDemoVideo: false,
+    artisanPortalUrl: 'https://sacviet.id.vn/#/artisans',
+    artisanDemoAccount: {
+      username: 'nghenhanB@gmail.com',
+      password: 'NghenhanB@123',
+      note: 'Tài khoản demo, dữ liệu bên trong là dữ liệu minh họa',
+    },
     vecomFanpageUrl: 'https://www.facebook.com/VecomNet?locale=vi_VN',
   },
 
@@ -47,16 +63,16 @@ export const projectConfigModel = {
   // Các con số nổi bật ngay trên Banner mở đầu (Hero)
   heroQuickStats: [
     {
-      value: '54 Dân Tộc',
-      label: 'Số hóa di sản & Bản đồ định vị làng nghề',
+      value: '54 dân tộc',
+      label: 'Số hóa di sản & bản đồ định vị làng nghề',
     },
     {
       value: '100% MVP',
-      label: 'Đã lập trình hoàn thiện Sàn TMĐT & Gemini AI',
+      label: 'Đã lập trình hoàn thiện sàn TMĐT & Gemini AI',
     },
     {
-      value: 'Mô Hình D2C',
-      label: 'Kết nối trực tiếp Hợp tác xã – Cắt giảm thương lái',
+      value: 'Mô hình D2C',
+      label: 'Kết nối trực tiếp Hợp tác xã – cắt giảm thương lái',
     },
     {
       value: 'Tháng 10–12',
@@ -64,7 +80,7 @@ export const projectConfigModel = {
     },
   ],
 
-  // Danh mục thanh điều hướng (Navbar) - Ngắn gọn, không bị tràn dòng
+  // Danh mục thanh điều hướng (Navbar)
   navigationItems: [
     { id: 'tong-quan', shortNumber: '01', label: 'Tổng quan' },
     { id: 'doi-thi', shortNumber: '02', label: 'Đội thi' },
@@ -73,5 +89,6 @@ export const projectConfigModel = {
     { id: 'van-hanh-o2o', shortNumber: '05', label: 'Vận hành' },
     { id: 'tai-chinh', shortNumber: '06', label: 'Tài chính' },
     { id: 'truyen-thong', shortNumber: '07', label: 'Truyền thông' },
+    { id: 'nguon-tham-khao', shortNumber: '08', label: 'Nguồn tham khảo' },
   ] as NavItem[],
 };

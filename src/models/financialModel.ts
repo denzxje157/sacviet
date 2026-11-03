@@ -10,33 +10,33 @@ import { RevenueStream, YearlyProjection, FinancialMetric } from './types';
 
 export const financialModel = {
   sectionBadge: 'MỤC 5 & 6 ĐỀ ÁN • KẾT QUẢ TIỀM NĂNG & KẾ HOẠCH VỐN',
-  sectionTitle: 'Mô Hình Tài Chính Tinh Gọn & Lộ Trình Tăng Trưởng Bền Vững',
+  sectionTitle: 'Mô hình tài chính tinh gọn & lộ trình tăng trưởng bền vững',
   sectionSubtitle:
-    'Nhờ lợi thế tự chủ lập trình công nghệ lõi và kiến trúc đám mây Serverless, Sắc Việt nén tối đa chi phí khởi tạo (CAPEX), đạt biên lợi nhuận ròng 20% – 25% và dự kiến hòa vốn ngay trong tháng thứ 10 – 12 của năm đầu tiên.',
+    'Nhờ tự chủ công nghệ lõi và kiến trúc đám mây Serverless, Sắc Việt tối ưu hóa chi phí khởi tạo (CAPEX), đạt biên lợi nhuận ròng 20% – 25% và dự kiến hòa vốn ngay trong tháng thứ 10 – 12 của năm đầu tiên.',
 
   keyMetrics: [
     {
-      label: 'Chi Phí Khởi Tạo (CAPEX)',
+      label: 'Chi phí khởi tạo (CAPEX)',
       value: '50 – 70 Triệu VNĐ',
-      subtext: 'Pháp lý, máy chủ ban đầu & thiết kế nhận diện (Nhóm đã tự chủ 100% chi phí code R&D)',
+      subtext: 'Pháp lý, hạ tầng ban đầu & thiết kế nhận diện (nhóm tự chủ mã nguồn R&D)',
       highlight: false,
     },
     {
-      label: 'Chi Phí Vận Hành (OPEX)',
+      label: 'Chi phí vận hành (OPEX)',
       value: '30 – 45 Triệu / Tháng',
-      subtext: 'Phân bổ tối ưu cho phí API AI/Cloud, Marketing chuyển đổi và nhân sự vận hành lõi',
+      subtext: 'Phân bổ cho phí API AI/Cloud, Marketing chuyển đổi và hỗ trợ vận hành',
       highlight: false,
     },
     {
-      label: 'Biên Lợi Nhuận Ròng',
+      label: 'Biên lợi nhuận ròng',
       value: '20% – 25%',
-      subtext: 'Nhờ tự động hóa >80% khâu sản xuất nội dung SEO và chăm sóc khách hàng bằng AI',
+      subtext: 'Nhờ ứng dụng AI hỗ trợ sản xuất nội dung SEO và tư vấn văn hóa',
       highlight: true,
     },
     {
-      label: 'Thời Điểm Hòa Vốn (Break-even)',
-      value: 'Tháng Thứ 10 – 12',
-      subtext: 'Đạt điểm hòa vốn ngay trong năm đầu tiên với ~500 đơn B2C/tháng kết hợp hợp đồng B2B',
+      label: 'Thời điểm hòa vốn (Break-even)',
+      value: 'Tháng thứ 10 – 12',
+      subtext: 'Đạt điểm hòa vốn trong năm đầu tiên với ~500 đơn B2C/tháng kết hợp hợp đồng B2B',
       highlight: true,
     },
   ] as FinancialMetric[],
@@ -44,15 +44,15 @@ export const financialModel = {
   revenueStreams: [
     {
       id: 'commission',
-      name: '1. Phí Hoa Hồng Nền Tảng (Commission Fee)',
-      rateOrScale: '10% – 12% / giao dịch',
+      name: '1. Phí hoa hồng nền tảng (Commission fee)',
+      rateOrScale: '10% / giao dịch',
       description:
-        'Trích xuất tự động trên mỗi đơn hàng D2C thành công. Mức phí thấp hơn nhiều so với sàn TMĐT đại trà giúp nghệ nhân giữ lại tối đa lợi nhuận mà giá bán lẻ vẫn cạnh tranh.',
+        'Trích xuất tự động 10% trên mỗi giao dịch D2C thành công (nghệ nhân nhận 90% giá bán trước phí vận chuyển và cổng thanh toán). Thấp hơn đáng kể so với mức phí sàn đại trà (phí khoảng 15% – 18%, tổng chi phí có thể trên 25%) [2].',
       sharePercent: 55,
     },
     {
       id: 'b2b-gifts',
-      name: '2. Hợp Đồng Quà Tặng Văn Hóa Doanh Nghiệp (B2B)',
+      name: '2. Hợp đồng quà tặng văn hóa doanh nghiệp (B2B)',
       rateOrScale: 'Theo hợp đồng & Bộ sưu tập',
       description:
         'Cung cấp các bộ quà tặng thủ công mang đậm bản sắc dân tộc kèm câu chuyện di sản cho các doanh nghiệp, ngân hàng, chuỗi nhà hàng và resort sinh thái.',
@@ -60,7 +60,7 @@ export const financialModel = {
     },
     {
       id: 'value-added-ads',
-      name: '3. Dịch Vụ Gia Tăng & Xúc Tiến Du Lịch Địa Phương',
+      name: '3. Dịch vụ gia tăng & xúc tiến du lịch địa phương',
       rateOrScale: 'Gói tài trợ & Hiển thị ưu tiên',
       description:
         'Khai thác doanh thu từ gói hiển thị nổi bật trên Bản đồ di sản số và chiến dịch quảng bá dành cho các địa phương, hợp tác xã muốn thúc đẩy du lịch văn hóa.',
@@ -70,24 +70,24 @@ export const financialModel = {
 
   yearlyProjections: [
     {
-      year: 'Năm Thứ 1',
-      phaseName: 'Thâm Nhập Thị Trường & Hòa Vốn',
+      year: 'Năm thứ 1',
+      phaseName: 'Thâm nhập thị trường & hòa vốn',
       revenueRange: '800 Triệu – 1,2 Tỷ VNĐ',
       revenueNumericMaxBillion: 1.2,
       targetOrders: '~500 đơn B2C/tháng + Hợp đồng B2B điểm',
       keyMilestone: 'Ký kết các HTX điểm (Bàu Trúc, Tây Bắc), vận hành O2O và cán đích hòa vốn ở tháng 10–12.',
     },
     {
-      year: 'Năm Thứ 2',
-      phaseName: 'Mở Rộng Mạng Lưới HTX Toàn Quốc',
+      year: 'Năm thứ 2',
+      phaseName: 'Mở rộng mạng lưới HTX toàn quốc',
       revenueRange: '2,0 Tỷ – 2,8 Tỷ VNĐ',
       revenueNumericMaxBillion: 2.8,
       targetOrders: '~1.200 đơn B2C/tháng + Mở rộng đối tác Resort/Bảo tàng',
       keyMilestone: 'Phủ rộng mạng lưới QR O2O tại các điểm du lịch trọng điểm và chuẩn hóa kho vận tự động.',
     },
     {
-      year: 'Năm Thứ 3',
-      phaseName: 'Đa Ngôn Ngữ & Xuất Khẩu Văn Hóa',
+      year: 'Năm thứ 3',
+      phaseName: 'Đa ngôn ngữ & xuất khẩu văn hóa',
       revenueRange: '3,5 Tỷ – 5,0 Tỷ VNĐ',
       revenueNumericMaxBillion: 5.0,
       targetOrders: '~2.500+ đơn/tháng + Thương mại xuyên biên giới',

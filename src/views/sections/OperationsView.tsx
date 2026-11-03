@@ -70,7 +70,7 @@ export const OperationsView: React.FC<OperationsViewProps> = ({ data }) => {
           <div className="flex items-center gap-2 mb-5">
             <ShieldAlert size={20} className="text-primary shrink-0" />
             <h3 className="font-black text-xl md:text-2xl text-primary">
-              Phân Tích Rủi Ro Thực Tế & Giải Pháp Hóa Giải
+              Phân tích rủi ro thực tế & giải pháp hóa giải
             </h3>
           </div>
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

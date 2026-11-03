@@ -13,12 +13,36 @@ export type SectionId =
   | 'cong-nghe-mvp'
   | 'van-hanh-o2o'
   | 'tai-chinh'
-  | 'truyen-thong';
+  | 'truyen-thong'
+  | 'nguon-tham-khao';
 
 export interface NavItem {
   id: SectionId;
   label: string;
   shortNumber: string;
+}
+
+export type PolicyPageId =
+  | 'doi-tra-hoan-tien'
+  | 'bao-mat-thong-tin'
+  | 'dieu-khoan-su-dung'
+  | 'don-vi-van-hanh';
+
+export interface ReferenceLink {
+  label: string;
+  url: string;
+}
+
+export interface ReferenceItem {
+  id: string;
+  refIndex: number;
+  statistic: string;
+  claimContext: string;
+  source: string;
+  year: string;
+  link?: string;
+  links?: ReferenceLink[];
+  accessDate?: string;
 }
 
 export interface TeamMember {
@@ -41,6 +65,37 @@ export interface PartnerGroup {
   title: string;
   items: string[];
   description: string;
+}
+
+export interface FieldworkSlide {
+  id: string;
+  imageUrl: string;
+  imageAlt: string;
+  title: string;
+  caption: string;
+  tag?: string;
+  badge?: string;
+  fitMode?: 'cover' | 'contain';
+  location?: string;
+  date?: string;
+  coopName?: string;
+  permissionStatus?: string;
+}
+
+export interface FieldworkProof {
+  badge: string;
+  title: string;
+  subtitle: string;
+  imageUrl: string;
+  imageAlt: string;
+  caption: string;
+  location: string;
+  date: string;
+  coopName: string;
+  permissionStatus: string;
+  fieldworkSummary?: string;
+  isVerified?: boolean;
+  slides?: FieldworkSlide[];
 }
 
 export interface ComparisonPoint {
@@ -73,7 +128,10 @@ export interface MvpModulePreview {
   badge: string;
   headline: string;
   description: string;
-  imageUrl: string;
+  imageUrl?: string;
+  imageAlt?: string;
+  isPlaceholderImage?: boolean;
+  placeholderText?: string;
   keyFeatures: string[];
   liveActionText: string;
 }

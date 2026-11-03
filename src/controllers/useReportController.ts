@@ -1,10 +1,16 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { SectionId, TeamMember } from '../models/types';
 import { projectConfigModel } from '../models/projectConfigModel';
-import { teamMembersData, teamOverviewModel, strategicPartnersData } from '../models/teamModel';
+import {
+  teamMembersData,
+  teamOverviewModel,
+  strategicPartnersData,
+  fieldworkProofModel,
+} from '../models/teamModel';
 import { problemSolutionModel, techAndMvpModel, operationsModel } from '../models/proposalModel';
 import { financialModel } from '../models/financialModel';
 import { marketingModel } from '../models/marketingModel';
+import { referenceModel } from '../models/referenceModel';
 
 /**
  * ============================================================================
@@ -12,13 +18,16 @@ import { marketingModel } from '../models/marketingModel';
  * ============================================================================
  * -> Đóng vai trò cầu nối giữa [MODEL] (Dữ liệu) và [VIEW] (Giao diện).
  * -> Xử lý toàn bộ logic: cuộn trang (Scroll-spy), lọc thành viên Đội thi,
- *    chuyển tab xem trước Sản phẩm MVP, và mô phỏng bài toán Tài chính.
+ *    chuyển tab xem trước Sản phẩm MVP, mô phỏng Tài chính và xem Chính sách.
  */
 
 export const useReportController = () => {
   // 1. State điều hướng & Menu di động
   const [activeSection, setActiveSection] = useState<SectionId>('tong-quan');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState<boolean>(false);
+
+  // 1.1 State xem trang chính sách sàn TMĐT
+  const [selectedPolicyId, setSelectedPolicyId] = useState<string | null>(null);
 
   // 2. State lọc vai trò thành viên Đội thi
   const [selectedRoleFilter, setSelectedRoleFilter] = useState<string>('ALL');
@@ -109,11 +118,22 @@ export const useReportController = () => {
     };
   }, [simulatedMonthlyOrders, simulatedAvgOrderValueK]);
 
+  // Mở và đóng trang chính sách
+  const openPolicy = useCallback((policyId: string) => {
+    setSelectedPolicyId(policyId);
+    setIsMobileMenuOpen(false);
+  }, []);
+
+  const closePolicy = useCallback(() => {
+    setSelectedPolicyId(null);
+  }, []);
+
   return {
     // Models được cấp phát qua Controller
     models: {
       config: projectConfigModel,
       teamOverview: teamOverviewModel,
+      fieldwork: fieldworkProofModel,
       teamMembers: filteredTeamMembers,
       allTeamMembers: teamMembersData,
       partners: strategicPartnersData,
@@ -122,11 +142,13 @@ export const useReportController = () => {
       operations: operationsModel,
       financial: financialModel,
       marketing: marketingModel,
+      reference: referenceModel,
     },
     // State & Actions điều khiển giao diện
     state: {
       activeSection,
       isMobileMenuOpen,
+      selectedPolicyId,
       selectedRoleFilter,
       activeMvpTabId,
       activeMvpModule,
@@ -137,6 +159,8 @@ export const useReportController = () => {
     actions: {
       scrollToSection,
       setIsMobileMenuOpen,
+      openPolicy,
+      closePolicy,
       setSelectedRoleFilter,
       setActiveMvpTabId,
       getLiveMvpModuleUrl,
