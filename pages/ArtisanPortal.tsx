@@ -234,17 +234,15 @@ const ArtisanPortal: React.FC = () => {
 
 
   useEffect(() => {
-    // Only switch mode if no active artisan session or force requested
-    const activeArtisanId = localStorage.getItem('sacviet_active_artisan_id');
-    const forceParam = searchParams.get('force') === 'true';
-    if (!activeArtisanId || forceParam) {
-      if (searchParams.get('register') === 'true' || searchParams.get('tab') === 'register') {
-        setIsRegisterMode(true);
-        setAuthTab('register');
-      } else if (searchParams.get('tab') === 'login') {
-        setIsRegisterMode(true);
-        setAuthTab('login');
-      }
+    // Luôn ưu tiên hiển thị chế độ đăng ký nếu URL có ?register=true hoặc ?tab=register
+    const isRegister = searchParams.get('register') === 'true' || searchParams.get('tab') === 'register';
+    const isLogin = searchParams.get('tab') === 'login';
+    if (isRegister) {
+      setIsRegisterMode(true);
+      setAuthTab('register');
+    } else if (isLogin) {
+      setIsRegisterMode(true);
+      setAuthTab('login');
     }
   }, [searchParams]);
 
@@ -264,6 +262,39 @@ const ArtisanPortal: React.FC = () => {
       const paramId = searchParams.get('artisanId');
       const activeArtisanId = localStorage.getItem('sacviet_active_artisan_id');
       const forceParam = searchParams.get('force') === 'true';
+      const isExplicitRegister = searchParams.get('register') === 'true' || searchParams.get('tab') === 'register';
+      const isExplicitLogin = searchParams.get('tab') === 'login';
+
+      // 0. ƯU TIÊN CAO NHẤT: Nếu người dùng truy cập link yêu cầu đăng ký mở gian hàng (?register=true)
+      if (isExplicitRegister) {
+        setIsRegisterMode(true);
+        setAuthTab('register');
+        if (user) {
+          const userArtisan = await artisanPortalService.getArtisanByUser(user);
+          if (userArtisan) {
+            // Người dùng đã có gian hàng liên kết
+            setCurrentArtisan(userArtisan);
+            await refreshArtisanData(userArtisan.id);
+          } else {
+            setCurrentArtisan(null);
+            setRegName(user.fullName || '');
+            setRegPhone(user.phone || '');
+          }
+        } else {
+          setCurrentArtisan(null);
+        }
+        setIsLoading(false);
+        return;
+      }
+
+      // 0.1 Nếu người dùng yêu cầu tab đăng nhập (?tab=login)
+      if (isExplicitLogin) {
+        setIsRegisterMode(true);
+        setAuthTab('login');
+        setCurrentArtisan(null);
+        setIsLoading(false);
+        return;
+      }
 
       // 1. Ưu tiên xem theo paramId (Admin soi gian hàng cụ thể)
       if (paramId) {
@@ -320,16 +351,7 @@ const ArtisanPortal: React.FC = () => {
         }
       }
 
-      const shouldRegister = searchParams.get('register') === 'true' || searchParams.get('tab') === 'register';
-      if (shouldRegister) {
-        setIsRegisterMode(true);
-        setAuthTab('register');
-        setCurrentArtisan(null);
-        setIsLoading(false);
-        return;
-      }
-
-      // Khách chưa đăng nhập: hiển thị form đăng nhập tài khoản Sắc Việt
+      // 4. Mặc định: khách chưa đăng nhập -> hiển thị form đăng nhập tài khoản Sắc Việt
       setIsRegisterMode(true);
       setAuthTab('login');
       setCurrentArtisan(null);
@@ -1085,7 +1107,7 @@ const ArtisanPortal: React.FC = () => {
                         )}
 
                         {/* Câu chuyện / Tiểu sử nghề di sản */}
-                        <p className="text-xs sm:text-sm font-serif text-text-main/85 leading-relaxed bg-[#FAF7F0] p-2.5 rounded-xl border border-gold/20">
+                        <p className="text-xs sm:text-sm font-sans text-text-main/85 leading-relaxed bg-[#FAF7F0] p-2.5 rounded-xl border border-gold/20">
                           {artisan.bio || 'Chưa có thông tin giới thiệu chi tiết.'}
                         </p>
 
@@ -1307,6 +1329,30 @@ const ArtisanPortal: React.FC = () => {
         <div className="py-4 sm:py-6">
           {isRegisterMode ? (
             <div className="space-y-6">
+              {/* THÔNG BÁO NẾU NGƯỜI DÙNG ĐÃ CÓ GIAN HÀNG */}
+              {currentArtisan && (
+                <div className="max-w-2xl mx-auto bg-amber-50/90 border-2 border-gold/40 rounded-2xl p-4 flex flex-col sm:flex-row items-center justify-between gap-3 shadow-sm animate-fade-in">
+                  <div className="flex items-center gap-3 text-left">
+                    <span className="material-symbols-outlined text-gold text-2xl shrink-0">verified</span>
+                    <div>
+                      <p className="text-xs font-black text-text-main">
+                        Bạn đã sở hữu gian hàng: <span className="text-primary">{currentArtisan.name}</span>
+                      </p>
+                      <p className="text-[11px] text-text-soft">
+                        {currentArtisan.village} • Dân tộc {currentArtisan.ethnic}
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => { setIsRegisterMode(false); setSearchParams({}); }}
+                    className="px-4 py-2 bg-primary text-white font-bold text-xs uppercase tracking-wider rounded-xl shadow-xs hover:brightness-110 active:scale-95 transition-all shrink-0 cursor-pointer"
+                  >
+                    Vào Gian Hàng &rarr;
+                  </button>
+                </div>
+              )}
+
               {/* NẾU ĐÃ CÓ TÀI KHOẢN USER ĐĂNG NHẬP: THÔNG BÁO TÀI KHOẢN ĐANG LIÊN KẾT */}
               {user ? (
                 <div className="max-w-2xl mx-auto bg-amber-50/80 border border-amber-200/80 rounded-2xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-xs">
@@ -1523,6 +1569,18 @@ const ArtisanPortal: React.FC = () => {
                     MÀN HÌNH TẠO TÀI KHOẢN SẮC VIỆT MỚI (BƯỚC 1 CỦA NGHỆ NHÂN)
                    ==================================================== */
                 <div className="max-w-md mx-auto bg-white rounded-2xl shadow-lg border border-gold/30 p-5 sm:p-7 animate-fade-in space-y-4">
+                  {/* QUY TRÌNH 2 BƯỚC MỞ GIAN HÀNG */}
+                  <div className="bg-[#FAF7F0] p-2.5 rounded-xl border border-gold/25 flex items-center justify-around text-xs">
+                    <div className="flex items-center gap-1.5 font-black text-primary">
+                      <span className="size-5 rounded-full bg-primary text-white flex items-center justify-center text-[10px] font-bold shadow-xs">1</span>
+                      <span className="uppercase text-[10px] tracking-wider">Tạo Tài Khoản</span>
+                    </div>
+                    <span className="material-symbols-outlined text-xs text-gold">arrow_forward</span>
+                    <div className="flex items-center gap-1.5 font-bold text-stone-400">
+                      <span className="size-5 rounded-full bg-stone-200 text-stone-600 flex items-center justify-center text-[10px] font-bold">2</span>
+                      <span className="uppercase text-[10px] tracking-wider">Mở Gian Hàng</span>
+                    </div>
+                  </div>
                   <div className="text-center">
                     <span className="size-12 bg-primary/10 text-primary rounded-xl flex items-center justify-center mx-auto mb-2.5 border border-primary/20 shadow-inner">
                       <span className="material-symbols-outlined text-2xl">person_add</span>
@@ -2192,7 +2250,7 @@ const ArtisanPortal: React.FC = () => {
                             <div>
                               <h4 className="font-bold text-text-main text-sm line-clamp-1">{product.name}</h4>
                               <p className="text-primary font-black text-base mt-0.5">{product.price.toLocaleString('vi-VN')} đ</p>
-                              <p className="text-text-soft text-xs font-serif line-clamp-2 mt-2 italic bg-[#FAF7F0] p-2 rounded-lg border border-gold/15">
+                              <p className="text-text-soft text-xs font-sans line-clamp-2 mt-2 italic bg-[#FAF7F0] p-2 rounded-lg border border-gold/15">
                                 "{product.heritageStory}"
                               </p>
                             </div>
@@ -2621,7 +2679,7 @@ const ArtisanPortal: React.FC = () => {
                   value={newProdStory}
                   onChange={e => setNewProdStory(e.target.value)}
                   placeholder="Kể ngắn gọn về ý nghĩa hoa văn, kỹ thuật dệt hoặc nặn gốm thủ công..."
-                  className="w-full p-2.5 bg-[#FAF7F0] border border-gold/25 rounded-xl text-xs font-serif text-text-main focus:border-primary outline-none resize-none"
+                  className="w-full p-2.5 bg-[#FAF7F0] border border-gold/25 rounded-xl text-xs font-sans text-text-main focus:border-primary outline-none resize-none"
                 ></textarea>
               </div>
 
@@ -2680,7 +2738,7 @@ const ArtisanPortal: React.FC = () => {
             </div>
 
             {lightboxData.desc && (
-              <div className="p-4 bg-[#FAF7F0] border-t border-gold/30 text-xs text-text-main font-serif">
+              <div className="p-4 bg-[#FAF7F0] border-t border-gold/30 text-xs text-text-main font-sans">
                 <strong>Chi tiết minh chứng:</strong> {lightboxData.desc}
               </div>
             )}

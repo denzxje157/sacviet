@@ -6,10 +6,10 @@
     <link rel="icon" type="image/png" href="https://cazllsidgvysyxbvrftq.supabase.co/storage/v1/object/public/images-sacviet/logo.png?v=3" />
     <title>Sắc Việt</title>
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-    <!-- Cập nhật Font: Montserrat (thay cho Be Vietnam Pro) và Playfair Display (cho phần kể chuyện/serif) -->
+    <!-- Cập nhật Font: Kết hợp Montserrat và Be Vietnam Pro chống triệt để lỗi vỡ font tiếng Việt -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,600;1,700&family=Montserrat:ital,wght@0,300..900;1,300..900&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap" rel="stylesheet">
     
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1" rel="stylesheet" />
     <!-- Leaflet CSS -->
@@ -28,8 +28,9 @@
               'bronze': '#8B5A2B',
             },
             fontFamily: {
-              'display': ['"Montserrat"', 'sans-serif'],
-              'serif': ['"Playfair Display"', 'serif'], // Font cho tiêu đề và kể chuyện
+              'display': ['"Montserrat"', '"Be Vietnam Pro"', 'sans-serif'],
+              'sans': ['"Montserrat"', '"Be Vietnam Pro"', 'sans-serif'],
+              'serif': ['"Playfair Display"', '"Be Vietnam Pro"', 'Georgia', 'serif'],
             },
           }
         }
@@ -38,6 +39,12 @@
     <style>
       * {
         -webkit-tap-highlight-color: transparent;
+      }
+      html, body, button, input, textarea, select {
+        font-family: "Montserrat", "Be Vietnam Pro", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        text-rendering: optimizeLegibility;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
       }
       html {
         scroll-behavior: smooth;
@@ -48,6 +55,7 @@
       body {
         background-color: #F9F5EA;
         color: #420808;
+        font-family: "Montserrat", "Be Vietnam Pro", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
         position: relative;
         min-height: 100vh;
         overflow-x: hidden;
@@ -151,8 +159,8 @@
   }
 }
 </script>
-  <script type="module" crossorigin src="/assets/index-B6NULOnJ.js"></script>
-  <link rel="stylesheet" crossorigin href="/assets/index-B7mbY5xV.css">
+  <script type="module" crossorigin src="/assets/index-DS9lLEjm.js"></script>
+  <link rel="stylesheet" crossorigin href="/assets/index-CGC0xm8i.css">
 </head>
   <body class="font-display antialiased">
     <div id="root"></div>
