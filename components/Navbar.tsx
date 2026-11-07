@@ -116,6 +116,15 @@ const Navbar: React.FC = () => {
               </button>
             )}
 
+            {/* QR Scanner Shortcut */}
+            <Link
+              to="/marketplace?scan=true"
+              className="size-8 md:size-10 flex items-center justify-center rounded-full bg-white border border-gold/30 text-primary hover:bg-gold/15 transition-all shadow-sm shrink-0 hover:scale-105 active:scale-95"
+              title="Quét mã QR tem sản phẩm di sản"
+            >
+              <span className="material-symbols-outlined text-lg md:text-xl text-primary">qr_code_scanner</span>
+            </Link>
+
             {/* Cart Button */}
             <button 
               onClick={toggleCart}

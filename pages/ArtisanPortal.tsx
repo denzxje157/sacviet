@@ -8,6 +8,7 @@ import {
 } from '../services/artisanPortalService';
 import { supabase, isSupabaseConfigured } from '../services/supabaseClient';
 import { useAuth } from '../context/AuthContext';
+import ProductQRModal, { QRProductData } from '../components/ProductQRModal';
 
 // Nén ảnh canvas để tối ưu dung lượng và lưu mượt mà trong localStorage
 const compressImage = (file: File, maxWidth = 1200, maxHeight = 1200, quality = 0.8): Promise<string> => {
@@ -2237,13 +2238,32 @@ const ArtisanPortal: React.FC = () => {
                                   <span>Xem trên Chợ Phiên</span>
                                   <span className="material-symbols-outlined text-xs group-hover:translate-x-0.5 transition-transform">arrow_forward</span>
                                 </a>
-                                <button
-                                  type="button"
-                                  onClick={() => handleDeleteProduct(product.id, product.name)}
-                                  className="text-[10px] font-medium text-stone-400 hover:text-red-600 transition-colors"
-                                >
-                                  Gỡ sản phẩm
-                                </button>
+                                <div className="flex items-center gap-2">
+                                  <button
+                                    type="button"
+                                    onClick={() => setQrProduct({
+                                      id: product.id,
+                                      name: product.name,
+                                      ethnic: product.ethnic,
+                                      price: `${product.price.toLocaleString('vi-VN')} đ`,
+                                      artisan: profile?.name,
+                                      artisanVillage: profile?.village,
+                                      img: product.image
+                                    })}
+                                    className="text-[10px] font-bold text-amber-800 hover:text-amber-950 flex items-center gap-1 bg-amber-50 hover:bg-amber-100 px-2 py-1 rounded-lg border border-amber-200 transition-all cursor-pointer shadow-xs"
+                                    title="Xem và tải tem QR dán gói hàng"
+                                  >
+                                    <span className="material-symbols-outlined text-xs">qr_code_2</span>
+                                    <span>Tem QR dán gói</span>
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => handleDeleteProduct(product.id, product.name)}
+                                    className="text-[10px] font-medium text-stone-400 hover:text-red-600 transition-colors"
+                                  >
+                                    Gỡ
+                                  </button>
+                                </div>
                               </div>
                             </div>
                           </div>
@@ -2921,6 +2941,13 @@ const ArtisanPortal: React.FC = () => {
             </form>
           </div>
         </div>
+      )}
+      {/* MODAL TEM QR CHO NGHỆ NHÂN */}
+      {qrProduct && (
+        <ProductQRModal
+          product={qrProduct}
+          onClose={() => setQrProduct(null)}
+        />
       )}
     </div>
   );

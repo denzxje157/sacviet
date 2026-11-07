@@ -1,12 +1,14 @@
 /// <reference types="vite/client" />
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { createPortal } from 'react-dom';
-import { useSearchParams, useNavigate, Link } from 'react-router-dom';
+import { useSearchParams, useNavigate, Link, useParams } from 'react-router-dom';
 import { useCart } from '../context/CartContext.tsx';
 import { supabase } from '../services/supabaseClient.ts'; 
 import { marketplaceData } from '../data/mockData.ts';
 import { getArtisanByEthnic } from '../data/artisanData.ts';
 import { artisanPortalService } from '../services/artisanPortalService.ts';
+import ProductQRModal, { QRProductData } from '../components/ProductQRModal.tsx';
+import QRScannerModal from '../components/QRScannerModal.tsx';
 
 interface Product {
   id: string;
@@ -31,7 +33,7 @@ interface Product {
 export { marketplaceData };
 export const rawData = marketplaceData;
 
-const ProductCard = React.memo(({ product, onOpenDetail }: { product: Product, onOpenDetail: (p: Product) => void }) => {
+const ProductCard = React.memo(({ product, onOpenDetail, onOpenQR }: { product: Product, onOpenDetail: (p: Product) => void, onOpenQR: (p: Product) => void }) => {
   const isOutOfStock = product?.stock <= 0; 
 
   return (
@@ -54,6 +56,17 @@ const ProductCard = React.memo(({ product, onOpenDetail }: { product: Product, o
         <div className="absolute top-2 left-2 bg-primary/90 text-white text-[9px] font-black px-2 md:px-3 py-1 rounded-full uppercase tracking-widest backdrop-blur-sm border border-gold/30 shadow-md">
           {product?.ethnic || 'Khác'}
         </div>
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            onOpenQR(product);
+          }}
+          className="absolute top-2 right-2 size-7 sm:size-8 rounded-full bg-white/95 hover:bg-gold text-primary hover:text-[#54080A] flex items-center justify-center shadow-md border border-gold/30 transition-all hover:scale-110 active:scale-90 z-20 cursor-pointer"
+          title="Xem tem QR định danh sản phẩm"
+        >
+          <span className="material-symbols-outlined text-sm sm:text-base leading-none">qr_code_2</span>
+        </button>
       </div>
 
       <div className="p-3 text-left flex-grow flex flex-col">
@@ -85,7 +98,7 @@ const ProductCard = React.memo(({ product, onOpenDetail }: { product: Product, o
   );
 });
 
-const ProductModal = ({ product, onClose, showToastMsg }: { product: Product, onClose: () => void, showToastMsg: (msg: string) => void }) => {
+const ProductModal = ({ product, onClose, showToastMsg, onOpenQR }: { product: Product, onClose: () => void, showToastMsg: (msg: string) => void, onOpenQR: (p: Product) => void }) => {
   const [quantity, setQuantity] = useState(1);
   const cartContext = useCart();
   const addToCart = cartContext?.addToCart;
@@ -232,6 +245,16 @@ const ProductModal = ({ product, onClose, showToastMsg }: { product: Product, on
                <h4 className="font-bold text-primary uppercase text-xs mb-1 flex items-center gap-1.5"><span className="material-symbols-outlined text-sm">auto_stories</span>Câu chuyện sản phẩm</h4>
                <p className="text-text-main text-xs sm:text-sm leading-relaxed text-justify font-medium">"{product.desc || 'Chưa có mô tả chi tiết.'}"</p>
              </div>
+
+              {/* Nút Xem Tem QR Định Danh & Nguồn Gốc */}
+              <button
+                type="button"
+                onClick={() => onOpenQR(product)}
+                className="w-full py-2.5 px-3 rounded-2xl border-2 border-gold/50 bg-gradient-to-r from-amber-50 via-gold/10 to-amber-50 hover:from-amber-100 hover:to-gold/20 text-[#54080A] font-black text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-all active:scale-95 cursor-pointer shadow-sm group"
+              >
+                <span className="material-symbols-outlined text-lg text-primary group-hover:scale-110 transition-transform">qr_code_2</span>
+                <span>Xem Tem QR Định Danh & Nguồn Gốc</span>
+              </button>
           </div>
           
           <div className="p-3 sm:p-4 bg-white border-t border-gold/10 shrink-0 shadow-[0_-5px_20px_rgba(0,0,0,0.05)]">
@@ -256,6 +279,7 @@ const ProductModal = ({ product, onClose, showToastMsg }: { product: Product, on
 };
 
 const Marketplace: React.FC = () => {
+  const { id: routeId } = useParams();
   const [searchParams, setSearchParams] = useSearchParams();
   const initialEthnic = useMemo(() => (searchParams.get('ethnic') || 'TẤT CẢ').toUpperCase(), [searchParams]);
   const [selectedEthnic, setSelectedEthnic] = useState<string>(initialEthnic);
@@ -263,6 +287,8 @@ const Marketplace: React.FC = () => {
   const [sortOrder, setSortOrder] = useState('default');
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [qrProduct, setQrProduct] = useState<QRProductData | null>(null);
+  const [isScannerOpen, setIsScannerOpen] = useState(false);
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   
@@ -288,7 +314,7 @@ const Marketplace: React.FC = () => {
         const mappedArtisanProds: Product[] = (artisanProds || []).map(ap => {
           const matchedArtisan = artisanMap.get(ap.artisanId);
           return {
-            id: ap.id,
+            id: String(ap.id),
             name: ap.name,
             ethnic: ap.ethnic || (matchedArtisan ? matchedArtisan.ethnic : 'Khác'),
             stock: ap.stock ?? 10,
@@ -330,7 +356,7 @@ const Marketplace: React.FC = () => {
               const matchedArtisan = artisanId ? artisanMap.get(artisanId) : undefined;
 
               return {
-                id: p.id,
+                id: String(p.id),
                 name: p.ten_san_pham,
                 ethnic: p.dan_toc?.ten_dan_toc || 'Khác',
                 stock: p.so_luong || 0,
@@ -371,6 +397,88 @@ const Marketplace: React.FC = () => {
 
   useEffect(() => { setSelectedEthnic(initialEthnic); setCurrentPage(1); }, [initialEthnic]);
 
+  // Tự động nhận diện khi quét QR ngoài đời thực (?product=...) hoặc mở máy quét (?scan=true)
+  useEffect(() => {
+    // Trích xuất tham số đa năng: hỗ trợ cả trước hash, sau hash và window.location
+    const getParam = (key: string): string | null => {
+      const fromSearchParam = searchParams.get(key);
+      if (fromSearchParam) return fromSearchParam;
+
+      const fromSearch = new URLSearchParams(window.location.search).get(key);
+      if (fromSearch) return fromSearch;
+
+      if (window.location.hash.includes('?')) {
+        const hashQuery = window.location.hash.split('?')[1];
+        const fromHash = new URLSearchParams(hashQuery).get(key);
+        if (fromHash) return fromHash;
+      }
+      return null;
+    };
+
+    if (getParam('scan') === 'true') {
+      setIsScannerOpen(true);
+      if (searchParams.get('scan')) {
+        const newParams = new URLSearchParams(searchParams);
+        newParams.delete('scan');
+        setSearchParams(newParams, { replace: true });
+      }
+    }
+
+    // Lấy targetId từ route (/product/:id) hoặc tham số URL (?product=...)
+    let targetId = routeId || getParam('product') || getParam('productId');
+    
+    // Fallback: Tìm bằng regex trực tiếp trên toàn bộ URL (bất chấp ứng dụng quét QR nào)
+    if (!targetId && typeof window !== 'undefined') {
+      const hrefMatch = window.location.href.match(/[?&#](?:product|productId)=([^&#]+)/i);
+      if (hrefMatch && hrefMatch[1]) {
+        targetId = decodeURIComponent(hrefMatch[1]);
+      }
+    }
+
+    if (targetId && products.length > 0) {
+      const cleanTarget = decodeURIComponent(targetId).trim().toLowerCase();
+      
+      const matched = products.find(p => {
+        const pId = String(p.id ?? '').trim().toLowerCase();
+        const pName = String(p.name ?? '').trim().toLowerCase();
+        return (
+          pId === cleanTarget || 
+          pName === cleanTarget || 
+          (cleanTarget.length >= 3 && pName.includes(cleanTarget)) ||
+          (pName.length >= 3 && cleanTarget.includes(pName))
+        );
+      });
+
+      if (matched) {
+        setSelectedProduct(matched);
+        showToastMsg(`Đã mở sản phẩm: ${matched.name}`);
+      } else {
+        console.warn('Không tìm thấy sản phẩm khớp với mã QR:', cleanTarget);
+      }
+    }
+  }, [searchParams, products, setSearchParams]);
+
+  const handleScanSuccess = (scannedId: string, _rawText: string) => {
+    const cleanTarget = scannedId.trim().toLowerCase();
+    const matched = products.find(p => {
+      const pId = String(p.id ?? '').trim().toLowerCase();
+      const pName = String(p.name ?? '').trim().toLowerCase();
+      return (
+        pId === cleanTarget || 
+        pName === cleanTarget || 
+        (cleanTarget.length >= 3 && pName.includes(cleanTarget)) ||
+        (pName.length >= 3 && cleanTarget.includes(pName))
+      );
+    });
+    if (matched) {
+      setSelectedProduct(matched);
+      showToastMsg(`Quét QR thành công: ${matched.name}`);
+    } else {
+      setSearchTerm(scannedId);
+      showToastMsg(`Đã nhận diện mã: "${scannedId}". Đang tìm kiếm...`);
+    }
+  };
+
   const ethnicList = useMemo(() => {
     const list = Array.from(new Set(products.map(p => p.ethnic)));
     return ['TẤT CẢ', ...list.sort((a, b) => a.localeCompare(b, 'vi'))];
@@ -409,7 +517,31 @@ const Marketplace: React.FC = () => {
         document.body
       )}
 
-      {selectedProduct && <ProductModal product={selectedProduct} onClose={() => setSelectedProduct(null)} showToastMsg={showToastMsg} />}
+      {selectedProduct && (
+        <ProductModal 
+          product={selectedProduct} 
+          onClose={() => setSelectedProduct(null)} 
+          showToastMsg={showToastMsg}
+          onOpenQR={(p) => setQrProduct(p)}
+        />
+      )}
+
+      {/* MODAL TEM QR ĐỊNH DANH DI SẢN */}
+      {qrProduct && (
+        <ProductQRModal
+          product={qrProduct}
+          onClose={() => setQrProduct(null)}
+          onCopySuccess={showToastMsg}
+        />
+      )}
+
+      {/* MODAL MÁY QUÉT QR */}
+      <QRScannerModal
+        isOpen={isScannerOpen}
+        onClose={() => setIsScannerOpen(false)}
+        onScanSuccess={handleScanSuccess}
+        onErrorToast={showToastMsg}
+      />
       
       <div className="w-[96%] max-w-[1920px] mx-auto px-4 py-8 md:py-12 relative z-10">
         
@@ -434,8 +566,30 @@ const Marketplace: React.FC = () => {
               <div className="absolute inset-y-0 left-0 pl-4 sm:pl-5 flex items-center pointer-events-none z-10 text-[#8B1A1A]">
                 <span className="material-symbols-outlined group-hover:scale-110 transition-transform text-lg sm:text-xl leading-none">search</span>
               </div>
-              <input type="text" placeholder="Tìm kiếm sản phẩm..." value={searchTerm} onChange={(e) => { setSearchTerm(e.target.value); setCurrentPage(1); }} className="w-full bg-white/95 backdrop-blur border-2 border-gold/20 rounded-full py-2.5 sm:py-3.5 pl-11 sm:pl-14 pr-4 sm:pr-6 text-text-main shadow-md sm:shadow-xl text-sm sm:text-base font-medium focus:outline-none focus:border-gold transition-all" />
+              <input type="text" placeholder="Tìm kiếm sản phẩm di sản..." value={searchTerm} onChange={(e) => { setSearchTerm(e.target.value); setCurrentPage(1); }} className="w-full bg-white/95 backdrop-blur border-2 border-gold/20 rounded-full py-2.5 sm:py-3.5 pl-11 sm:pl-14 pr-4 sm:pr-6 text-text-main shadow-md sm:shadow-xl text-sm sm:text-base font-medium focus:outline-none focus:border-gold transition-all" />
             </div>
+
+            {/* Nút Quét Mã QR Di Sản (Đã sửa màu đỏ mận sang trọng, chữ trắng viền vàng cực nét) */}
+            <button
+              type="button"
+              onClick={() => setIsScannerOpen(true)}
+              style={{
+                backgroundColor: '#781012',
+                backgroundImage: 'linear-gradient(135deg, #8B1A1A 0%, #54080A 100%)',
+                color: '#FFFFFF',
+                borderColor: '#D4AF37',
+                boxShadow: '0 6px 20px rgba(120, 16, 18, 0.35)'
+              }}
+              className="px-5 sm:px-7 py-2.5 sm:py-3.5 rounded-full font-black text-xs sm:text-sm uppercase tracking-wider flex items-center justify-center gap-2.5 border-2 transition-all hover:brightness-115 active:scale-95 cursor-pointer shrink-0"
+              title="Quét tem QR trên sản phẩm hoặc bao bì"
+            >
+              <span className="material-symbols-outlined text-base sm:text-lg animate-pulse" style={{ color: '#FCD34D' }}>
+                qr_code_scanner
+              </span>
+              <span className="whitespace-nowrap font-black tracking-wider text-white" style={{ color: '#FFFFFF', textShadow: '0 1px 2px rgba(0,0,0,0.5)' }}>
+                Quét mã QR
+              </span>
+            </button>
             
             <div className="relative w-full sm:w-56 shrink-0">
               <select value={sortOrder} onChange={(e) => { setSortOrder(e.target.value); setCurrentPage(1); }} className="w-full bg-white/95 backdrop-blur border-2 border-gold/20 rounded-full py-2.5 sm:py-3.5 pl-4 sm:pl-6 pr-8 sm:pr-10 text-text-main shadow-md sm:shadow-xl text-xs sm:text-sm font-bold focus:outline-none focus:border-gold transition-all appearance-none cursor-pointer">
@@ -464,7 +618,7 @@ const Marketplace: React.FC = () => {
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2.5 sm:gap-4 md:gap-8 min-h-[500px] content-start pb-24 md:pb-8">
           {isLoading ? (
             <div className="col-span-full py-20 text-center text-gold font-black text-xl sm:text-2xl animate-pulse">Đang kết nối chợ phiên...</div>
-          ) : currentProducts.map((p) => <ProductCard key={p.id} product={p} onOpenDetail={setSelectedProduct} />)}
+          ) : currentProducts.map((p) => <ProductCard key={p.id} product={p} onOpenDetail={setSelectedProduct} onOpenQR={(prod) => setQrProduct(prod)} />)}
         </div>
 
         {totalPages > 1 && (
