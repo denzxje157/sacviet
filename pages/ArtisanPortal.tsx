@@ -88,6 +88,9 @@ const ArtisanPortal: React.FC = () => {
   const [newProdDays, setNewProdDays] = useState<number>(7);
   const [newProdCategory, setNewProdCategory] = useState('Thổ cẩm');
 
+  // Modal Tem QR Sản Phẩm
+  const [qrProduct, setQrProduct] = useState<QRProductData | null>(null);
+
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   const showToast = (msg: string) => {
@@ -2304,8 +2307,8 @@ const ArtisanPortal: React.FC = () => {
                                       name: product.name,
                                       ethnic: product.ethnic,
                                       price: `${product.price.toLocaleString('vi-VN')} đ`,
-                                      artisan: profile?.name,
-                                      artisanVillage: profile?.village,
+                                      artisan: currentArtisan?.name,
+                                      artisanVillage: currentArtisan?.village,
                                       img: product.image
                                     })}
                                     className="text-[10px] font-bold text-amber-800 hover:text-amber-950 flex items-center gap-1 bg-amber-50 hover:bg-amber-100 px-2 py-1 rounded-lg border border-amber-200 transition-all cursor-pointer shadow-xs"
