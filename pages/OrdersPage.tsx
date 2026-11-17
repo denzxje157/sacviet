@@ -4,6 +4,8 @@ import { useCart } from '../context/CartContext.tsx';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { supabase } from '../services/supabaseClient.ts';
+import HeritageUnboxingModal from '../components/HeritageUnboxingModal';
+import { courseList } from '../data/courseData';
 
 interface OrderItem {
   id: string;
@@ -37,6 +39,7 @@ const OrdersPage: React.FC = () => {
   const navigate = useNavigate();
   const [orders, setOrders] = useState<Order[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [selectedUnboxingOrder, setSelectedUnboxingOrder] = useState<Order | null>(null);
 
   useEffect(() => {
     const fetchOrders = async () => {
@@ -249,6 +252,14 @@ const OrdersPage: React.FC = () => {
                    
                    {/* Actions */}
                    <div className="mt-5 sm:mt-6 pt-5 sm:pt-6 border-t border-gold/10 grid grid-cols-2 sm:flex sm:justify-end gap-2.5">
+                      <button
+                        type="button"
+                        onClick={() => setSelectedUnboxingOrder(order)}
+                        className="col-span-2 sm:col-span-1 w-full sm:w-auto px-4 py-2.5 rounded-xl bg-stone-100 hover:bg-stone-200 border border-stone-300 text-stone-800 text-xs uppercase font-bold transition-colors active:scale-95 flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs"
+                      >
+                         <span className="material-symbols-outlined text-sm text-amber-700">package_2</span>
+                         Đập hộp / Kiện hàng
+                      </button>
                       <button 
                         onClick={() => handleContactSupport(order.id)}
                         className="w-full sm:w-auto px-4 py-2.5 rounded-xl border-2 border-gold/30 text-text-main text-xs uppercase font-bold hover:bg-gold/10 transition-colors active:scale-95 text-center cursor-pointer"
@@ -269,6 +280,23 @@ const OrdersPage: React.FC = () => {
           </div>
         )}
       </div>
+      {selectedUnboxingOrder && (
+        <HeritageUnboxingModal
+          isOpen={!!selectedUnboxingOrder}
+          onClose={() => setSelectedUnboxingOrder(null)}
+          course={
+            courseList.find(c => selectedUnboxingOrder.items?.some(it => it.id?.includes(c.id) || it.name?.includes(c.title))) || courseList[0]
+          }
+          orderId={selectedUnboxingOrder.id}
+          customerName={selectedUnboxingOrder.customer?.name || user?.user_metadata?.full_name || 'Học Viên Sắc Việt'}
+          onStartLearning={() => {
+            const matched = courseList.find(c => selectedUnboxingOrder.items?.some(it => it.id?.includes(c.id) || it.name?.includes(c.title))) || courseList[0];
+            setSelectedUnboxingOrder(null);
+            navigate(`/course/${matched.id}`);
+          }}
+        />
+      )}
+
       <style>{`
         @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
         .animate-fade-in { animation: fade-in 0.4s ease-out forwards; }

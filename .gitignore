@@ -1,3 +1,13 @@
 node_modules
 .env
 seed_orders.cjs
+
+# Báo cáo học thuật và script tạo báo cáo (lưu cục bộ)
+Bao_Cao_*
+*.docx
+*.pdf
+generate_*.py
+build_perfect_report.py
+convert_to_docx.py
+report_assets/
+template_media/

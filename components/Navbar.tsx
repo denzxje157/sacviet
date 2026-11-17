@@ -18,6 +18,7 @@ const Navbar: React.FC = () => {
     const links = [
       { name: 'Trang chủ', path: '/' },
       { name: 'Chợ Phiên', path: '/marketplace' },
+      { name: 'Truyền Nghề', path: '/courses' },
       { name: 'Nghệ Nhân', path: '/artisans' },
       { name: 'Thư viện', path: '/library' },
       { name: 'Cộng đồng', path: '/community' },
@@ -56,7 +57,8 @@ const Navbar: React.FC = () => {
           <nav className="hidden lg:flex items-center gap-3 xl:gap-7 ml-1">
             {navLinks.map((link) => {
               const isActive = location.pathname === link.path || 
-                (link.path === '/artisans' && location.pathname.startsWith('/artisan'));
+                (link.path === '/artisans' && location.pathname.startsWith('/artisan')) ||
+                (link.path === '/courses' && (location.pathname.startsWith('/course') || location.pathname.startsWith('/truyen-nghe')));
               return (
                 <Link
                   key={link.path}

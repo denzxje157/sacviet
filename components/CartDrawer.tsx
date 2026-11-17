@@ -4,6 +4,8 @@ import { useCart } from '../context/CartContext.tsx';
 import { useAuth } from '../context/AuthContext.tsx';
 import { supabase } from '../services/supabaseClient.ts';
 import { orderService } from '../services/orderService';
+import HeritageUnboxingModal from './HeritageUnboxingModal';
+import { courseList } from '../data/courseData';
 
 const CartDrawer: React.FC = () => {
   const navigate = useNavigate();
@@ -29,6 +31,8 @@ const CartDrawer: React.FC = () => {
 
   const [savedAddresses, setSavedAddresses] = useState<any[]>([]);
   const [selectedAddressId, setSelectedAddressId] = useState<string>('new');
+  const [showUnboxingModal, setShowUnboxingModal] = useState<boolean>(false);
+  const [unboxingCourse, setUnboxingCourse] = useState(courseList[0]);
 
   useEffect(() => {
     const fetchAddresses = async () => {
@@ -117,6 +121,9 @@ const CartDrawer: React.FC = () => {
     }
 
     setIsSubmitting(true);
+    // Lưu lại thông tin khóa học / sản phẩm để mở hộp demo nếu có
+    const matchedCourse = courseList.find(c => cart.some(item => item.id.includes(c.id) || item.name.includes(c.title))) || courseList[0];
+    setUnboxingCourse(matchedCourse);
     const newOrderId = `SN-${Math.floor(100000 + Math.random() * 900000)}`;
     setOrderId(newOrderId);
     const paymentText = paymentMethod === 'cod' ? 'Thanh toán khi nhận hàng (COD)' : 'Chuyển khoản (QR)';
@@ -408,6 +415,15 @@ const CartDrawer: React.FC = () => {
 
                       <div className="w-full space-y-2.5">
                         <button 
+                          type="button"
+                          onClick={() => setShowUnboxingModal(true)}
+                          className="w-full bg-stone-800 hover:bg-stone-900 text-white py-3 rounded-xl font-bold uppercase text-xs tracking-wider shadow-sm transition-all active:scale-95 flex items-center justify-center gap-2 cursor-pointer"
+                        >
+                          <span className="material-symbols-outlined text-base">package_2</span>
+                          Mở hộp xem kiện hàng mẫu (Demo Unboxing)
+                        </button>
+
+                        <button 
                           onClick={() => {
                             clearCart();
                             setStep('cart');
@@ -471,6 +487,23 @@ const CartDrawer: React.FC = () => {
           </div>
         )}
       </div>
+
+      {showUnboxingModal && (
+        <HeritageUnboxingModal
+          isOpen={showUnboxingModal}
+          onClose={() => setShowUnboxingModal(false)}
+          course={unboxingCourse}
+          orderId={orderId || 'SN-849201'}
+          customerName={formData.name || user?.user_metadata?.full_name || 'Học Viên Sắc Việt'}
+          onStartLearning={() => {
+            setShowUnboxingModal(false);
+            clearCart();
+            setStep('cart');
+            toggleCart();
+            navigate(`/course/${unboxingCourse.id}`);
+          }}
+        />
+      )}
 
       <style>{`
         @keyframes slide-in-right { from { transform: translateX(100%); } to { transform: translateX(0); } }

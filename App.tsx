@@ -16,6 +16,8 @@ import BlogDetail from './pages/BlogDetail';
 import ArtisansList from './pages/ArtisansList.tsx';
 import ArtisanDetail from './pages/ArtisanDetail.tsx';
 import ArtisanPortal from './pages/ArtisanPortal.tsx';
+import Courses from './pages/Courses.tsx';
+import CourseDetail from './pages/CourseDetail.tsx';
 
 // Admin Pages
 import AdminDashboard from './pages/admin/AdminDashboard.tsx';
@@ -73,6 +75,10 @@ const App: React.FC = () => {
                       <Route path="/cart" element={<Marketplace />} />
                       <Route path="/checkout" element={<Marketplace />} />
                       <Route path="/checkout/success" element={<Marketplace />} />
+                      <Route path="/courses" element={<Courses />} />
+                      <Route path="/truyen-nghe" element={<Courses />} />
+                      <Route path="/course/:id" element={<CourseDetail />} />
+                      <Route path="/truyen-nghe/:id" element={<CourseDetail />} />
                       <Route path="/artisans" element={<ArtisansList />} />
                       <Route path="/artisan" element={<ArtisanDetail />} />
                       <Route path="/artisan/:id" element={<ArtisanDetail />} />
