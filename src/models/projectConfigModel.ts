@@ -40,8 +40,8 @@ export const projectConfigModel = {
     proposalPdfDownloadUrl: '/assets/DBC_ND3_LHU_ADLEY_vongloai.pdf',
     proposalPdfFileName: 'DBC_ND3_LHU_ADLEY_vongloai.pdf',
     hasPdfFile: true,
-    demoVideoUrl: '[CẦN ĐIỀN: Link video demo]',
-    hasDemoVideo: false,
+    demoVideoUrl: 'https://drive.google.com/file/d/1XRQagbBhq_WZZ-1bcRnqWgbjdG2Sb02b/view?usp=drive_link',
+    hasDemoVideo: true,
     artisanPortalUrl: 'https://sacviet.id.vn/#/artisans',
     artisanDemoAccount: {
       username: 'nghenhanB@gmail.com',
