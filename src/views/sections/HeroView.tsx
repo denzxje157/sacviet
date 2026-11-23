@@ -238,17 +238,16 @@ export const HeroView: React.FC<HeroViewProps> = ({ config, onSelectSection }) =
                 <span>Dùng thử Kênh Nghệ nhân</span>
                 <ExternalLink size={14} />
               </a>
-              <button
-                onClick={() =>
-                  alert(
-                    'Video demo dự án đang trong quá trình ghi hình và biên tập. Trạng thái: [CẦN ĐIỀN: Link video demo].'
-                  )
-                }
-                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-background-light border border-gold/40 text-text-main text-xs font-bold hover:bg-gold/15 transition-all cursor-pointer whitespace-nowrap"
+              <a
+                href={config.links.demoVideoUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-background-light border border-gold/40 text-text-main text-xs font-bold hover:bg-gold/15 hover:text-primary transition-all cursor-pointer whitespace-nowrap"
+                title="Xem Video Demo Dự Án Sắc Việt"
               >
                 <PlayCircle size={15} className="text-primary" />
-                <span>Video demo (Đang cập nhật)</span>
-              </button>
+                <span>Xem Video Demo</span>
+              </a>
             </div>
           </div>
 
