@@ -119,18 +119,15 @@ export const FooterView: React.FC<FooterViewProps> = ({
                 <span>Mở Web Sản Phẩm MVP</span>
                 <ExternalLink size={14} className="shrink-0" />
               </a>
-              <button
-                onClick={() =>
-                  alert(
-                    'Bản PDF đề án chính thức đang được chuẩn bị. Bạn vui lòng tải tạm bản Mô tả dự án (.DOCX) bên cạnh!'
-                  )
-                }
-                className="flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl border border-amber-400 bg-amber-500/20 text-amber-200 text-xs font-bold hover:bg-amber-500/30 transition-all whitespace-nowrap cursor-pointer"
-                title="Đang chờ file PDF chính thức từ nhóm"
+              <a
+                href={config.links.proposalPdfDownloadUrl}
+                download={config.links.proposalPdfFileName}
+                className="flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl border border-gold-light/60 bg-primary/80 hover:bg-primary text-white text-xs font-bold transition-all whitespace-nowrap cursor-pointer"
+                title="Tải Bản Đề Án Chính Thức (.PDF)"
               >
-                <FileDown size={14} className="shrink-0" />
-                <span>PDF [CẦN FILE PDF]</span>
-              </button>
+                <FileDown size={14} className="shrink-0 text-gold-light" />
+                <span>Tải đề án PDF</span>
+              </a>
               <a
                 href={config.links.proposalDocxDownloadUrl}
                 download={config.links.proposalDocxFileName}

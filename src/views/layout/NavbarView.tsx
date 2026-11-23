@@ -81,18 +81,15 @@ export const NavbarView: React.FC<NavbarViewProps> = ({
         <div className="hidden md:flex items-center gap-2 shrink-0 whitespace-nowrap">
           {/* Cụm nút tải Đề án gọn gàng (PDF + DOCX) */}
           <div className="inline-flex items-center rounded-full border border-gold/45 bg-white p-0.5 shadow-2xs shrink-0">
-            <button
-              onClick={() =>
-                alert(
-                  'Bản PDF đề án chính thức đang được chuẩn bị. Bạn vui lòng tải tạm bản Mô tả dự án (.DOCX) bên cạnh!'
-                )
-              }
-              className="flex items-center gap-1 px-2.5 py-1.5 rounded-full hover:bg-amber-100 text-amber-900 text-xs font-bold transition-all cursor-pointer"
-              title="Đang chờ file PDF chính thức từ nhóm"
+            <a
+              href={config.links.proposalPdfDownloadUrl}
+              download={config.links.proposalPdfFileName}
+              className="flex items-center gap-1 px-2.5 py-1.5 rounded-full hover:bg-primary/10 text-primary text-xs font-bold transition-all cursor-pointer"
+              title="Tải Bản Đề Án Chính Thức (.PDF)"
             >
-              <FileDown size={13} className="text-amber-700 shrink-0" />
+              <FileDown size={13} className="text-primary shrink-0" />
               <span>Tải PDF</span>
-            </button>
+            </a>
             <div className="w-[1px] h-3.5 bg-gold/30 mx-0.5" />
             <a
               href={config.links.proposalDocxDownloadUrl}
@@ -170,7 +167,7 @@ export const NavbarView: React.FC<NavbarViewProps> = ({
               className="flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-xl border border-amber-400 bg-amber-50 text-amber-900 text-xs font-bold whitespace-nowrap"
             >
               <FileDown size={14} className="text-amber-700" />
-              <span>Tải PDF [CẦN FILE PDF]</span>
+              <span>Tải đề án PDF</span>
             </button>
             <a
               href={config.links.proposalDocxDownloadUrl}

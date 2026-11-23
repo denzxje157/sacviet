@@ -128,7 +128,7 @@ export const HeroView: React.FC<HeroViewProps> = ({ config, onSelectSection }) =
                   title="Đang chờ file PDF chính thức từ nhóm"
                 >
                   <FileDown size={15} className="text-amber-800 shrink-0" />
-                  <span>Tải bản PDF [CẦN FILE PDF]</span>
+                  <span>Tải đề án PDF</span>
                 </button>
               )}
 

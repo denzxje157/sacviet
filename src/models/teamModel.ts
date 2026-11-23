@@ -15,7 +15,7 @@ export const teamOverviewModel = {
   sectionSubtitle:
     'Đội ngũ nòng cốt gồm 05 sinh viên từ các ngành Công nghệ thông tin và Thương mại điện tử – trực tiếp kiến trúc và lập trình hoàn thiện mã nguồn nền tảng MVP Sắc Việt.',
   incubationSupport:
-    'Dự án đang trong giai đoạn ươm tạo và nhận được sự bảo trợ, cố vấn chuyên môn từ các giảng viên tại Trường Đại học Lạc Hồng về định hướng công nghệ cũng như mô hình phát triển kinh doanh.',
+    'Dự án đang trong giai đoạn ươm tạo tại Trường Đại học Lạc Hồng và được Kỹ Sư Bùi Xuân Cảnh (Giảng viên Khoa CNTT) cố vấn chuyên môn về công nghệ AI, kiến trúc RAG và kiểm soát nội dung di sản.',
 };
 
 export const fieldworkProofModel: FieldworkProof = {
@@ -189,7 +189,7 @@ export const strategicPartnersData: PartnerGroup[] = [
   {
     category: 'Cố vấn & bảo trợ',
     title: 'Trường Đại học Lạc Hồng',
-    items: ['Giảng viên cố vấn Công nghệ & AI', 'Giảng viên cố vấn Quản trị Kinh doanh', 'Vườn ươm Khởi nghiệp Sinh viên'],
+    items: ['Kỹ Sư Bùi Xuân Cảnh (Mentor Công nghệ & RAG AI)', 'Giảng viên cố vấn Quản trị Kinh doanh', 'Vườn ươm Khởi nghiệp Sinh viên'],
     description: 'Định hướng chiến lược học thuật, thẩm định mô hình tài chính và kết nối hệ sinh thái khởi nghiệp.',
   },
   {
